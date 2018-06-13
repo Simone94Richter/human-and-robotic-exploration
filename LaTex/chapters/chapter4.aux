@@ -1,0 +1,105 @@
+\relax 
+\@writefile{toc}{\contentsline {chapter}{\numberline {4}Graph-based map analysis}{45}}
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\@writefile{loa}{\addvspace {10\p@ }}
+\@writefile{toc}{\contentsline {section}{\numberline {4.1}Overview}{45}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.2}Analysis of the map}{45}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.1}Outlines graph}{46}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.2}Reachability graphs}{46}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.2.1}Tiles graph}{46}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.2.2}Rooms graph}{46}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.2.3}Rooms and game elements graph}{47}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.3}Visibility graph}{47}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.4}Interesting metrics}{47}}
+\newlabel{ss:interesting_metrics}{{4.2.4}{47}}
+\newlabel{img:graph_divisive}{{4.1a}{48}}
+\newlabel{sub@img:graph_divisive}{{a}{48}}
+\newlabel{img:graph_out}{{4.1b}{48}}
+\newlabel{sub@img:graph_out}{{b}{48}}
+\newlabel{img:graph_tile}{{4.1c}{48}}
+\newlabel{sub@img:graph_tile}{{c}{48}}
+\newlabel{img:graph_room}{{4.1d}{48}}
+\newlabel{sub@img:graph_room}{{d}{48}}
+\newlabel{img:graph_room_res}{{4.1e}{48}}
+\newlabel{sub@img:graph_room_res}{{e}{48}}
+\newlabel{img:graph_visibility}{{4.1f}{48}}
+\newlabel{sub@img:graph_visibility}{{f}{48}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.1}{\ignorespaces A map and all the graphs that can be generated from it.\relax }}{48}}
+\citation{great1vs1}
+\@writefile{toc}{\contentsline {section}{\numberline {4.3}Placement of game elements on the map}{49}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3.1}Rules for the placement of game elements}{50}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3.2}Placement process}{51}}
+\newlabel{ss:placement}{{4.3.2}{51}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.2.1}Room selection}{51}}
+\newlabel{sss:room_selection}{{4.3.2.1}{51}}
+\@writefile{toc}{\contentsline {paragraph}{Heuristic-based room selection}{51}}
+\newlabel{eq:room_heuristic}{{4.1}{52}}
+\@writefile{toc}{\contentsline {paragraph}{Uniform room selection}{52}}
+\newlabel{eq:tile_heuristic}{{4.2}{52}}
+\@writefile{toc}{\contentsline {paragraph}{Random room selection}{52}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.2.2}Tile selection}{52}}
+\@writefile{toc}{\contentsline {paragraph}{Heuristic-based tile selection}{52}}
+\@writefile{toc}{\contentsline {paragraph}{Uniform tile selection}{53}}
+\@writefile{toc}{\contentsline {paragraph}{Random tile selection}{53}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3.3}Heuristics for the placement of game elements}{53}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.3.1}Spawn points}{53}}
+\newlabel{sss:sph}{{4.3.3.1}{53}}
+\@writefile{toc}{\contentsline {paragraph}{Room selection}{53}}
+\newlabel{eq:lowriskdeg}{{4.4}{53}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.2}{\ignorespaces How the \textit  {degree heuristic} defined for spawn points varies depending on the room node degree.}}{54}}
+\newlabel{fig:degree}{{4.2}{54}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.3}{\ignorespaces How the \textit  {visibility heuristic} defined for spawn points varies depending on the tile node degree.}}{54}}
+\newlabel{fig:visibility_low}{{4.3}{54}}
+\newlabel{eq:lowriskres}{{4.5}{54}}
+\@writefile{toc}{\contentsline {paragraph}{Tile selection}{54}}
+\newlabel{eq:lowvis}{{4.6}{54}}
+\newlabel{eq:lowwallclos}{{4.7}{54}}
+\newlabel{eq:lowresclos}{{4.8}{55}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.3.2}Health packs}{55}}
+\@writefile{toc}{\contentsline {paragraph}{Room selection}{55}}
+\newlabel{eq:lowriskdegh}{{4.9}{55}}
+\newlabel{eq:degfit}{{4.10}{55}}
+\newlabel{eq:intervaldistance}{{4.11}{55}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.4}{\ignorespaces The values assumed by $\intd  $ with $[0.3, 0.5]$ set as interval of desired values.\relax }}{56}}
+\newlabel{fig:interval}{{4.4}{56}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.5}{\ignorespaces How the \textit  {visibility heuristic} defined for health packs varies depending on the tile node degree.}}{56}}
+\newlabel{fig:visibility_medium}{{4.5}{56}}
+\@writefile{toc}{\contentsline {paragraph}{Tile selection}{56}}
+\newlabel{eq:lowvish}{{4.12}{56}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.3.3}Ammunition}{56}}
+\@writefile{toc}{\contentsline {paragraph}{Room selection}{56}}
+\newlabel{eq:degfita1}{{4.13}{57}}
+\newlabel{eq:degfita2}{{4.14}{57}}
+\@writefile{toc}{\contentsline {paragraph}{Tile selection}{57}}
+\newlabel{eq:highvisa}{{4.15}{57}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3.4}Weapon placement}{57}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.4}Summary}{58}}
+\@setckpt{chapters/chapter4}{
+\setcounter{page}{59}
+\setcounter{equation}{15}
+\setcounter{enumi}{0}
+\setcounter{enumii}{0}
+\setcounter{enumiii}{0}
+\setcounter{enumiv}{0}
+\setcounter{footnote}{2}
+\setcounter{mpfootnote}{0}
+\setcounter{part}{0}
+\setcounter{chapter}{4}
+\setcounter{section}{4}
+\setcounter{subsection}{0}
+\setcounter{subsubsection}{0}
+\setcounter{paragraph}{0}
+\setcounter{subparagraph}{0}
+\setcounter{figure}{5}
+\setcounter{table}{0}
+\setcounter{AlgoLine}{0}
+\setcounter{algocfline}{2}
+\setcounter{algocfproc}{2}
+\setcounter{algocf}{2}
+\setcounter{parentequation}{0}
+\setcounter{ContinuedFloat}{0}
+\setcounter{pp@next@reset}{0}
+\setcounter{subfigure}{0}
+\setcounter{subtable}{0}
+}

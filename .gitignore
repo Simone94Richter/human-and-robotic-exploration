@@ -1,0 +1,44 @@
+# Unity geenrated #
+**/[Oo]bj/
+**/[Bb]uild/
+**/[Ll]ibrary/
+**/[Bb]uild/
+**/[Bb]uilds/
+**/Assets/AssetStoreTools*
+*.ogg
+*.ogg.meta
+*.ogv
+*.ogv.meta
+
+# Visual Studio 2015 cache directory #
+**/.vs/
+
+# Visual Studio / MonoDevelop generated #
+ExportedObj/
+*.svd
+*.userprefs
+*.csproj
+*.pidb
+*.suo
+*.sln
+*.user
+*.unityproj
+*.booproj
+
+# Unity3D generated meta files #
+*.pidb.meta
+
+# Unity3D Generated File On Crash Reports #
+sysinfo.txt
+
+# OS generated #
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+Results/desktop.ini
+*.lnk
