@@ -37,7 +37,8 @@ public class SLMapManager : MapManager {
 
         if(robot != null)
         {
-            robot.SetMap(map);
+            float floorSize = mapAssemblerScript.GetSquareSize();
+            robot.SetMap(map, floorSize);
         }
     }
 
