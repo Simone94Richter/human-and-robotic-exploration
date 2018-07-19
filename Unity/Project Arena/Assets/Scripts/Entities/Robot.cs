@@ -12,6 +12,7 @@ public class Robot : Entity, IRobot{
     [SerializeField] [Range(0f, 5f)] public float timeBetweenRays;
     [SerializeField] private float gravity = 100f;
     [SerializeField] [Range(100f, 1000f)] public float rangeRays;
+    [SerializeField] [Range(1.0f, 10.0f)] public float rayCertainty = 8.0f;
 
     [Header("Raycast parameters")] [SerializeField] private bool limitRange = false;
     [SerializeField] private float range = 150f;
@@ -44,7 +45,9 @@ public class Robot : Entity, IRobot{
 
     GameObject tempDestination;
 
-    private List<Vector3> goals; 
+    private List<Vector3> goals;
+
+    RobotMovement rM;
 
     // Use this for initialization
     void Start()
@@ -57,6 +60,7 @@ public class Robot : Entity, IRobot{
         goRotation = false;
         goSending = true;
         rb = gameObject.GetComponent<Rigidbody>();
+        rM = GetComponent<RobotMovement>();
         starting_speedX = rb.velocity.x;
         starting_speedY = rb.velocity.y;
         starting_speedZ = rb.velocity.z;
@@ -72,65 +76,27 @@ public class Robot : Entity, IRobot{
 
             angle = angle + angleRay;
         }
-        //StartingMonitoring();
     }
 
     // Update is called once per frame
-    void Update()
+    void LateUpdate()
     {
         if (goSending)
         {
             goSending = false;
             StartCoroutine(SendingRays());
         }
-        if (!targetFound && goForward && !goRotation)
-        {
-            transform.position += transform.forward * Time.deltaTime * speed;
-            //rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y, speed);
-            transform.rotation = transform.rotation;
-        }
-        else if (!targetFound && !goForward && goRotation)
-        {
-            transform.position = transform.position;
-            //rb.velocity = new Vector3(0,0,0);
-            //Vector3 angularVelocity = new Vector3(0, speed, 0);
-            transform.Rotate(Vector3.up * Time.deltaTime * rotationSpeed); 
-        }
+        
         if (!targetFound && goChoosing)
         {
             ChoosingPointToReach();
         }
         if (!targetFound && goApproach)
         {
-            ApproachingPointToReach();
+            goApproach = false;
+            rM.ApproachingPointToReach(goals);
         }
-        if (tempDestination)
-        {
-            if (tempReached)
-            {
-                Destroy(tempDestination);
-                tempReached = false;
-            }
-            Plane[] planes = GeometryUtility.CalculateFrustumPlanes(robotCamera);
-            Ray center = new Ray(transform.position, transform.forward);
-            Debug.DrawRay(transform.position, transform.forward * rangeRays, Color.red, 0.5f);
-            if (GeometryUtility.TestPlanesAABB(planes, tempDestination.GetComponent<BoxCollider>().bounds) && Physics.Raycast(center, out hit, rangeRays) 
-                && hit.collider.gameObject.name == "New Game Object")
-            { 
-                goForward = true;
-                goRotation = false;
-            }
-            else
-            {
-                goForward = false;
-                goRotation = true;
-            }
-        }
-        else
-        {
-            goForward = false;
-            goRotation = false;
-        }
+        SaveMapAsText();
     }
 
     public void SetMap(char[,] map, float floorSquareSize)
@@ -226,11 +192,6 @@ public class Robot : Entity, IRobot{
 
         float angle = angleRay;
         yield return new WaitForSeconds(timeBetweenRays);
-        float robot_x = transform.position.x;
-        float robot_z = transform.position.z;
-        robot_x = robot_x / squareSize;
-        robot_z = robot_z / squareSize;
-        robot_map[(int)robot_x, (int)robot_z] = 'r';
         landingRay[0] = new Ray(transform.position, transform.forward);
         //UpdatingSpace(landingRay[0]);
         Debug.DrawRay(transform.position, transform.forward * rangeRays, Color.red, 2f);
@@ -291,7 +252,7 @@ public class Robot : Entity, IRobot{
                 {
                     Debug.Log("Target found!");
                     targetFound = true;
-                    robot_map[(int)x, (int)y] = 'g';
+                    robot_map[(int)x, (int)y] = 't';
                     SettingR(hit.point, Vector3.Distance(hit.collider.gameObject.transform.position, this.gameObject.transform.position), ray[i]);
                     //Debug.Log(x + "" + y);
                     //portarlo dritto al target
@@ -307,6 +268,11 @@ public class Robot : Entity, IRobot{
                 }
             }
         }
+        float robot_x = transform.position.x;
+        float robot_z = transform.position.z;
+        robot_x = robot_x / squareSize;
+        robot_z = robot_z / squareSize;
+        robot_map[(int)robot_x, (int)robot_z] = 'p';
         goChoosing = true;
     }
 
@@ -354,36 +320,13 @@ public class Robot : Entity, IRobot{
         goApproach = true;
     }
 
-    public void ApproachingPointToReach()
-    {
-        goApproach = false;
-        perTestare(goals);
-        if (tempDestination)
-        {
-            Destroy(tempDestination);
-            tempReached = false;
-        }
-        int desiredPos = Random.Range(0, goals.Count);
-        tempDestination = new GameObject();
-        //tempDestination = Resources.Load("Small Target") as GameObject;
-        tempDestination.transform.position = goals[desiredPos];
-        Debug.Log("Chosen point to reach is: " + goals[desiredPos]);
-        tempDestination.AddComponent<BoxCollider>();
-        tempDestination.GetComponent<BoxCollider>().isTrigger = true;
-        tempDestination.AddComponent<RobotSpoofedDest>();
-        tempDestination.GetComponent<RobotSpoofedDest>().robot = this.gameObject;
-        tempDestination.tag = "Opponent";
-        tempDestination.layer = 8;
-        //goForward = true;
-    }
-
     public void SetTempReached()
     {
         tempReached = true;
         goSending = true;
     }
 
-    public void perTestare(List<Vector3> goal)
+    /*public void perTestare(List<Vector3> goal)
     {
         goal = goals;
         List<GameObject> testTempPos = new List<GameObject>();
@@ -400,5 +343,25 @@ public class Robot : Entity, IRobot{
             testTempPos[i].tag = "Opponent";
             testTempPos[i].layer = 8;
         }
+    }*/
+
+    private void SaveMapAsText()
+    {
+        string textMap = "";
+        //string path = "C:/Users/zhan yuan/Desktop/polimi/magistrale/Tesi/Text";
+
+        //AddMapEdge();
+
+        for (int i = 0; i < robot_map.GetLength(0); i++)
+        {
+            for (int j = 0; j < robot_map.GetLength(1); j++)
+            {
+                textMap += robot_map[i, j];
+            }
+            if (i < robot_map.GetLength(0) - 1)
+                textMap += "\n";
+        }
+
+        //File.WriteAllText(path + "/" + Time.time.ToString() + ".txt", textMap);
     }
 }

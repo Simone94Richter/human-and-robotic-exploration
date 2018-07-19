@@ -10,5 +10,4 @@ public interface IRobot{
 
     void ChoosingPointToReach();
 
-    void ApproachingPointToReach();
 }
