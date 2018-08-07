@@ -48,6 +48,7 @@ public class Robot : Entity, IRobot{
     private List<Vector3> goals;
 
     RobotMovement rM;
+    RobotProgress rP;
 
     // Use this for initialization
     void Start()
@@ -61,6 +62,7 @@ public class Robot : Entity, IRobot{
         goSending = true;
         rb = gameObject.GetComponent<Rigidbody>();
         rM = GetComponent<RobotMovement>();
+        rP = GetComponent<RobotProgress>();
         starting_speedX = rb.velocity.x;
         starting_speedY = rb.velocity.y;
         starting_speedZ = rb.velocity.z;
@@ -76,6 +78,7 @@ public class Robot : Entity, IRobot{
 
             angle = angle + angleRay;
         }
+        StartCoroutine(SavingProgress());
     }
 
     // Update is called once per frame
@@ -96,7 +99,6 @@ public class Robot : Entity, IRobot{
             goApproach = false;
             rM.ApproachingPointToReach(goals);
         }
-        SaveMapAsText();
     }
 
     public void SetMap(char[,] map, float floorSquareSize)
@@ -226,7 +228,7 @@ public class Robot : Entity, IRobot{
                     x_coord = x_coord / squareSize;
                     y_coord = y_coord / squareSize;
                     robot_map[(int)x_coord, (int)y_coord] = 'r';
-                    Debug.Log(robot_map[(int)x_coord, (int)y_coord] + "" + (int)x_coord + "" + (int)y_coord);
+                    //Debug.Log(robot_map[(int)x_coord, (int)y_coord] + "" + (int)x_coord + "" + (int)y_coord);
                 }
             }
             else
@@ -235,10 +237,10 @@ public class Robot : Entity, IRobot{
                 float y = hit.transform.position.z / squareSize;
                 if (hit.collider.gameObject.tag == "Environment")
                 {
-                    Debug.Log("Environment hit!");
-                    Debug.Log("You hit " + hit.collider.gameObject.tag);
+                    //Debug.Log("Environment hit!");
+                    //Debug.Log("You hit " + hit.collider.gameObject.tag);
                     //Debug.Log(hit.collider.gameObject.transform.position);
-                    Debug.Log(hit.point);
+                    //Debug.Log(hit.point);
                     //robot_map[(int)x, (int)y] = 'r';
                     //float dx = hit.collider.gameObject.transform.position.x - this.gameObject.transform.position.x;
                     float dx = hit.point.x - this.gameObject.transform.position.x;
@@ -250,7 +252,7 @@ public class Robot : Entity, IRobot{
                 }
                 else if (hit.collider.gameObject.tag == "Target")
                 {
-                    Debug.Log("Target found!");
+                    //Debug.Log("Target found!");
                     targetFound = true;
                     robot_map[(int)x, (int)y] = 't';
                     SettingR(hit.point, Vector3.Distance(hit.collider.gameObject.transform.position, this.gameObject.transform.position), ray[i]);
@@ -259,7 +261,7 @@ public class Robot : Entity, IRobot{
                 }
                 else
                 {
-                    Debug.Log("The ray hit " + hit.transform.name);
+                    //Debug.Log("The ray hit " + hit.transform.name);
                     //robot_map[(int)x, (int)y] = 'r';
                     float dx = hit.collider.gameObject.transform.position.x - this.gameObject.transform.position.x;
                     float dz = hit.collider.gameObject.transform.position.z - this.gameObject.transform.position.z;
@@ -278,13 +280,16 @@ public class Robot : Entity, IRobot{
 
     private void SettingR(Vector3 collisionPoint, float distance, Ray ray)
     {
-        Debug.Log("Max distance: " + distance);
+        //Debug.Log("Max distance: " + distance);
+        //Debug.Log(ray.GetPoint(distance) + ", " + (int)(ray.GetPoint(distance).x/squareSize));
         for (float i = 0; i < distance; i++)
         {
             float x = ray.GetPoint(i).x / squareSize;
             float y = ray.GetPoint(i).z / squareSize;
+            x = FixingRound(x);
+            y = FixingRound(y);
             robot_map[(int)x, (int)y] = 'r';
-            Debug.Log(robot_map[(int)x, (int)y] + "" + (int)x + "" + (int)y + " at a distance " + i);
+            //Debug.Log(robot_map[(int)x, (int)y] + "" + (int)x + "" + (int)y + " at a distance " + i);
         }
     }
 
@@ -308,15 +313,15 @@ public class Robot : Entity, IRobot{
         {
             for (int y = 0; y < height; y++)
             {
-                if(robot_map[x,y] == 'r')
-                Debug.Log(robot_map[x,y] + "" + x + "" + y);
+                //if(robot_map[x,y] == 'r')
+                //Debug.Log(robot_map[x,y] + "" + x + "" + y);
             }
         }
         goals = posToReach;
-        for (int i = 0; i < goals.Count; i++)
+        /*for (int i = 0; i < goals.Count; i++)
         {
-            Debug.Log("Possible point to reach is: " + goals[i]);
-        }
+            //Debug.Log("Possible point to reach is: " + goals[i]);
+        }*/
         goApproach = true;
     }
 
@@ -324,6 +329,29 @@ public class Robot : Entity, IRobot{
     {
         tempReached = true;
         goSending = true;
+    }
+
+    private float FixingRound(float coordinate)
+    {
+        if (Mathf.Abs(coordinate - Mathf.Round(coordinate)) >= 0.5f)
+        {
+            return (Mathf.Round(coordinate) - 1);
+        }
+        else return Mathf.Round(coordinate);
+    }
+
+    private IEnumerator SavingProgress()
+    {
+        while (goSending)
+        {
+            yield return null;
+        }
+        while (!targetFound)
+        {
+            rP.SaveMap(robot_map);
+            rP.SavePos(transform.position, transform.rotation);
+            yield return new WaitForSeconds(1.5f);
+        }
     }
 
     /*public void perTestare(List<Vector3> goal)
@@ -344,24 +372,4 @@ public class Robot : Entity, IRobot{
             testTempPos[i].layer = 8;
         }
     }*/
-
-    private void SaveMapAsText()
-    {
-        string textMap = "";
-        //string path = "C:/Users/zhan yuan/Desktop/polimi/magistrale/Tesi/Text";
-
-        //AddMapEdge();
-
-        for (int i = 0; i < robot_map.GetLength(0); i++)
-        {
-            for (int j = 0; j < robot_map.GetLength(1); j++)
-            {
-                textMap += robot_map[i, j];
-            }
-            if (i < robot_map.GetLength(0) - 1)
-                textMap += "\n";
-        }
-
-        //File.WriteAllText(path + "/" + Time.time.ToString() + ".txt", textMap);
-    }
 }
