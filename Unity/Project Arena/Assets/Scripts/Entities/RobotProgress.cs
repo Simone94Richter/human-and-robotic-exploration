@@ -31,6 +31,7 @@ public class RobotProgress : MonoBehaviour {
             File.Create(filePathPosRes);
         }
         gameDataPos = new JsonRobotObjects();
+        gameDataPos.position = new List<string>();
         gameDataMap = new JsonMapObjects();
         //gameDataMap.u = new List<string>();
         //gameDataMap.r = new List<string>();
@@ -49,9 +50,11 @@ public class RobotProgress : MonoBehaviour {
         //string textMap = "";
 
         //AddMapEdge();
+        //gameDataMap = new JsonMapObjects();
         gameDataMap.u = new List<string>();
         gameDataMap.r = new List<string>();
         gameDataMap.g = new List<string>();
+        gameDataMap.w = new List<string>();
 
         for (int i = 0; i < robot_map.GetLength(0); i++)
         {
@@ -68,6 +71,10 @@ public class RobotProgress : MonoBehaviour {
                 {
                     gameDataMap.g.Add(i.ToString() + "," + j.ToString());
                 }
+                else if (robot_map[i, j] == 'w')
+                {
+                    gameDataMap.w.Add(i.ToString() + "," + j.ToString());
+                }
                 //textMap += robot_map[i, j];
             }
             //textMap += "\n";
@@ -77,10 +84,10 @@ public class RobotProgress : MonoBehaviour {
         File.WriteAllText(filePathMapRes, mapAsJson);
     }
 
-    public void SavePos(Vector3 position, Quaternion rotation)
+    public void SavePos(int posX, int posZ, Quaternion rotation)
     {
-        gameDataPos.position = position;
-        gameDataPos.rotation = rotation;
+        gameDataPos.position.Add(posX.ToString() + "," + posZ.ToString());
+        gameDataPos.rotationY = rotation.y;
         posAsJson = JsonUtility.ToJson(gameDataPos);
         File.WriteAllText(filePathPosRes, posAsJson);
     }

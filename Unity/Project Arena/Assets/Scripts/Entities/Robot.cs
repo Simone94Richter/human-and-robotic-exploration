@@ -44,6 +44,7 @@ public class Robot : Entity, IRobot{
     private char[,] robot_map;
 
     GameObject tempDestination;
+    GameObject destination;
 
     private List<Vector3> goals;
 
@@ -78,7 +79,6 @@ public class Robot : Entity, IRobot{
 
             angle = angle + angleRay;
         }
-        StartCoroutine(SavingProgress());
     }
 
     // Update is called once per frame
@@ -99,6 +99,10 @@ public class Robot : Entity, IRobot{
             goApproach = false;
             rM.ApproachingPointToReach(goals);
         }
+        if (targetFound)
+        {
+            rM.ApproachingGoal(destination);
+        }
     }
 
     public void SetMap(char[,] map, float floorSquareSize)
@@ -117,6 +121,8 @@ public class Robot : Entity, IRobot{
                 robot_map[x, y] = 'u';
             }
         }
+
+        StartCoroutine(SavingProgress());
     }
 
 
@@ -227,6 +233,8 @@ public class Robot : Entity, IRobot{
                     float y_coord = ray[i].GetPoint(j).z;
                     x_coord = x_coord / squareSize;
                     y_coord = y_coord / squareSize;
+                    x_coord = FixingRound(x_coord);
+                    y_coord = FixingRound(y_coord);
                     robot_map[(int)x_coord, (int)y_coord] = 'r';
                     //Debug.Log(robot_map[(int)x_coord, (int)y_coord] + "" + (int)x_coord + "" + (int)y_coord);
                 }
@@ -247,15 +255,22 @@ public class Robot : Entity, IRobot{
                     float dz = hit.point.z - this.gameObject.transform.position.z;
                     //float dz = hit.collider.gameObject.transform.position.z - this.gameObject.transform.position.z;
                     SettingR(hit.point, Mathf.Sqrt((dx*dx) + (dz*dz)), ray[i]);
+                    SettingW(Mathf.Sqrt((dx * dx) + (dz * dz)), ray[i]);
                     //Debug.Log(x + "" + y);
-                    //aggiungere al proprio array che quello è un wall ed effettuare un ricalcolo
                 }
                 else if (hit.collider.gameObject.tag == "Target")
                 {
-                    //Debug.Log("Target found!");
+                    Debug.Log("Target found!");
                     targetFound = true;
-                    robot_map[(int)x, (int)y] = 't';
+                    rM.targetFound = true;
+                    rM.squareSize = squareSize;
+                    destination = hit.collider.gameObject;
+  
                     SettingR(hit.point, Vector3.Distance(hit.collider.gameObject.transform.position, this.gameObject.transform.position), ray[i]);
+
+                    x = FixingRound(x);
+                    y = FixingRound(y);
+                    robot_map[(int)x, (int)y] = 'g';
                     //Debug.Log(x + "" + y);
                     //portarlo dritto al target
                 }
@@ -266,14 +281,23 @@ public class Robot : Entity, IRobot{
                     float dx = hit.collider.gameObject.transform.position.x - this.gameObject.transform.position.x;
                     float dz = hit.collider.gameObject.transform.position.z - this.gameObject.transform.position.z;
                     SettingR(hit.point, Mathf.Sqrt((dx * dx) + (dz * dz)), ray[i]);
+                    SettingW(Mathf.Sqrt((dx * dx) + (dz * dz)), ray[i]);
                     //Debug.Log(x + "" + y);
                 }
             }
+        }
+        if (destination)
+        {
+            float x = FixingRound(destination.transform.position.x/squareSize);
+            float z = FixingRound(destination.transform.position.z/squareSize);
+            robot_map[(int)x, (int)z] = 'g';
         }
         float robot_x = transform.position.x;
         float robot_z = transform.position.z;
         robot_x = robot_x / squareSize;
         robot_z = robot_z / squareSize;
+        robot_x = FixingRound(robot_x);
+        robot_z = FixingRound(robot_z);
         robot_map[(int)robot_x, (int)robot_z] = 'p';
         goChoosing = true;
     }
@@ -293,6 +317,77 @@ public class Robot : Entity, IRobot{
         }
     }
 
+    private void SettingW(float distance, Ray ray)
+    {
+        float robotX = transform.position.x / squareSize;
+        float robotz = transform.position.z / squareSize;
+        robotX = FixingRound(robotX);
+        robotz = FixingRound(robotz);
+        //float hitPX = collisionPoint.x;
+        //float hitPZ = collisionPoint.z;
+        float x = ray.GetPoint(distance).x / squareSize;
+        float z = ray.GetPoint(distance).z / squareSize;
+        x = FixingRound(x);
+        z = FixingRound(z);
+
+        float dx = (x - robotX);
+        float dz = (z - robotz);
+
+        if (dx >= 0 && dz >= 0) //primo quadrante
+        {
+            if (robot_map[(int)x+1,(int)z] == 'u')
+            {
+                robot_map[(int)x + 1, (int)z] = 'w';
+            }
+            else if (robot_map[(int)x, (int)z+1] == 'u')
+            {
+                robot_map[(int)x, (int)z+1] = 'w';
+            }
+        }else if (dx >= 0 && dz <= 0) //quarto quadrante
+        {
+            if (robot_map[(int)x + 1, (int)z] == 'u')
+            {
+                robot_map[(int)x + 1, (int)z] = 'w';
+            }
+            else if (robot_map[(int)x, (int)z-1] == 'u')
+            {
+                robot_map[(int)x, (int)z-1] = 'w';
+            }
+        }else if (dx <= 0 && dz >= 0) //secondo quadrante
+        {
+            if (robot_map[(int)x-1, (int)z] == 'u')
+            {
+                robot_map[(int)x - 1, (int)z] = 'w';
+            }
+            else if (robot_map[(int)x, (int)z+1] == 'u')
+            {
+                robot_map[(int)x, (int)z + 1] = 'w';
+            }
+        }else if(dx <= 0 && dz <= 0)//terzo quadrante
+        {
+            if (robot_map[(int)x, (int)z - 1] == 'u')
+            {
+                robot_map[(int)x, (int)z - 1] = 'w';
+            }
+            else if (robot_map[(int)x-1, (int)z] == 'u')
+            {
+                robot_map[(int)x-1, (int)z] = 'w';
+            }
+        }
+        /*int i = -1;
+        while (i <= 1)
+        {
+            int j = -1;
+            while (j <= 1)
+            {
+                char cell = robot_map[(int)(x+i),(int)(y+i)];
+                if (cell == 'u') robot_map[(int)(x + i), (int)(y + i)] = 'w';
+                j++;
+            }
+            i++;
+        }*/
+    }
+
     public void ChoosingPointToReach()
     {
         goChoosing = false;
@@ -309,14 +404,14 @@ public class Robot : Entity, IRobot{
                 }
             }
         }
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
+        //for (int x = 0; x < width; x++)
+        //{
+        //    for (int y = 0; y < height; y++)
+        //    {
                 //if(robot_map[x,y] == 'r')
                 //Debug.Log(robot_map[x,y] + "" + x + "" + y);
-            }
-        }
+        //    }
+        //}
         goals = posToReach;
         /*for (int i = 0; i < goals.Count; i++)
         {
@@ -342,15 +437,19 @@ public class Robot : Entity, IRobot{
 
     private IEnumerator SavingProgress()
     {
-        while (goSending)
-        {
-            yield return null;
-        }
-        while (!targetFound)
+        //while (goSending)
+        //{
+        //    yield return null;
+        //}
+        while (rM.inGameSession)
         {
             rP.SaveMap(robot_map);
-            rP.SavePos(transform.position, transform.rotation);
-            yield return new WaitForSeconds(1.5f);
+            float x = transform.position.x / squareSize;
+            x = FixingRound(x);
+            float z = transform.position.z /squareSize;
+            z = FixingRound(z);
+            rP.SavePos((int)x, (int)z, transform.rotation);
+            yield return new WaitForSeconds(1.0f);
         }
     }
 

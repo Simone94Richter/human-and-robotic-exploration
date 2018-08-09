@@ -6,8 +6,8 @@ using System;
 [Serializable]
 public class JsonRobotObjects {
 
-    public Vector3 position;
-    public Quaternion rotation;
+    public List<string> position;
+    public float rotationY;
 
 
 }

@@ -124,7 +124,8 @@ public class TutorialGameManager : GameManager {
 
         GameObject newTarget = (GameObject)Instantiate(target);
         newTarget.name = target.name;
-        newTarget.transform.position = spawnPointManagerScript.GetSpawnPosition();
+        //newTarget.transform.position = spawnPointManagerScript.GetSpawnPosition();
+        newTarget.transform.position = new Vector3(spawnPointManagerScript.GetSpawnPosition().x, 0.5f, spawnPointManagerScript.GetSpawnPosition().z);
         newTarget.GetComponent<Entity>().SetupEntity(0, null, this, 0);
     }
 
