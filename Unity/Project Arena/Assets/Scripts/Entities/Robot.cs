@@ -20,10 +20,19 @@ public class Robot : Entity, IRobot{
     [SerializeField] private float sparkDuration = 0.01f;
     [SerializeField] private LayerMask ignoredLayers;
 
-    [Header("Algorithm")]
-    [SerializeField] public int algorithmChoice;
+    [Header("Is map to be analyzed numeric or char?")]
+    public bool isNumeric;
 
-    bool targetFound;
+    [Header("Arbitrary float used to detect wall after a collision with one of them")]
+    public float epsilon = 1f; //for now, 1 is the best
+
+    [Header("Num paramters for numerical mapping")]
+    public float numFreeCell = 0f;
+    public float numWallCell = 1.5f;
+    public float numUnknownCell = 1f;
+    public float numGoalCell = 2f;
+
+    bool targetFound; //is the objective detected by mapping?
     bool goApproach;
     bool goChoosing;
     bool goForward;
@@ -34,22 +43,28 @@ public class Robot : Entity, IRobot{
     Rigidbody rb;
     RaycastHit hit;
     List<Ray> landingRay = new List<Ray>();
+    List<Vector3> route;
 
-    float squareSize;
+    float finishingTime;
+    float startingTime;
+    float squareSize; //dimension of a cell of the floor, used in order to discretize the final map
     float starting_speedX;
     float starting_speedY;
     float starting_speedZ;
 
-    private char[,] total_map;
-    private char[,] robot_map;
+    private char[,] total_map; //the original map, passed by the system
+    private char[,] robot_map; //the char map updated by the robot
+    private float [,] numeric_robot_map; //the numeric map updated by the robot
 
-    GameObject tempDestination;
-    GameObject destination;
+    GameObject tempDestination; //the temp point to reach, expressed as a GameObject
+    GameObject destination; //the target, properly
 
-    private List<Vector3> goals;
+    private List<Vector3> goals; //list of frontier points
+    private Vector3 tempGoal; //Vector3 of the temp point to reach
 
     RobotMovement rM;
     RobotProgress rP;
+    RobotPlanning rPl;
 
     // Use this for initialization
     void Start()
@@ -64,6 +79,8 @@ public class Robot : Entity, IRobot{
         rb = gameObject.GetComponent<Rigidbody>();
         rM = GetComponent<RobotMovement>();
         rP = GetComponent<RobotProgress>();
+        rPl = GetComponent<RobotPlanning>();
+        rPl.range = rangeRays;
         starting_speedX = rb.velocity.x;
         starting_speedY = rb.velocity.y;
         starting_speedZ = rb.velocity.z;
@@ -97,7 +114,31 @@ public class Robot : Entity, IRobot{
         if (!targetFound && goApproach)
         {
             goApproach = false;
-            rM.ApproachingPointToReach(goals);
+            //inserire qui il metodo di planning
+            if (!isNumeric)
+            {
+                rPl.isNumeric = false;
+                rPl.robot_map = robot_map;
+            }
+            else
+            {
+                rPl.isNumeric = true;
+                rPl.numeric_robot_map = numeric_robot_map;
+            }
+            route = new List<Vector3>();
+            rPl.hasTerminated = false;
+            //rPl.CheckVisibility(FixingRound(transform.position.x/squareSize), FixingRound(transform.position.z / squareSize),
+            //    FixingRound(tempGoal.x / squareSize), FixingRound(tempGoal.z / squareSize));
+            route = rPl.CheckVisibility(transform.position/squareSize, tempGoal/squareSize, route);
+            if (route == null || route.Count == 0)
+            {
+                rM.ApproachingPointToReach(tempGoal);
+            }
+            else
+            {
+                int start = 0;
+                rM.ApproachingPointToReach(route, start);
+            }
         }
         if (targetFound)
         {
@@ -105,9 +146,15 @@ public class Robot : Entity, IRobot{
         }
     }
 
+    /// <summary>
+    /// Method called by the GameManager to initialized the map of the robot
+    /// </summary>
+    /// <param name="map">the original map, held by the GameManaer</param>
+    /// <param name="floorSquareSize">Parameter used to discretize the cell of the floor (from Unity world to robot map)</param>
     public void SetMap(char[,] map, float floorSquareSize)
     {
         squareSize = floorSquareSize;
+        rPl.squareSize = floorSquareSize;
         total_map = map;
         robot_map = map;
         //per un mero controllo
@@ -118,10 +165,13 @@ public class Robot : Entity, IRobot{
             for (int y = 0; y < height; y++)
             {
                 //Debug.Log(total_map[x,y] + "" + x + "" + y);
+                if(!isNumeric)
                 robot_map[x, y] = 'u';
+                else numeric_robot_map[x, y] = numUnknownCell;
             }
         }
 
+        startingTime = Time.time;
         StartCoroutine(SavingProgress());
     }
 
@@ -235,7 +285,9 @@ public class Robot : Entity, IRobot{
                     y_coord = y_coord / squareSize;
                     x_coord = FixingRound(x_coord);
                     y_coord = FixingRound(y_coord);
+                    if(!isNumeric)
                     robot_map[(int)x_coord, (int)y_coord] = 'r';
+                    else numeric_robot_map[(int)x_coord, (int)y_coord] = numFreeCell; 
                     //Debug.Log(robot_map[(int)x_coord, (int)y_coord] + "" + (int)x_coord + "" + (int)y_coord);
                 }
             }
@@ -255,7 +307,8 @@ public class Robot : Entity, IRobot{
                     float dz = hit.point.z - this.gameObject.transform.position.z;
                     //float dz = hit.collider.gameObject.transform.position.z - this.gameObject.transform.position.z;
                     SettingR(hit.point, Mathf.Sqrt((dx*dx) + (dz*dz)), ray[i]);
-                    SettingW(Mathf.Sqrt((dx * dx) + (dz * dz)), ray[i]);
+                    float angle = Vector3.Angle(transform.right, ray[i].direction);
+                    SettingW(Mathf.Sqrt((dx * dx) + (dz * dz)), ray[i], epsilon, angle);
                     //Debug.Log(x + "" + y);
                 }
                 else if (hit.collider.gameObject.tag == "Target")
@@ -270,7 +323,9 @@ public class Robot : Entity, IRobot{
 
                     x = FixingRound(x);
                     y = FixingRound(y);
-                    robot_map[(int)x, (int)y] = 'g';
+                    if (!isNumeric)
+                        robot_map[(int)x, (int)y] = 'g';
+                    else numeric_robot_map[(int)x, (int)y] = numGoalCell;
                     //Debug.Log(x + "" + y);
                     //portarlo dritto al target
                 }
@@ -281,7 +336,8 @@ public class Robot : Entity, IRobot{
                     float dx = hit.collider.gameObject.transform.position.x - this.gameObject.transform.position.x;
                     float dz = hit.collider.gameObject.transform.position.z - this.gameObject.transform.position.z;
                     SettingR(hit.point, Mathf.Sqrt((dx * dx) + (dz * dz)), ray[i]);
-                    SettingW(Mathf.Sqrt((dx * dx) + (dz * dz)), ray[i]);
+                    float angle = Vector3.Angle(ray[i].direction, transform.right);
+                    SettingW(Mathf.Sqrt((dx * dx) + (dz * dz)), ray[i], epsilon, angle);
                     //Debug.Log(x + "" + y);
                 }
             }
@@ -290,7 +346,9 @@ public class Robot : Entity, IRobot{
         {
             float x = FixingRound(destination.transform.position.x/squareSize);
             float z = FixingRound(destination.transform.position.z/squareSize);
-            robot_map[(int)x, (int)z] = 'g';
+            if (!isNumeric)
+                robot_map[(int)x, (int)z] = 'g';
+            else numeric_robot_map[(int)x, (int)z] = numGoalCell;
         }
         float robot_x = transform.position.x;
         float robot_z = transform.position.z;
@@ -298,7 +356,9 @@ public class Robot : Entity, IRobot{
         robot_z = robot_z / squareSize;
         robot_x = FixingRound(robot_x);
         robot_z = FixingRound(robot_z);
-        robot_map[(int)robot_x, (int)robot_z] = 'p';
+        if (!isNumeric)
+            robot_map[(int)robot_x, (int)robot_z] = 'p';
+        else numeric_robot_map[(int)robot_x, (int)robot_z] = 3f;
         goChoosing = true;
     }
 
@@ -312,12 +372,14 @@ public class Robot : Entity, IRobot{
             float y = ray.GetPoint(i).z / squareSize;
             x = FixingRound(x);
             y = FixingRound(y);
-            robot_map[(int)x, (int)y] = 'r';
+            if (!isNumeric)
+                robot_map[(int)x, (int)y] = 'r';
+            else numeric_robot_map[(int)x, (int)y] = numFreeCell;
             //Debug.Log(robot_map[(int)x, (int)y] + "" + (int)x + "" + (int)y + " at a distance " + i);
         }
     }
 
-    private void SettingW(float distance, Ray ray)
+    private void SettingW(float distance, Ray ray, float epsilon, float angle)
     {
         float robotX = transform.position.x / squareSize;
         float robotz = transform.position.z / squareSize;
@@ -332,8 +394,20 @@ public class Robot : Entity, IRobot{
 
         float dx = (x - robotX);
         float dz = (z - robotz);
+        //Debug.Log(angle);
+        //Debug.Log(Mathf.Sin(angle) + Mathf.Cos(angle));
+        
+        //method 1
+        float wallPointX = FixingRound(ray.GetPoint(distance + epsilon).x / squareSize);
+        float wallPointZ = FixingRound(ray.GetPoint(distance + epsilon).z / squareSize);
 
-        if (dx >= 0 && dz >= 0) //primo quadrante
+        if (!isNumeric)
+            robot_map[(int)wallPointX, (int)wallPointZ] = 'w';
+        else numeric_robot_map[(int)wallPointX, (int)wallPointZ] = numWallCell;
+        //Debug.Log("(" + wallPointX + ", " + wallPointZ + ")");
+        
+        //method 2
+        /*if (dx >= 0 && dz >= 0) //primo quadrante
         {
             if (robot_map[(int)x+1,(int)z] == 'u')
             {
@@ -343,6 +417,8 @@ public class Robot : Entity, IRobot{
             {
                 robot_map[(int)x, (int)z+1] = 'w';
             }
+            if (robot_map[(int)x + 1, (int)z + 1] == 'u')
+                robot_map[(int)x + 1, (int)z + 1] = 'w';
         }else if (dx >= 0 && dz <= 0) //quarto quadrante
         {
             if (robot_map[(int)x + 1, (int)z] == 'u')
@@ -353,7 +429,10 @@ public class Robot : Entity, IRobot{
             {
                 robot_map[(int)x, (int)z-1] = 'w';
             }
-        }else if (dx <= 0 && dz >= 0) //secondo quadrante
+            if (robot_map[(int)x + 1, (int)z - 1] == 'u')
+                robot_map[(int)x + 1, (int)z - 1] = 'w';
+        }
+        else if (dx <= 0 && dz >= 0) //secondo quadrante
         {
             if (robot_map[(int)x-1, (int)z] == 'u')
             {
@@ -363,7 +442,10 @@ public class Robot : Entity, IRobot{
             {
                 robot_map[(int)x, (int)z + 1] = 'w';
             }
-        }else if(dx <= 0 && dz <= 0)//terzo quadrante
+            if (robot_map[(int)x - 1, (int)z + 1] == 'u')
+                robot_map[(int)x - 1, (int)z + 1] = 'w';
+        }
+        else if(dx <= 0 && dz <= 0)//terzo quadrante
         {
             if (robot_map[(int)x, (int)z - 1] == 'u')
             {
@@ -373,7 +455,9 @@ public class Robot : Entity, IRobot{
             {
                 robot_map[(int)x-1, (int)z] = 'w';
             }
-        }
+            if (robot_map[(int)x - 1, (int)z - 1] == 'u')
+                robot_map[(int)x - 1, (int)z - 1] = 'w';
+        }*/
         /*int i = -1;
         while (i <= 1)
         {
@@ -392,15 +476,33 @@ public class Robot : Entity, IRobot{
     {
         goChoosing = false;
         List<Vector3> posToReach = new List<Vector3>();
-        int width = robot_map.GetLength(0);
-        int height = robot_map.GetLength(1);
-        for (int x = 0; x < width; x++)
+        if (!isNumeric)
         {
-            for (int y = 0; y < height; y++)
+            int width = robot_map.GetLength(0);
+            int height = robot_map.GetLength(1);
+            for (int x = 0; x < width; x++)
             {
-                if (robot_map[x, y] == 'r')
+                for (int y = 0; y < height; y++)
                 {
-                    posToReach.Add(new Vector3(x * squareSize, transform.position.y, y * squareSize));
+                    if (robot_map[x, y] == 'r')
+                    {
+                        posToReach.Add(new Vector3(x * squareSize, transform.position.y, y * squareSize));
+                    }
+                }
+            }
+        }
+        else
+        {
+            int width = numeric_robot_map.GetLength(0);
+            int height = numeric_robot_map.GetLength(1);
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    if (numeric_robot_map[x, y] == numFreeCell)
+                    {
+                        posToReach.Add(new Vector3(x * squareSize, transform.position.y, y * squareSize));
+                    }
                 }
             }
         }
@@ -417,6 +519,9 @@ public class Robot : Entity, IRobot{
         {
             //Debug.Log("Possible point to reach is: " + goals[i]);
         }*/
+        int desiredPos = Random.Range(0, goals.Count);
+        tempGoal = goals[desiredPos];
+
         goApproach = true;
     }
 
@@ -443,7 +548,9 @@ public class Robot : Entity, IRobot{
         //}
         while (rM.inGameSession)
         {
-            rP.SaveMap(robot_map);
+            if (!isNumeric)
+                rP.SaveMapChar(robot_map);
+            else rP.SaveMapNum(numeric_robot_map);
             float x = transform.position.x / squareSize;
             x = FixingRound(x);
             float z = transform.position.z /squareSize;
@@ -451,6 +558,8 @@ public class Robot : Entity, IRobot{
             rP.SavePos((int)x, (int)z, transform.rotation);
             yield return new WaitForSeconds(1.0f);
         }
+        finishingTime = Time.time;
+        rP.SaveTime(finishingTime - startingTime);
     }
 
     /*public void perTestare(List<Vector3> goal)

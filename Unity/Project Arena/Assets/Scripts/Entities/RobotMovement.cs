@@ -106,7 +106,7 @@ public class RobotMovement : MonoBehaviour {
         }
     }
 
-    public void ApproachingPointToReach(List<Vector3> goals)
+    public void ApproachingPointToReach(Vector3 goals)
     {
         //goApproach = false;
         //perTestare(goals);
@@ -115,11 +115,14 @@ public class RobotMovement : MonoBehaviour {
             Destroy(tempDestination);
             tempReached = false;
         }
-        int desiredPos = Random.Range(0, goals.Count);
+
         tempDestination = new GameObject();
+
+        tempDestination.transform.position = goals;
+        //int desiredPos = Random.Range(0, goals.Count);
         //tempDestination = Resources.Load("Small Target") as GameObject;
-        tempDestination.transform.position = goals[desiredPos];
-        Debug.Log("Chosen point to reach is: " + goals[desiredPos]);
+        //tempDestination.transform.position = goals[desiredPos];
+        //Debug.Log("Chosen point to reach is: " + goals[desiredPos]);
         tempDestination.AddComponent<BoxCollider>();
         tempDestination.GetComponent<BoxCollider>().isTrigger = true;
         tempDestination.AddComponent<RobotSpoofedDest>();
@@ -127,6 +130,32 @@ public class RobotMovement : MonoBehaviour {
         tempDestination.tag = "Opponent";
         tempDestination.layer = 8;
         //goForward = true;
+    }
+
+    public void ApproachingPointToReach(List<Vector3> goals, int index)
+    {
+        if (tempDestination)
+        {
+            Destroy(tempDestination);
+            tempReached = false;
+        }
+
+        tempDestination = new GameObject();
+
+        Debug.Log("List: " + goals.Count + ", starting with " + index);
+        tempDestination.transform.position = goals[index];
+        //int desiredPos = Random.Range(0, goals.Count);
+        //tempDestination = Resources.Load("Small Target") as GameObject;
+        //tempDestination.transform.position = goals[desiredPos];
+        //Debug.Log("Chosen point to reach is: " + goals[desiredPos]);
+        tempDestination.AddComponent<BoxCollider>();
+        tempDestination.GetComponent<BoxCollider>().isTrigger = true;
+        tempDestination.AddComponent<RobotSpoofedDestPath>();
+        tempDestination.GetComponent<RobotSpoofedDestPath>().robot = this.gameObject;
+        tempDestination.GetComponent<RobotSpoofedDestPath>().index = index;
+        tempDestination.GetComponent<RobotSpoofedDestPath>().path = goals;
+        tempDestination.tag = "Opponent";
+        tempDestination.layer = 8;
     }
 
     public void ApproachingGoal(GameObject target)

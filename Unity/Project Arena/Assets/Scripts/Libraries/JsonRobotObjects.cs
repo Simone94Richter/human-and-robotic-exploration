@@ -8,6 +8,6 @@ public class JsonRobotObjects {
 
     public List<string> position;
     public float rotationY;
-
+    public float time;
 
 }

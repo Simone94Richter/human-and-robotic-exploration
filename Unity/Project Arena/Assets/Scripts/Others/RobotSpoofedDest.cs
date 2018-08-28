@@ -10,11 +10,6 @@ public class RobotSpoofedDest : MonoBehaviour {
 	void Start () {
 		
 	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 
     public void OnTriggerEnter(Collider collision)
     {

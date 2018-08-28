@@ -45,7 +45,7 @@ public class RobotProgress : MonoBehaviour {
         
 	}*/
 
-    public void SaveMap(char [,] robot_map)
+    public void SaveMapChar(char [,] robot_map)
     {
         //string textMap = "";
 
@@ -84,10 +84,53 @@ public class RobotProgress : MonoBehaviour {
         File.WriteAllText(filePathMapRes, mapAsJson);
     }
 
+    public void SaveMapNum(float[,] robot_map)
+    {
+        gameDataMap.u = new List<string>();
+        gameDataMap.r = new List<string>();
+        gameDataMap.g = new List<string>();
+        gameDataMap.w = new List<string>();
+
+        for (int i = 0; i < robot_map.GetLength(0); i++)
+        {
+            for (int j = 0; j < robot_map.GetLength(1); j++)
+            {
+                if (robot_map[i, j] == 1f)
+                {
+                    gameDataMap.u.Add(i.ToString() + "," + j.ToString());
+                }
+                else if (robot_map[i, j] == 0f)
+                {
+                    gameDataMap.r.Add(i.ToString() + "," + j.ToString());
+                }
+                else if (robot_map[i, j] == 2f)
+                {
+                    gameDataMap.g.Add(i.ToString() + "," + j.ToString());
+                }
+                else if (robot_map[i, j] == 1.5f)
+                {
+                    gameDataMap.w.Add(i.ToString() + "," + j.ToString());
+                }
+                //textMap += robot_map[i, j];
+            }
+            //textMap += "\n";
+        }
+
+        mapAsJson = JsonUtility.ToJson(gameDataMap);
+        File.WriteAllText(filePathMapRes, mapAsJson);
+    }
+
     public void SavePos(int posX, int posZ, Quaternion rotation)
     {
         gameDataPos.position.Add(posX.ToString() + "," + posZ.ToString());
         gameDataPos.rotationY = rotation.y;
+        posAsJson = JsonUtility.ToJson(gameDataPos);
+        File.WriteAllText(filePathPosRes, posAsJson);
+    }
+
+    public void SaveTime(float time)
+    {
+        gameDataPos.time = time;
         posAsJson = JsonUtility.ToJson(gameDataPos);
         File.WriteAllText(filePathPosRes, posAsJson);
     }
