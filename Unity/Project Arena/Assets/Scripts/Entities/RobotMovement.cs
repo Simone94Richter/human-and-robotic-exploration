@@ -46,7 +46,10 @@ public class RobotMovement : MonoBehaviour {
                 transform.position = transform.position;
                 //rb.velocity = new Vector3(0,0,0);
                 //Vector3 angularVelocity = new Vector3(0, speed, 0);
+                //if(tempDestination.transform.position.x > transform.position.x) //destination is on the right of the robot
                 transform.Rotate(Vector3.up * Time.deltaTime * rotationSpeed);
+                //if (tempDestination.transform.position.x < transform.position.x) //destination is on the left of the robot
+                //transform.Rotate(Vector3.up * Time.deltaTime * -rotationSpeed);
             }
             if (tempReached)
             {

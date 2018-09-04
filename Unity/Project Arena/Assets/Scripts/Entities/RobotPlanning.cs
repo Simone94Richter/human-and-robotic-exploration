@@ -39,8 +39,10 @@ public class RobotPlanning : MonoBehaviour {
         //robot = new Vector3(robot_x, transform.position.y, robot_z);
         //destination = new Vector3(temp_x, transform.position.y, temp_z);
         Debug.DrawLine(robot*squareSize, destination*squareSize, Color.green, 4f);
-        //float distance = Mathf.Sqrt((robot.x - destination.x)*(robot.x - destination.x) + (robot.y - destination.y) * (robot.y - destination.y));
-        if (Physics.Linecast(robot * squareSize, destination * squareSize, layerMask) /*|| distance > range*/ /*&& !hasTerminated*/)
+        Vector3 robotPos = robot * squareSize;
+        Vector3 destPos = destination * squareSize;
+        float distance = Mathf.Sqrt((robotPos.x - destPos.x)*(robotPos.x - destPos.x) + (robotPos.z - destPos.z) * (robotPos.z - destPos.z));
+        if (Physics.Linecast(robot * squareSize, destination * squareSize, layerMask) || distance > range /*&& !hasTerminated*/)
         {
             Debug.Log("Something hidden or too far");
             if (!isNumeric)
@@ -264,7 +266,7 @@ public class RobotPlanning : MonoBehaviour {
             {
                 //Debug.Log("Inside while");
                 //Debug.Log(current);
-                return ReconstructPath(cameFrom, current);
+                return ReconstructPath(cameFrom, current, destPos);
             }
 
             for (int i = -1; i<2; i++)
@@ -334,11 +336,13 @@ public class RobotPlanning : MonoBehaviour {
 
     }
 
-    private List<Vector3> ReconstructPath(Vector3[,] cameFom, Vector3 current) //this method gives problems
+    private List<Vector3> ReconstructPath(Vector3[,] cameFom, Vector3 current, Vector3 destination) //this method gives problems
     {
         List<Vector3> total_path = new List<Vector3>();
+        List<Vector3> optimal_path = new List<Vector3>();
         total_path.Add(current);
-        //bool isContained = false;
+        float distance;
+        int lastTwo = 2;
         int i_curr = 0;
         int j_curr = 0;
 
@@ -376,7 +380,25 @@ public class RobotPlanning : MonoBehaviour {
 
         }
 
-        return total_path;
+        //only cells where the destination cannot be seen are contained
+        for (int k = 0; k < total_path.Count; k++)
+        {
+            distance = Mathf.Sqrt((total_path[k].x - destination.x) * (total_path[k].x - destination.x) + (total_path[k].z - destination.z) * (total_path[k].z - destination.z));
+            Debug.DrawLine(total_path[k], destination, Color.green, 4f);
+            if (Physics.Linecast(total_path[k], destination, layerMask) || distance > range)
+            {
+                optimal_path.Add(total_path[k]);
+            }
+            else if(lastTwo > 0)   //is better to have at least two elements before directly approach to the final destination. With only one there is the risk that the robot is not able to reach it
+            {
+                optimal_path.Add(total_path[k]);
+                lastTwo--;
+            }
+        }
+
+        optimal_path.Add(destination);
+        
+        return optimal_path;
 
     }
 
