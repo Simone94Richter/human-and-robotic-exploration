@@ -23,6 +23,8 @@ if os.path.isfile(inputDir + "/" + fileName) and os.path.isfile(inputDir + "/" +
             for i in range(len(array_unknown)): 
                 for s in array_unknown[i].split():
                     a,b = s.split(",") 
+                    a = int(a)
+                    b = int(b)
                     #s = int(s)
                     #if s.isdigit():
                     #print(a)
@@ -32,11 +34,15 @@ if os.path.isfile(inputDir + "/" + fileName) and os.path.isfile(inputDir + "/" +
             for j in range(len(array_wall)):
                 for s in array_wall[j].split():
                     a,b = s.split(",")
+                    a = int(a)
+                    b = int(b)
                     plt.plot(a, b, 'rs')
             
             for l in range(len(array_goal)):
                 for s in array_goal[l].split():
                     a,b = s.split(",")
+                    a = int(a)
+                    b = int(b)
                     plt.plot(a, b, 'gs')
         
             #print(len(array_clear))
@@ -52,9 +58,13 @@ if os.path.isfile(inputDir + "/" + fileName) and os.path.isfile(inputDir + "/" +
         for k in range(len(array_pos)):
             for s in array_pos[k].split():
                 x,z = s.split(",")
+                x = int(x)
+                z = int(z)
                 #print(x, z)
                 if k+1 < len(array_pos):
                     a,b = array_pos[k+1].split(",")
+                    a = int(a)
+                    b = int(b)
                     plt.plot([x, a], [z, b], 'k-')
 
     #plt.axis([0, 50, 0, 50])
