@@ -12,7 +12,7 @@ public class RobotMovement : MonoBehaviour {
     bool goForward;
     bool goRotation;
     public bool targetFound;
-    bool tempReached;
+    public bool tempReached;
 
     public bool inGameSession = true;
 
@@ -22,6 +22,8 @@ public class RobotMovement : MonoBehaviour {
     GameObject target;
 
     RaycastHit hit;
+
+    private Vector3 tempRelatedToRobot;
 
     // Use this for initialization
     void Start () {
@@ -35,27 +37,35 @@ public class RobotMovement : MonoBehaviour {
 	void Update () {
         if (tempDestination)
         {
-            if (!targetFound && goForward && !goRotation)
+            //Debug.Log(transform.InverseTransformPoint(tempDestination.transform.position));
+            if (!targetFound && goForward && !goRotation && !tempReached)
             {
                 transform.position += transform.forward * Time.deltaTime * speed;
                 //rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y, speed);
                 transform.rotation = transform.rotation;
             }
-            else if (!targetFound && !goForward && goRotation)
+            else if (!targetFound && !goForward && goRotation && !tempReached)
             {
                 transform.position = transform.position;
-                //rb.velocity = new Vector3(0,0,0);
-                //Vector3 angularVelocity = new Vector3(0, speed, 0);
-                //if(tempDestination.transform.position.x > transform.position.x) //destination is on the right of the robot
-                transform.Rotate(Vector3.up * Time.deltaTime * rotationSpeed);
-                //if (tempDestination.transform.position.x < transform.position.x) //destination is on the left of the robot
-                //transform.Rotate(Vector3.up * Time.deltaTime * -rotationSpeed);
+                tempRelatedToRobot = transform.InverseTransformPoint(tempDestination.transform.position);
+                if (tempRelatedToRobot.x >= 0 && tempRelatedToRobot.z >= 0) //primo quadrante
+                {
+                    transform.Rotate(Vector3.up * Time.deltaTime * rotationSpeed);
+                }
+                else if (tempRelatedToRobot.x < 0 && tempRelatedToRobot.z >= 0) //secondo quadrante
+                {
+                    transform.Rotate(-Vector3.up * Time.deltaTime * rotationSpeed);
+                }
+                else if(tempRelatedToRobot.x < 0 && tempRelatedToRobot.z < 0) //terzo quadrante
+                {
+                    transform.Rotate(-Vector3.up * Time.deltaTime * rotationSpeed);
+                }
+                else if (tempRelatedToRobot.x >= 0 && tempRelatedToRobot.z < 0) // quarto quadrante
+                {
+                    transform.Rotate(Vector3.up * Time.deltaTime * rotationSpeed);
+                }
             }
-            if (tempReached)
-            {
-                Destroy(tempDestination);
-                tempReached = false;
-            }
+
             Plane[] planes = GeometryUtility.CalculateFrustumPlanes(robotCamera);
             Ray center = new Ray(transform.position, transform.forward);
             Debug.DrawRay(transform.position, transform.forward * rangeRays, Color.red, 0.5f);
@@ -84,8 +94,8 @@ public class RobotMovement : MonoBehaviour {
             if (GeometryUtility.TestPlanesAABB(planes, target.GetComponent<SphereCollider>().bounds) && Physics.Raycast(center, out hit, rangeRays)
                 && hit.collider.gameObject.tag == "Target")
             {
-                float x = hit.transform.position.x / squareSize;
-                float y = hit.transform.position.z / squareSize;
+                //float x = hit.transform.position.x / squareSize;
+                //float y = hit.transform.position.z / squareSize;
                 float dx = hit.point.x - this.gameObject.transform.position.x;
                 float dz = hit.point.z - this.gameObject.transform.position.z;
                 if (Mathf.Sqrt((dx * dx) + (dz * dz)) <= 5.5f)
@@ -127,6 +137,7 @@ public class RobotMovement : MonoBehaviour {
         //tempDestination.transform.position = goals[desiredPos];
         //Debug.Log("Chosen point to reach is: " + goals[desiredPos]);
         tempDestination.AddComponent<BoxCollider>();
+        tempDestination.GetComponent<BoxCollider>().size = new Vector3(0.5f, 1f, 0.5f);
         tempDestination.GetComponent<BoxCollider>().isTrigger = true;
         tempDestination.AddComponent<RobotSpoofedDest>();
         tempDestination.GetComponent<RobotSpoofedDest>().robot = this.gameObject;
@@ -152,6 +163,7 @@ public class RobotMovement : MonoBehaviour {
         //tempDestination.transform.position = goals[desiredPos];
         //Debug.Log("Chosen point to reach is: " + goals[desiredPos]);
         tempDestination.AddComponent<BoxCollider>();
+        tempDestination.GetComponent<BoxCollider>().size = new Vector3(0.5f, 1f, 0.5f);
         tempDestination.GetComponent<BoxCollider>().isTrigger = true;
         tempDestination.AddComponent<RobotSpoofedDestPath>();
         tempDestination.GetComponent<RobotSpoofedDestPath>().robot = this.gameObject;

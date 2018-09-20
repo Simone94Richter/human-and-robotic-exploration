@@ -17,9 +17,13 @@ public class RobotProgress : MonoBehaviour {
 
     private JsonRobotObjects gameDataPos;
     private JsonMapObjects gameDataMap;
+    private RobotConnection rC;
 
     // Use this for initialization
     void Start () {
+
+        rC = GetComponent<RobotConnection>();
+
         filePathMapRes = Application.dataPath + pathMap;
         if (!File.Exists(filePathMapRes))
         {
@@ -33,9 +37,7 @@ public class RobotProgress : MonoBehaviour {
         gameDataPos = new JsonRobotObjects();
         gameDataPos.position = new List<string>();
         gameDataMap = new JsonMapObjects();
-        //gameDataMap.u = new List<string>();
-        //gameDataMap.r = new List<string>();
-        //gameDataMap.g = new List<string>();
+
         posAsJson = "";
         mapAsJson = "";
     }
@@ -133,5 +135,10 @@ public class RobotProgress : MonoBehaviour {
         gameDataPos.time = time;
         posAsJson = JsonUtility.ToJson(gameDataPos);
         File.WriteAllText(filePathPosRes, posAsJson);
+    }
+
+    public void PreparingForServer()
+    {
+        rC.SendDataToServer(JsonUtility.ToJson(gameDataMap), JsonUtility.ToJson(gameDataPos));
     }
 }

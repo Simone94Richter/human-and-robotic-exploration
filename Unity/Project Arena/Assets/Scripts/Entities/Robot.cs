@@ -32,13 +32,13 @@ public class Robot : Entity, IRobot{
     public float numUnknownCell = 1f;
     public float numGoalCell = 2f;
 
-    bool targetFound; //is the objective detected by mapping?
-    bool goApproach;
-    bool goChoosing;
-    bool goForward;
-    bool goRotation;
-    bool goSending;
-    bool tempReached;
+    private bool targetFound; //is the objective detected by mapping?
+    private bool goApproach;
+    private bool goChoosing;
+    private bool goForward;
+    private bool goRotation;
+    private bool goSending;
+    private bool tempReached;
 
     Rigidbody rb;
     RaycastHit hit;
@@ -48,9 +48,6 @@ public class Robot : Entity, IRobot{
     float finishingTime;
     float startingTime;
     float squareSize; //dimension of a cell of the floor, used in order to discretize the final map
-    float starting_speedX;
-    float starting_speedY;
-    float starting_speedZ;
 
     private char[,] total_map; //the original map, passed by the system
     private char[,] robot_map; //the char map updated by the robot
@@ -81,9 +78,6 @@ public class Robot : Entity, IRobot{
         rP = GetComponent<RobotProgress>();
         rPl = GetComponent<RobotPlanning>();
         rPl.range = rangeRays;
-        starting_speedX = rb.velocity.x;
-        starting_speedY = rb.velocity.y;
-        starting_speedZ = rb.velocity.z;
         landingRay.Add(new Ray(transform.position, Vector3.forward));
         float angle = angleRay;
         for (int i = 1; i < numbRay-1; i=i+2) //y rimane invariato, bisogna spaziare intorno a x e z
@@ -114,7 +108,7 @@ public class Robot : Entity, IRobot{
         if (!targetFound && goApproach)
         {
             goApproach = false;
-            //inserire qui il metodo di planning
+
             if (!isNumeric)
             {
                 rPl.isNumeric = false;
@@ -126,10 +120,8 @@ public class Robot : Entity, IRobot{
                 rPl.numeric_robot_map = numeric_robot_map;
             }
             route = new List<Vector3>();
-            rPl.hasTerminated = false;
-            //rPl.CheckVisibility(FixingRound(transform.position.x/squareSize), FixingRound(transform.position.z / squareSize),
-            //    FixingRound(tempGoal.x / squareSize), FixingRound(tempGoal.z / squareSize));
-            route = rPl.CheckVisibility(transform.position/squareSize, tempGoal/squareSize, route);
+            route = rPl.CheckVisibility(transform.position, tempGoal);
+            rM.tempReached = false;
             if (route == null || route.Count == 0)
             {
                 rM.ApproachingPointToReach(tempGoal);
@@ -392,8 +384,8 @@ public class Robot : Entity, IRobot{
         x = FixingRound(x);
         z = FixingRound(z);
 
-        float dx = (x - robotX);
-        float dz = (z - robotz);
+        //float dx = (x - robotX);
+        //float dz = (z - robotz);
         //Debug.Log(angle);
         //Debug.Log(Mathf.Sin(angle) + Mathf.Cos(angle));
         
@@ -401,9 +393,9 @@ public class Robot : Entity, IRobot{
         float wallPointX = FixingRound(ray.GetPoint(distance + epsilon).x / squareSize);
         float wallPointZ = FixingRound(ray.GetPoint(distance + epsilon).z / squareSize);
 
-        if (!isNumeric)
+        if (!isNumeric && robot_map[(int)wallPointX,(int)wallPointZ] != 'r')
             robot_map[(int)wallPointX, (int)wallPointZ] = 'w';
-        else numeric_robot_map[(int)wallPointX, (int)wallPointZ] = numWallCell;
+        else if(isNumeric && numeric_robot_map[(int)wallPointX, (int)wallPointZ] != numFreeCell) numeric_robot_map[(int)wallPointX, (int)wallPointZ] = numWallCell;
         //Debug.Log("(" + wallPointX + ", " + wallPointZ + ")");
         
         //method 2
@@ -486,7 +478,10 @@ public class Robot : Entity, IRobot{
                 {
                     if (robot_map[x, y] == 'r')
                     {
-                        posToReach.Add(new Vector3(x * squareSize, transform.position.y, y * squareSize));
+                        if (robot_map[x+1, y] == 'u' || robot_map[x-1, y] == 'u' || robot_map[x, y+1] == 'u' || robot_map[x, y-1] == 'u')
+                        {
+                            posToReach.Add(new Vector3(x * squareSize, transform.position.y, y * squareSize));
+                        }
                     }
                 }
             }
@@ -501,7 +496,10 @@ public class Robot : Entity, IRobot{
                 {
                     if (numeric_robot_map[x, y] == numFreeCell)
                     {
-                        posToReach.Add(new Vector3(x * squareSize, transform.position.y, y * squareSize));
+                        if (numeric_robot_map[x + 1, y] == numUnknownCell || robot_map[x - 1, y] == numUnknownCell || robot_map[x, y + 1] == numUnknownCell || robot_map[x, y - 1] == numUnknownCell)
+                        {
+                            posToReach.Add(new Vector3(x * squareSize, transform.position.y, y * squareSize));
+                        }
                     }
                 }
             }
@@ -527,6 +525,7 @@ public class Robot : Entity, IRobot{
 
     public void SetTempReached()
     {
+        rM.tempReached = true;
         tempReached = true;
         goSending = true;
     }
@@ -560,24 +559,6 @@ public class Robot : Entity, IRobot{
         }
         finishingTime = Time.time;
         rP.SaveTime(finishingTime - startingTime);
+        rP.PreparingForServer();
     }
-
-    /*public void perTestare(List<Vector3> goal)
-    {
-        goal = goals;
-        List<GameObject> testTempPos = new List<GameObject>();
-        for (int i = 0; i < goals.Count; i++)
-        {
-            testTempPos.Add(new GameObject());
-            //tempDestination = Resources.Load("Small Target") as GameObject;
-            testTempPos[i].transform.position = goals[i];
-            Debug.Log("Chosen point to reach is: " + goals[i]);
-            testTempPos[i].AddComponent<BoxCollider>();
-            testTempPos[i].GetComponent<BoxCollider>().isTrigger = true;
-            testTempPos[i].AddComponent<RobotSpoofedDest>();
-            testTempPos[i].GetComponent<RobotSpoofedDest>().robot = this.gameObject;
-            testTempPos[i].tag = "Opponent";
-            testTempPos[i].layer = 8;
-        }
-    }*/
 }
