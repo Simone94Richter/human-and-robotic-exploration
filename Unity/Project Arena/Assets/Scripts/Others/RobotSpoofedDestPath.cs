@@ -8,11 +8,6 @@ public class RobotSpoofedDestPath : MonoBehaviour {
     public int index;
     public List<Vector3> path;
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-
     public void OnTriggerEnter(Collider collision)
     {
         if (collision.gameObject.tag == "Player")

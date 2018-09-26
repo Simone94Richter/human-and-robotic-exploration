@@ -45,9 +45,16 @@ public class TutorialGameManager : GameManager {
                 Spawn(player);
 
                 // Setup the contenders.
-                //playerScript.SetupEntity(totalHealthPlayer, activeGunsPlayer, this, 1);
-
-                //playerScript.LockCursor();
+                if (playerScript)
+                {
+                    playerScript.SetupEntity(totalHealthPlayer, activeGunsPlayer, this, 1);
+                    playerScript.LockCursor();
+                }
+                if (robotScript && !IsReady())
+                {
+                    robotScript.StartingCountDown();
+                }
+                
                 startTime = Time.time;
             }
 
@@ -125,7 +132,7 @@ public class TutorialGameManager : GameManager {
         GameObject newTarget = (GameObject)Instantiate(target);
         newTarget.name = target.name;
         //newTarget.transform.position = spawnPointManagerScript.GetSpawnPosition();
-        newTarget.transform.position = new Vector3(spawnPointManagerScript.GetSpawnPosition().x, 0.5f, spawnPointManagerScript.GetSpawnPosition().z);
+        newTarget.transform.position = new Vector3(spawnPointManagerScript.GetSpawnPosition().x, 0.3f, spawnPointManagerScript.GetSpawnPosition().z);
         newTarget.GetComponent<Entity>().SetupEntity(0, null, this, 0);
     }
 

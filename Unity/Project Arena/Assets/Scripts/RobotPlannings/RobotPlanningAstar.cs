@@ -101,12 +101,17 @@ public class RobotPlanningAstar : RobotPlanning {
                 {
                     continue; //this neighbour has already been evaluated
                 }
-                else if( ( (curr_x + i) >= 0 && (curr_x + i) < gScore.GetLength(0) ) && ( (curr_z) >= 0 && (curr_z) < gScore.GetLength(1) ) && (robot_map[curr_x+i,curr_z] == 'r'))
+                else if( ( (curr_x + i) >= 0 && (curr_x + i) < gScore.GetLength(0) ) && ( (curr_z) >= 0 && (curr_z) < gScore.GetLength(1) ) && (robot_map[curr_x+i,curr_z] != 'u'))
                 {
                     float neigh_x = (curr_x + i) * squareSize;
                     float neigh_z = (curr_z) * squareSize;
                     //the distance from start to neighbour
-                    tentativeGScore = gScore[curr_x+i,curr_z] + Mathf.Sqrt((current.x - neigh_x) * (current.x - neigh_x) + (current.z - neigh_z) * (current.z - neigh_z));
+                    if (robot_map[curr_x+i, curr_z] == 'w')
+                    {
+                        tentativeGScore = gScore[curr_x + i, curr_z] + Mathf.Sqrt((current.x - neigh_x) * (current.x - neigh_x) + (current.z - neigh_z) * (current.z - neigh_z)) + penaltyCost;
+                    }
+                    else
+                        tentativeGScore = gScore[curr_x+i,curr_z] + Mathf.Sqrt((current.x - neigh_x) * (current.x - neigh_x) + (current.z - neigh_z) * (current.z - neigh_z));
 
                     if (!openSet.Contains(new Vector3((curr_x + i) * squareSize, transform.position.y, (curr_z) * squareSize)))
                     {
@@ -131,12 +136,17 @@ public class RobotPlanningAstar : RobotPlanning {
                 {
                     continue; //this neighbour has already been evaluated
                 }
-                else if (((curr_x) >= 0 && (curr_x) < gScore.GetLength(0)) && ((curr_z + j) >= 0 && (curr_z + j) < gScore.GetLength(1)) && (robot_map[curr_x, curr_z + j] == 'r'))
+                else if (((curr_x) >= 0 && (curr_x) < gScore.GetLength(0)) && ((curr_z + j) >= 0 && (curr_z + j) < gScore.GetLength(1)) && (robot_map[curr_x, curr_z + j] != 'u'))
                 {
                     float neigh_x = (curr_x) * squareSize;
                     float neigh_z = (curr_z + j) * squareSize;
                     //the distance from start to neighbour
-                    tentativeGScore = gScore[curr_x, curr_z + j] + Mathf.Sqrt((current.x - neigh_x) * (current.x - neigh_x) + (current.z - neigh_z) * (current.z - neigh_z));
+                    if (robot_map[curr_x, curr_z+j] == 'w')
+                    {
+                        tentativeGScore = gScore[curr_x, curr_z + j] + Mathf.Sqrt((current.x - neigh_x) * (current.x - neigh_x) + (current.z - neigh_z) * (current.z - neigh_z)) + penaltyCost;
+                    }
+                    else
+                        tentativeGScore = gScore[curr_x, curr_z + j] + Mathf.Sqrt((current.x - neigh_x) * (current.x - neigh_x) + (current.z - neigh_z) * (current.z - neigh_z));
 
                     if (!openSet.Contains(new Vector3((curr_x) * squareSize, transform.position.y, (curr_z + j) * squareSize)))
                     {
@@ -217,11 +227,17 @@ public class RobotPlanningAstar : RobotPlanning {
                 {
                     continue;
                 }
-                else if (((curr_x + i) >= 0 && (curr_x + i) < gScore.GetLength(0)) && ((curr_z) >= 0 && (curr_z) < gScore.GetLength(1)) && (numeric_robot_map[curr_x + i, curr_z] == freeCell))
+                else if (((curr_x + i) >= 0 && (curr_x + i) < gScore.GetLength(0)) && ((curr_z) >= 0 && (curr_z) < gScore.GetLength(1)) && (numeric_robot_map[curr_x + i, curr_z] != unknownCell))
                 {
                     float neigh_x = (curr_x + i) * squareSize;
                     float neigh_z = (curr_z) * squareSize;
-                    tentativeGScore = gScore[curr_x + i, curr_z] + Mathf.Sqrt((current.x - neigh_x) * (current.x - neigh_x) + (current.z - neigh_z) * (current.z - neigh_z));
+
+                    if (numeric_robot_map[curr_x + i, curr_z] == nearWallCell)
+                    {
+                        tentativeGScore = gScore[curr_x + i, curr_z] + Mathf.Sqrt((current.x - neigh_x) * (current.x - neigh_x) + (current.z - neigh_z) * (current.z - neigh_z)) + penaltyCost;
+                    }
+                    else
+                        tentativeGScore = gScore[curr_x + i, curr_z] + Mathf.Sqrt((current.x - neigh_x) * (current.x - neigh_x) + (current.z - neigh_z) * (current.z - neigh_z));
 
                     if (!openSet.Contains(new Vector3((curr_x + i) * squareSize, transform.position.y, (curr_z) * squareSize)))
                     {
@@ -245,11 +261,17 @@ public class RobotPlanningAstar : RobotPlanning {
                 {
                     continue;
                 }
-                else if (((curr_x) >= 0 && (curr_x) < gScore.GetLength(0)) && ((curr_z + j) >= 0 && (curr_z + j) < gScore.GetLength(1)) && (numeric_robot_map[curr_x, curr_z + j] == freeCell))
+                else if (((curr_x) >= 0 && (curr_x) < gScore.GetLength(0)) && ((curr_z + j) >= 0 && (curr_z + j) < gScore.GetLength(1)) && (numeric_robot_map[curr_x, curr_z + j] != unknownCell))
                 {
                     float neigh_x = (curr_x) * squareSize;
                     float neigh_z = (curr_z + j) * squareSize;
-                    tentativeGScore = gScore[curr_x, curr_z + j] + Mathf.Sqrt((current.x - neigh_x) * (current.x - neigh_x) + (current.z - neigh_z) * (current.z - neigh_z));
+
+                    if (numeric_robot_map[curr_x, curr_z + j] == nearWallCell)
+                    {
+                        tentativeGScore = gScore[curr_x, curr_z + j] + Mathf.Sqrt((current.x - neigh_x) * (current.x - neigh_x) + (current.z - neigh_z) * (current.z - neigh_z)) + penaltyCost;
+                    }
+                    else
+                        tentativeGScore = gScore[curr_x, curr_z + j] + Mathf.Sqrt((current.x - neigh_x) * (current.x - neigh_x) + (current.z - neigh_z) * (current.z - neigh_z));
 
                     if (!openSet.Contains(new Vector3((curr_x) * squareSize, transform.position.y, (curr_z + j) * squareSize)))
                     {

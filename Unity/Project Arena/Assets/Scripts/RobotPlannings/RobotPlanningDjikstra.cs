@@ -26,7 +26,7 @@ public class RobotPlanningDjikstra : RobotPlanning {
     {
         List<Vector3> positions = new List<Vector3>();// the vertex set of univisited vertexes
         List<Vector3> exploredPositions = new List<Vector3>();
-        List<Vector3> tempDest = new List<Vector3>();
+        //List<Vector3> tempDest = new List<Vector3>();
         float[,] distVertex = new float[map.GetLength(0), map.GetLength(1)];
         Vector3[,] prev = new Vector3[map.GetLength(0), map.GetLength(1)];
 
@@ -41,7 +41,7 @@ public class RobotPlanningDjikstra : RobotPlanning {
         {
             for (int j = 0; j < map.GetLength(1); j++)
             {
-                if (map[i, j] == freeCell)
+                if (map[i, j] != unknownCell)
                 {
                     distVertex[i, j] = Mathf.Infinity;
                     prev[i, j] = Vector3.zero;
@@ -81,7 +81,7 @@ public class RobotPlanningDjikstra : RobotPlanning {
                 {
                     continue;
                 }
-                else if (posX + i >= 0 && posX + i < map.GetLength(0) && posZ >= 0 && posZ < map.GetLength(1) && map[posX + i, posZ] == freeCell)
+                else if (posX + i >= 0 && posX + i < map.GetLength(0) && posZ >= 0 && posZ < map.GetLength(1) && map[posX + i, posZ] != unknownCell)
                 {
                     int neighbourX = (int)FixingRound(neighbour.x / squareSize);
                     int neighbourZ = (int)FixingRound(neighbour.z / squareSize);
@@ -109,7 +109,7 @@ public class RobotPlanningDjikstra : RobotPlanning {
                 {
                     continue;
                 }
-                else if (posX >= 0 && posX < map.GetLength(0) && posZ + j >= 0 && posZ + j < map.GetLength(1) && map[posX, posZ + j] == freeCell)
+                else if (posX >= 0 && posX < map.GetLength(0) && posZ + j >= 0 && posZ + j < map.GetLength(1) && map[posX, posZ + j] != unknownCell)
                 {
                     int neighbourX = (int)FixingRound(neighbour.x / squareSize);
                     int neighbourZ = (int)FixingRound(neighbour.z / squareSize);
@@ -140,7 +140,7 @@ public class RobotPlanningDjikstra : RobotPlanning {
     {
         List<Vector3> positions = new List<Vector3>();// the vertex set of univisited vertexes
         List<Vector3> exploredPositions = new List<Vector3>();
-        List<Vector3> tempDest = new List<Vector3>();
+        //List<Vector3> tempDest = new List<Vector3>();
         float[,] distVertex = new float[map.GetLength(0), map.GetLength(1)];
         Vector3[,] prev = new Vector3[map.GetLength(0), map.GetLength(1)];
 
@@ -155,7 +155,7 @@ public class RobotPlanningDjikstra : RobotPlanning {
         {
             for (int j = 0; j < map.GetLength(1); j++)
             {
-                if (map[i, j] == freeCell)
+                if (map[i, j] != unknownCell)
                 {
                     distVertex[i, j] = Mathf.Infinity;
                     prev[i, j] = Vector3.zero;
@@ -195,7 +195,7 @@ public class RobotPlanningDjikstra : RobotPlanning {
                 {
                     continue;
                 }
-                else if (posX + i >= 0 && posX + i < map.GetLength(0) && posZ >= 0 && posZ < map.GetLength(1) && map[posX + i, posZ] == freeCell)
+                else if (posX + i >= 0 && posX + i < map.GetLength(0) && posZ >= 0 && posZ < map.GetLength(1) && map[posX + i, posZ] != unknownCell)
                 {
                     int neighbourX = (int)FixingRound(neighbour.x / squareSize);
                     int neighbourZ = (int)FixingRound(neighbour.z / squareSize);
@@ -223,7 +223,7 @@ public class RobotPlanningDjikstra : RobotPlanning {
                 {
                     continue;
                 }
-                else if (posX >= 0 && posX < map.GetLength(0) && posZ + j >= 0 && posZ + j < map.GetLength(1) && map[posX, posZ + j] == freeCell)
+                else if (posX >= 0 && posX < map.GetLength(0) && posZ + j >= 0 && posZ + j < map.GetLength(1) && map[posX, posZ + j] != unknownCell)
                 {
                     int neighbourX = (int)FixingRound(neighbour.x / squareSize);
                     int neighbourZ = (int)FixingRound(neighbour.z / squareSize);
