@@ -176,4 +176,8 @@ public class MLPrefabMapAssembler : PrefabMapAssembler {
         return null;
     }
 
+    public override void AssembleMap(float[,] map, float wallChar, float roomChar)
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -28,6 +28,10 @@ public abstract class PrefabMapAssembler : MapAssembler {
     protected char wallChar;
     // Char that denotes a room tile.
     protected char roomChar;
+    // Float that denotes a wall tile.
+    protected float wallNumb;
+    // Float that denotes a room tile.
+    protected float roomNumb;
     // Map width.
     protected int width;
     // Map heigth.
@@ -56,6 +60,30 @@ public abstract class PrefabMapAssembler : MapAssembler {
             // Debug.Log("Added mask " + convertedMask + ".");
             if (t.binaryMask != "0000" && t.binaryMask != "1111") {
                 for (int i = 1; i < 4; i++) {
+                    convertedMask = CircularShiftMask(convertedMask);
+                    processedTilePrefabs.Add(new ProcessedTilePrefab(convertedMask, t.prefab,
+                        90 * i + rotationCorrection));
+                    // Debug.Log("Added mask " + convertedMask + ".");
+                }
+            }
+        }
+    }
+
+    protected void ProcessTilesNumb()
+    {
+        processedTilePrefabs = new List<ProcessedTilePrefab>();
+
+        // For each tile create three rotated copies.
+        foreach (TilePrefab t in tilePrefabs)
+        {
+            string convertedMask = t.binaryMask;
+            processedTilePrefabs.Add(new ProcessedTilePrefab(convertedMask, t.prefab,
+                rotationCorrection));
+            // Debug.Log("Added mask " + convertedMask + ".");
+            if (t.binaryMask != "0000" && t.binaryMask != "1111")
+            {
+                for (int i = 1; i < 4; i++)
+                {
                     convertedMask = CircularShiftMask(convertedMask);
                     processedTilePrefabs.Add(new ProcessedTilePrefab(convertedMask, t.prefab,
                         90 * i + rotationCorrection));

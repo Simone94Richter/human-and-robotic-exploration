@@ -22,6 +22,9 @@ public abstract class MapManager : CoreComponent {
     // Do I have to load the map from a .txt?
     [SerializeField]
     protected bool loadMapFromFile = false;
+    //Do I have to load a numeric map?
+    [SerializeField]
+    protected bool isNumeric = false;
     // Path of the map to be laoded.
     [SerializeField]
     protected string textFilePath = null;

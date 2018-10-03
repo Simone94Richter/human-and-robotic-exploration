@@ -18,6 +18,8 @@ public class ObjectDisplacer : CoreComponent {
 
     // Dictionary associating a char to a list of objects.
     private Dictionary<char, CustomObjectList> charObjectsDictionary;
+    // Dictionary associating a float to a list of objects
+    private Dictionary<float, CustomObjectList> floatObjectsDictionary;
     // Dictionary associating a categoty to a list of objects.
     private Dictionary<String, List<GameObject>> categoryObjectsDictionary;
 
@@ -35,6 +37,7 @@ public class ObjectDisplacer : CoreComponent {
     // charObjectsDictionary. Sets the height direction correction value.
     private void InitializeAll() {
         charObjectsDictionary = new Dictionary<char, CustomObjectList>();
+        floatObjectsDictionary = new Dictionary<float, CustomObjectList>();
         categoryObjectsDictionary = new Dictionary<String, List<GameObject>>();
 
         foreach (CustomObject c in customObjects) {
@@ -52,6 +55,15 @@ public class ObjectDisplacer : CoreComponent {
                 charObjectsDictionary.Add(c.objectChar, new CustomObjectList(c));
             } else {
                 charObjectsDictionary[c.objectChar].AddObject(c);
+            }
+
+            if (!floatObjectsDictionary.ContainsKey(c.objectFloat))
+            {
+                floatObjectsDictionary.Add(c.objectFloat, new CustomObjectList(c));
+            }
+            else
+            {
+                floatObjectsDictionary[c.objectFloat].AddObject(c);
             }
         }
 
@@ -92,6 +104,43 @@ public class ObjectDisplacer : CoreComponent {
         }
     }
 
+    // Displace the custom objects inside the map.
+    public void DisplaceObjects(float[,] map, float squareSize, float height)
+    {
+        // categoryObjectsDictionary.Clear();
+        // DestroyAllCustomObjects();
+
+        for (int x = 0; x < map.GetLength(0); x++)
+        {
+            for (int y = 0; y < map.GetLength(1); y++)
+            {
+                if (floatObjectsDictionary.ContainsKey(map[x, y]))
+                {
+                    CustomObject currentObject = floatObjectsDictionary[map[x, y]].GetObject();
+
+                    GameObject childObject = (GameObject)Instantiate(currentObject.prefab);
+                    childObject.name = currentObject.prefab.name;
+                    childObject.transform.parent = transform.Find(currentObject.category);
+                    childObject.transform.localPosition = new Vector3(squareSize * x,
+                        heightDirCorrection * (heightCorrection + height +
+                        currentObject.heightCorrection), squareSize * y);
+                    childObject.transform.localScale *= sizeCorrection;
+
+                    if (categoryObjectsDictionary.ContainsKey(currentObject.category))
+                    {
+                        categoryObjectsDictionary[currentObject.category].Add(childObject);
+                    }
+                    else
+                    {
+                        categoryObjectsDictionary.Add(currentObject.category,
+                            new List<GameObject>());
+                        categoryObjectsDictionary[currentObject.category].Add(childObject);
+                    }
+                }
+            }
+        }
+    }
+
     // Remove all the custom objects.
     private void DestroyAllCustomObjects() {
         foreach (Transform category in transform) {
@@ -117,6 +166,8 @@ public class ObjectDisplacer : CoreComponent {
     private struct CustomObject {
         // Character which defines the object.
         public char objectChar;
+        // Float which defines the object
+        public float objectFloat;
         // Category of the object (optional).
         public string category;
         // Prefab of the object.

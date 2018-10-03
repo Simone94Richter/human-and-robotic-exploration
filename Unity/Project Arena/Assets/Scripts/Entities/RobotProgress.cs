@@ -3,17 +3,33 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 
+/// <summary>
+/// This class is responsible for saving relevant data about the exploration. They are:
+/// - Information about the data (the different type of tiles)
+/// - Information about the trajectory of the robot, in particular:
+///     - position
+///     - rotation (related to the Y axis)
+///     - time needed to found the desired object
+/// </summary>
 public class RobotProgress : MonoBehaviour {
 
+    [Header("Char Map case")]
     [Header("Where the file is located (inside the main application folder)")]
     public string pathMap = "/Results/resultMap.json";
     public string pathPos = "/Results/resultPosition.json";
 
-    string filePathMapRes;
-    string filePathPosRes;
+    [Header("Numerical Map case")]
+    [Header("Where the file is located (inside the main application folder)")]
+    public string pathMapNum = "/Results/resultMapNum.json";
+    public string pathPosNum = "/Results/resultPositionNum.json";
 
-    string posAsJson;
-    string mapAsJson;
+    private string filePathMapResChar; //complete path for the file dedicated to store map information (Char case)
+    private string filePathPosResChar; //complete path for the file dedicated to store trajectory information (Char case)
+    private string filePathMapResNum; //complete path for the file dedicated to store map information (Float case)
+    private string filePathPosResNum; //complete path for the file dedicated to store trajectory information (Float case)
+
+    private string posAsJson;
+    private string mapAsJson;
 
     private JsonRobotObjects gameDataPos;
     private JsonMapObjects gameDataMap;
@@ -24,35 +40,43 @@ public class RobotProgress : MonoBehaviour {
 
         rC = GetComponent<RobotConnection>();
 
-        filePathMapRes = Application.dataPath + pathMap;
-        if (!File.Exists(filePathMapRes))
+        filePathMapResChar = Application.dataPath + pathMap;
+        if (!File.Exists(filePathMapResChar))
         {
-            File.Create(filePathMapRes);
+            File.Create(filePathMapResChar);
         }
-        filePathPosRes = Application.dataPath + pathPos;
-        if (!File.Exists(filePathPosRes))
+        filePathPosResChar = Application.dataPath + pathPos;
+        if (!File.Exists(filePathPosResChar))
         {
-            File.Create(filePathPosRes);
+            File.Create(filePathPosResChar);
         }
+        filePathMapResNum = Application.dataPath + pathMapNum;
+        if (!File.Exists(filePathMapResNum))
+        {
+            File.Create(filePathMapResNum);
+        }
+        filePathPosResNum = Application.dataPath + pathPosNum;
+        if (!File.Exists(filePathPosResNum))
+        {
+            File.Create(filePathPosResNum);
+        }
+
         gameDataPos = new JsonRobotObjects();
         gameDataPos.position = new List<string>();
+        gameDataPos.rotationY = new List<float>();
+        gameDataPos.time = new List<float>();
         gameDataMap = new JsonMapObjects();
 
         posAsJson = "";
         mapAsJson = "";
     }
-	
-	// Update is called once per frame
-	/*void LateUpdate () {
-        
-	}*/
 
+    /// <summary>
+    /// This method is responsble for saving information about the map, in the case the source map is a char one
+    /// </summary>
+    /// <param name="robot_map">source map used by the robot</param>
     public void SaveMapChar(char [,] robot_map)
     {
-        //string textMap = "";
-
-        //AddMapEdge();
-        //gameDataMap = new JsonMapObjects();
         gameDataMap.u = new List<string>();
         gameDataMap.r = new List<string>();
         gameDataMap.g = new List<string>();
@@ -77,13 +101,11 @@ public class RobotProgress : MonoBehaviour {
                 {
                     gameDataMap.w.Add(i.ToString() + "," + j.ToString());
                 }
-                //textMap += robot_map[i, j];
             }
-            //textMap += "\n";
         }
 
         mapAsJson = JsonUtility.ToJson(gameDataMap);
-        File.WriteAllText(filePathMapRes, mapAsJson);
+        File.WriteAllText(filePathMapResChar, mapAsJson);
     }
 
     public void SaveMapNum(float[,] robot_map)
@@ -119,22 +141,37 @@ public class RobotProgress : MonoBehaviour {
         }
 
         mapAsJson = JsonUtility.ToJson(gameDataMap);
-        File.WriteAllText(filePathMapRes, mapAsJson);
+        File.WriteAllText(filePathMapResNum, mapAsJson);
     }
 
-    public void SavePos(int posX, int posZ, Quaternion rotation)
+    public void SavePosChar(int posX, int posZ, Quaternion rotation)
     {
         gameDataPos.position.Add(posX.ToString() + "," + posZ.ToString());
-        gameDataPos.rotationY = rotation.y;
+        gameDataPos.rotationY.Add(rotation.y);
         posAsJson = JsonUtility.ToJson(gameDataPos);
-        File.WriteAllText(filePathPosRes, posAsJson);
+        File.WriteAllText(filePathPosResChar, posAsJson);
     }
 
-    public void SaveTime(float time)
+    public void SavePosNum(int posX, int posZ, Quaternion rotation)
     {
-        gameDataPos.time = time;
+        gameDataPos.position.Add(posX.ToString() + "," + posZ.ToString());
+        gameDataPos.rotationY.Add(rotation.y);
         posAsJson = JsonUtility.ToJson(gameDataPos);
-        File.WriteAllText(filePathPosRes, posAsJson);
+        File.WriteAllText(filePathPosResNum, posAsJson);
+    }
+
+    public void SaveTimeChar(float time)
+    {
+        gameDataPos.time.Add(time);
+        posAsJson = JsonUtility.ToJson(gameDataPos);
+        File.WriteAllText(filePathPosResChar, posAsJson);
+    }
+
+    public void SaveTimeNum(float time)
+    {
+        gameDataPos.time.Add(time);
+        posAsJson = JsonUtility.ToJson(gameDataPos);
+        File.WriteAllText(filePathPosResNum, posAsJson);
     }
 
     public void PreparingForServer()

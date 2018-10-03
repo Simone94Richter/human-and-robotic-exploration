@@ -1,6 +1,7 @@
 ﻿using MapManipulation;
 using System;
 using System.IO;
+using UnityEngine;
 
 /// <summary>
 /// SLMapManager is an implementation of MapManager used to manage single-level maps.
@@ -8,13 +9,14 @@ using System.IO;
 public class SLMapManager : MapManager {
 
     private char[,] map;
+    private float[,] numeric_map;
 
     public override void ManageMap(bool assembleMap) {
         if (loadMapFromFile) {
             // Load the map.
             LoadMapFromText();
             // Flip the map if needed.
-            if (flip) {
+            if (flip && !isNumeric) {
                 map = MapEdit.FlipMap(map);                
             }
         } else {
@@ -27,18 +29,36 @@ public class SLMapManager : MapManager {
         }
 
         if (assembleMap) {
-            // Assemble the map.
-            mapAssemblerScript.AssembleMap(map, mapGeneratorScript.GetWallChar(),
-                mapGeneratorScript.GetRoomChar());
-            // Displace the objects.
-            objectDisplacerScript.DisplaceObjects(map, mapAssemblerScript.GetSquareSize(),
-                mapAssemblerScript.GetWallHeight());
+            if (!isNumeric)
+            {
+                // Assemble the map.
+                mapAssemblerScript.AssembleMap(map, mapGeneratorScript.GetWallChar(),
+                    mapGeneratorScript.GetRoomChar());
+                // Displace the objects.
+                objectDisplacerScript.DisplaceObjects(map, mapAssemblerScript.GetSquareSize(),
+                    mapAssemblerScript.GetWallHeight());
+            }
+            else
+            {
+                //Assemble the map
+                mapAssemblerScript.AssembleMap(numeric_map, mapGeneratorScript.GetWallNumb(), mapGeneratorScript.GetRoomNumb());
+                
+                // Displace the objects
+                objectDisplacerScript.DisplaceObjects(numeric_map, mapAssemblerScript.GetSquareSize(), mapAssemblerScript.GetWallHeight());
+            }
         }
 
         if(robot != null)
         {
             float floorSize = mapAssemblerScript.GetSquareSize();
-            robot.SetMap(map, floorSize);
+            if (!isNumeric)
+            {
+                robot.SetMap(map, floorSize);
+            }
+            else
+            {
+                robot.SetMap(numeric_map, floorSize);
+            }
         }
     }
 
@@ -51,7 +71,7 @@ public class SLMapManager : MapManager {
                 ErrorManager.ErrorBackToMenu(-1);
             } else {
                 try {
-                    ConvertToMatrix(File.ReadAllLines(@textFilePath));
+                    ConvertToMatrix(File.ReadAllLines(textFilePath));
                 } catch (Exception) {
                     ErrorManager.ErrorBackToMenu(-1);
                 }
@@ -64,11 +84,29 @@ public class SLMapManager : MapManager {
 
     // Converts the map from a list of lines to a matrix.
     private void ConvertToMatrix(string[] lines) {
-        map = new char[lines.GetLength(0), lines[0].Length];
+        if (!isNumeric)
+        {
+            map = new char[lines.GetLength(0), lines[0].Length];
 
-        for (int x = 0; x < map.GetLength(0); x++) {
-            for (int y = 0; y < map.GetLength(1); y++) {
-                map[x, y] = lines[x][y];
+            for (int x = 0; x < map.GetLength(0); x++)
+            {
+                for (int y = 0; y < map.GetLength(1); y++)
+                {
+                    map[x, y] = lines[x][y];
+                }
+            }
+        }
+        else
+        {
+            numeric_map = new float[lines.GetLength(0), lines[0].Length];
+
+            for (int x = 0; x < numeric_map.GetLength(0); x++)
+            {
+                for (int y = 0; y < numeric_map.GetLength(1); y++)
+                {
+                    numeric_map[x, y] = lines[x][y];
+                    Debug.Log(numeric_map[x, y]);
+                }
             }
         }
     }

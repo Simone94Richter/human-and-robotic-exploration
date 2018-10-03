@@ -42,6 +42,12 @@ public abstract class MapGenerator : CoreComponent {
     // Char that denotes a wall;
     [SerializeField]
     protected char wallChar = 'w';
+    // Float that denotes a room;
+    [SerializeField]
+    protected float roomNumb = 50f;
+    // Float that denotes a wall;
+    [SerializeField]
+    protected float wallNumb = 48f;
     // Custom objects that will be added to the map.
     [SerializeField]
     protected MapObject[] mapObjects;
@@ -56,6 +62,8 @@ public abstract class MapGenerator : CoreComponent {
 
     // Map, defined as a grid of chars.
     protected char[,] map;
+    // Map, defined as a grid of numbers
+    protected float[,] numeric_map;
     // Hash of the seed.
     protected int hash;
     // Pseudo random generator.
@@ -284,8 +292,18 @@ public abstract class MapGenerator : CoreComponent {
         return wallChar;
     }
 
+    public float GetWallNumb()
+    {
+        return wallNumb;
+    }
+
     public char GetRoomChar() {
         return roomChar;
+    }
+
+    public float GetRoomNumb()
+    {
+        return roomNumb;
     }
 
     public float GetHeight() {

@@ -3,22 +3,36 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
+/// <summary>
+/// This class is responsible to manage the operation of uploading usefull data to the server,
+/// used later for experimantal study
+/// </summary>
 public class RobotConnection : MonoBehaviour {
 
+    [Header("URL for loading the map information")]
     public string url = "http://travellersinn.herokuapp.com/tesi/postData.php";
+    [Header("URL for loading information about the trajectory of the robot")]
+    public string url2 = "http://travellersinn.herokuapp.com/tesi/postTrajectory.php";
+    [Header("Is the upload of data completed?")]
+    public bool uploadComplete = false;
 
     public void SendDataToServer(string jsonMap, string jsonPositions)
     {
-
-        StartCoroutine(Upload(url, jsonMap, jsonPositions));
+        StartCoroutine(Upload(jsonMap, jsonPositions));
     }
 
-    private IEnumerator Upload(string url, string json1, string json2)
+    /// <summary>
+    /// This method is responsible for sending data to the server
+    /// </summary>
+    /// <param name="json1">The content of the JSON about the map</param>
+    /// <param name="json2">The content of the JSON about the robot trajectory</param>
+    /// <returns></returns>
+    private IEnumerator Upload(string json1, string json2)
     {
         var uwr = new UnityWebRequest(url, "POST");
-        Debug.Log(json1);
+        //Debug.Log(json1);
         byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(json1);
-        Debug.Log(jsonToSend);
+        //Debug.Log(jsonToSend);
         uwr.uploadHandler = (UploadHandler)new UploadHandlerRaw(jsonToSend);
         uwr.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
         //uwr.SetRequestHeader("Content-Type", "application/json");
@@ -35,20 +49,27 @@ public class RobotConnection : MonoBehaviour {
             Debug.Log("Received: " + uwr.downloadHandler.text);
         }
 
-        /*WWWForm form = new WWWForm();
-        form.AddField("myField", "myData");
+        var uwr2 = new UnityWebRequest(url2, "POST");
+        //Debug.Log(json2);
+        byte[] jsonToSend2 = new System.Text.UTF8Encoding().GetBytes(json2);
+        //Debug.Log(jsonToSend2);
+        uwr2.uploadHandler = (UploadHandler)new UploadHandlerRaw(jsonToSend2);
+        uwr2.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+        //uwr.SetRequestHeader("Content-Type", "application/json");
 
-        UnityWebRequest www = UnityWebRequest.Post("http://www.my-server.com/myform", form);
-        yield return www.SendWebRequest();
+        //Send the request then wait here until it returns
+        yield return uwr2.SendWebRequest();
 
-        if (www.isNetworkError || www.isHttpError)
+        if (uwr2.isNetworkError)
         {
-            Debug.Log(www.error);
+            Debug.Log("Error While Sending: " + uwr2.error);
         }
         else
         {
-            Debug.Log("Form upload complete!");
-        }*/
+            Debug.Log("Received: " + uwr2.downloadHandler.text);
+        }
+
+        uploadComplete = true;
     }
 
 }

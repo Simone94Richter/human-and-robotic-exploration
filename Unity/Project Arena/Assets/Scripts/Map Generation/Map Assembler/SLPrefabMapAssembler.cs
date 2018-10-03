@@ -7,8 +7,10 @@ using UnityEngine;
 /// </summary>
 public class SLPrefabMapAssembler : PrefabMapAssembler {
 
-    // Map.
+    // Char Map.
     private char[,] map;
+    // Float Map
+    private float[,] numeric_map;
 
     private MeshCollider floorCollider;
     private MeshCollider ceilCollider;
@@ -60,6 +62,44 @@ public class SLPrefabMapAssembler : PrefabMapAssembler {
             ceilHeight, true);
     }
 
+    public override void AssembleMap(float[,] m, float wNumb, float rNumb)
+    {
+        wallNumb = wNumb; 
+        roomNumb = rNumb; 
+        width = m.GetLength(0);
+        height = m.GetLength(1);
+        numeric_map = m;
+
+        //Process all the tiles
+        ProcessTilesNumb();
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (numeric_map[x, y] != wallNumb)
+                {
+                    string currentMask = GetNeighbourhoodMaskNumb(x, y);
+                    foreach (ProcessedTilePrefab p in processedTilePrefabs)
+                    {
+                        if (p.mask == currentMask)
+                        {
+                            //Debug.Log(p.mask);
+                            AddPrefab(p.prefab, x, y, squareSize, p.rotation, wallHeight);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Generate floor and ceil colliders.
+        floorCollider.sharedMesh = CreateFlatMesh(width, height, squareSize, wallHeight +
+            floorHeight, false);
+        ceilCollider.sharedMesh = CreateFlatMesh(width, height, squareSize, wallHeight +
+            ceilHeight, true);
+    }
+
     public override void AssembleMap(List<char[,]> maps, char wallChar, char roomChar,
         char voidChar) { }
 
@@ -73,6 +113,17 @@ public class SLPrefabMapAssembler : PrefabMapAssembler {
         return new string(mask);
     }
 
+    protected string GetNeighbourhoodMaskNumb(int gridX, int gridY)
+    {
+        float[] mask = new float[4];
+        mask[0] = GetTileFloat(gridX, gridY + 1);
+        mask[1] = GetTileFloat(gridX + 1, gridY);
+        mask[2] = GetTileFloat(gridX, gridY - 1);
+        mask[3] = GetTileFloat(gridX - 1, gridY);
+        //Debug.Log(mask[0].ToString() + mask[1].ToString() + mask[2].ToString() + mask[3].ToString());
+        return mask[0].ToString() + mask[1].ToString() + mask[2].ToString() + mask[3].ToString();
+    }
+
     // Returns the char of a tile.
     protected char GetTileChar(int x, int y) {
         if (MapInfo.IsInMapRange(x, y, width, height)) {
@@ -82,4 +133,16 @@ public class SLPrefabMapAssembler : PrefabMapAssembler {
         }
     }
 
+    // Returns the char of a tile.
+    protected float GetTileFloat(int x, int y)
+    {
+        if (MapInfo.IsInMapRange(x, y, width, height))
+        {
+            return numeric_map[x, y] == wallNumb ? 1 : 0;
+        }
+        else
+        {
+            return 1;
+        }
+    }
 }

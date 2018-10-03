@@ -16,6 +16,8 @@ public abstract class MapAssembler : CoreComponent {
 
     public abstract void AssembleMap(char[,] map, char wallChar, char roomChar);
 
+    public abstract void AssembleMap(float[,] map, float wallChar, float roomChar);
+
     public abstract void AssembleMap(List<char[,]> maps, char wallChar, char roomChar,
         char voidChar);
 

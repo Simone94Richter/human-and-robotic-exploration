@@ -60,6 +60,10 @@ public class TutorialGameManager : GameManager {
 
             SetReady(true);
         } else if (IsReady() && !generateOnly) {
+            if (robotScript)
+            {
+                tutorialCompleted = robotScript.TargetReached();
+            }
             ManageGame();
         }
     }

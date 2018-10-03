@@ -43,6 +43,7 @@ public class Robot : Entity{
     private float squareSize; //dimension of a cell of the floor, used in order to discretize the final map
 
     private char[,] total_map; //the original map, passed by the system
+    private float[,] numeric_total_map; //the original numeric map, passed by the system
     private char[,] robot_map; //the char map updated by the robot
     private float [,] numeric_robot_map; //the numeric map updated by the robot
 
@@ -52,6 +53,7 @@ public class Robot : Entity{
     private List<Vector3> goals; //list of frontier points
     private Vector3 tempGoal; //Vector3 of the temp point to reach
 
+    private RobotConnection rC;
     private RobotDecisionMaking rDM;
     private RobotMovement rM;
     private RobotProgress rP;
@@ -62,6 +64,7 @@ public class Robot : Entity{
     {
         noPath = false;
         targetFound = false;
+        rC = GetComponent<RobotConnection>();
         rDM = GetComponent<RobotDecisionMaking>();
         rM = GetComponent<RobotMovement>();
         rP = GetComponent<RobotProgress>();
@@ -101,6 +104,7 @@ public class Robot : Entity{
         rPl.squareSize = floorSquareSize;
         total_map = map;
         robot_map = map;
+        isNumeric = false;
         //per un mero controllo
         int width = total_map.GetLength(0);
         int height = total_map.GetLength(1);
@@ -128,6 +132,43 @@ public class Robot : Entity{
             rPl.numeric_robot_map = numeric_robot_map;
         }
     }
+
+    public void SetMap(float[,] map, float floorSquareSize)
+    {
+        squareSize = floorSquareSize;
+        rPl.squareSize = floorSquareSize;
+        numeric_total_map = map;
+        numeric_robot_map = map;
+        isNumeric = true;
+        //per un mero controllo
+        int width = numeric_total_map.GetLength(0);
+        int height = numeric_total_map.GetLength(1);
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                Debug.Log(numeric_total_map[x,y]);
+                if (!isNumeric)
+                    robot_map[x, y] = 'u';
+                else numeric_robot_map[x, y] = numUnknownCell;
+                Debug.Log(numeric_total_map[x, y]);
+            }
+        }
+
+        startingTime = Time.time;
+
+        if (!isNumeric)
+        {
+            rPl.isNumeric = false;
+            rPl.robot_map = robot_map;
+        }
+        else
+        {
+            rPl.isNumeric = true;
+            rPl.numeric_robot_map = numeric_robot_map;
+        }
+    }
+
 
 
     // parte importata non rilevante
@@ -326,9 +367,9 @@ public class Robot : Entity{
         robot_z = robot_z / squareSize;
         robot_x = FixingRound(robot_x);
         robot_z = FixingRound(robot_z);
-        if (!isNumeric)
-            robot_map[(int)robot_x, (int)robot_z] = 'p';
-        else numeric_robot_map[(int)robot_x, (int)robot_z] = 3f;
+        //if (!isNumeric)
+        //    robot_map[(int)robot_x, (int)robot_z] = 'r';
+        //else numeric_robot_map[(int)robot_x, (int)robot_z] = numFreeCell;
 
         if (!isNumeric)
         {
@@ -447,6 +488,7 @@ public class Robot : Entity{
         while (!targetFound)
         {
             List<Vector3> posToReach = new List<Vector3>();
+            //List<Vector3> optionalPosToReach = new List<Vector3>();
             if (!isNumeric)
             {
                 int width = robot_map.GetLength(0);
@@ -461,6 +503,7 @@ public class Robot : Entity{
                             {
                                 posToReach.Add(new Vector3(x * squareSize, transform.position.y, y * squareSize));
                             }
+                            //optionalPosToReach.Add(new Vector3(x * squareSize, transform.position.y , y * squareSize));
                         }
                     }
                 }
@@ -473,33 +516,50 @@ public class Robot : Entity{
                 {
                     for (int y = 0; y < height; y++)
                     {
-                        if (numeric_robot_map[x, y] == numFreeCell)
+                        if (numeric_robot_map[x, y] == numFreeCell && x+1 < width && x-1 >= 0 && y+1 < height && y-1 >= 0)
                         {
-                            if (numeric_robot_map[x + 1, y] == numUnknownCell || robot_map[x - 1, y] == numUnknownCell || robot_map[x, y + 1] == numUnknownCell || robot_map[x, y - 1] == numUnknownCell)
+                            if (numeric_robot_map[x + 1, y] == numUnknownCell || numeric_robot_map[x - 1, y] == numUnknownCell || numeric_robot_map[x, y + 1] == numUnknownCell || numeric_robot_map[x, y - 1] == numUnknownCell)
                             {
                                 posToReach.Add(new Vector3(x * squareSize, transform.position.y, y * squareSize));
                             }
+                            //optionalPosToReach.Add(new Vector3(x * squareSize, transform.position.y, y * squareSize));
                         }
                     }
                 }
             }
 
-            goals = posToReach;
-
-            tempGoal = rDM.PosToReach(goals);
-
-            route = new List<Vector3>();
-            route = rPl.CheckVisibility(transform.position, tempGoal);
-            rM.tempReached = false;
-            if (route == null)
+            //only for debugging
+            /*for (int x = 0; x < numeric_robot_map.GetLength(0); x++)
             {
-                rM.ApproachingPointToReach(tempGoal);
+                for (int y = 0; y < numeric_robot_map.GetLength(1); y++)
+                {
+                    Debug.Log(numeric_robot_map[x,y]);
+                }
+            }*/
+
+            if (posToReach.Count != 0)
+            {
+                goals = posToReach;
+                tempGoal = rDM.PosToReach(goals);
+
+                route = new List<Vector3>();
+                route = rPl.CheckVisibility(transform.position, tempGoal);
+                rM.tempReached = false;
+                if (route == null)
+                {
+                    rM.ApproachingPointToReach(tempGoal);
+                }
+                else
+                {
+                    int start = 0;
+                    rM.ApproachingPointToReach(route, start);
+                }
             }
             else
             {
-                int start = 0;
-                rM.ApproachingPointToReach(route, start);
+                transform.Rotate(Vector3.up * Time.deltaTime * 20f);
             }
+
             yield return new WaitForSeconds(timeForDecision);
         }
     }
@@ -531,11 +591,25 @@ public class Robot : Entity{
             x = FixingRound(x);
             float z = transform.position.z /squareSize;
             z = FixingRound(z);
-            rP.SavePos((int)x, (int)z, transform.rotation);
+            if (!isNumeric)
+                rP.SavePosChar((int)x, (int)z, transform.rotation);
+            else rP.SavePosNum((int)x, (int)z, transform.rotation);
             yield return new WaitForSeconds(1.0f);
         }
         finishingTime = Time.time;
-        rP.SaveTime(finishingTime - startingTime);
+        if (!isNumeric)
+            rP.SaveTimeChar(finishingTime - startingTime);
+        else rP.SaveTimeNum(finishingTime - startingTime);
         rP.PreparingForServer();
+
+    }
+
+    public bool TargetReached()
+    {
+        if (rC.uploadComplete)
+        {
+            return true;
+        }
+        else return false;
     }
 }
