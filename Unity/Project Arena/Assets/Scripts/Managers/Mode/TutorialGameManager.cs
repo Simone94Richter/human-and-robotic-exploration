@@ -40,6 +40,7 @@ public class TutorialGameManager : GameManager {
             if (!generateOnly) {
                 // Set the spawn points.
                 spawnPointManagerScript.SetSpawnPoints(mapManagerScript.GetSpawnPoints());
+                spawnPointManagerScript.SetTargetPoint(mapManagerScript.GetTargetPoint());
 
                 // Spawn the player.
                 Spawn(player);
@@ -136,8 +137,12 @@ public class TutorialGameManager : GameManager {
         GameObject newTarget = (GameObject)Instantiate(target);
         newTarget.name = target.name;
         //newTarget.transform.position = spawnPointManagerScript.GetSpawnPosition();
-        newTarget.transform.position = new Vector3(spawnPointManagerScript.GetSpawnPosition().x, 0.3f, spawnPointManagerScript.GetSpawnPosition().z);
+        newTarget.transform.position = new Vector3(spawnPointManagerScript.GetTargetPosition().x, 0.3f, spawnPointManagerScript.GetTargetPosition().z);
         newTarget.GetComponent<Entity>().SetupEntity(0, null, this, 0);
+        if (player.GetComponent<RobotDMUtilityBased>())
+        {
+            player.GetComponent<RobotDMUtilityBased>().SetTargetPosition(newTarget.transform.position);
+        }
     }
 
     // Pauses and unpauses the game.

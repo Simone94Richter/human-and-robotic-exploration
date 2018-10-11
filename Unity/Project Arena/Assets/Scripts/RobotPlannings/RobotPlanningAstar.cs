@@ -27,21 +27,21 @@ public class RobotPlanningAstar : RobotPlanning {
 
     public override List<Vector3> CheckVisibility(Vector3 robot, Vector3 destination)
     {
-        Debug.DrawLine(robot, destination, Color.green, 4f);
+        //Debug.DrawLine(robot, destination, Color.green, 4f);
         float distance = Mathf.Sqrt((robot.x - destination.x)*(robot.x - destination.x) + (robot.z - destination.z) * (robot.z - destination.z));
         if (Physics.Linecast(robot, destination, layerMask) || distance > range)
         {
             //Debug.Log("Something hidden or too far");
             if (!isNumeric)
             {
-                return AstarCharMap(destination);
-            }else return AstarNumMap(destination);
+                return AstarCharMap(robot, destination);
+            }else return AstarNumMap(robot, destination);
         }
 
         return null;
     }
 
-    private List<Vector3> AstarCharMap(Vector3 destPos)
+    private List<Vector3> AstarCharMap(Vector3 robot, Vector3 destPos)
     {
         closedSet = new List<Vector3>();
         openSet = new List<Vector3>();
@@ -49,7 +49,7 @@ public class RobotPlanningAstar : RobotPlanning {
         gScore = new float[robot_map.GetLength(0), robot_map.GetLength(1)];
         fScore = new float[robot_map.GetLength(0), robot_map.GetLength(1)];
 
-        openSet.Add(transform.position);//adding the starting tile to the list of tiles to visit
+        openSet.Add(robot);//adding the starting tile to the list of tiles to visit
 
         //initialization of the gScore and fScore by setting both of them (for every tile) to Infinite
         for (int i = 0; i < gScore.GetLength(0); i++)
@@ -62,8 +62,8 @@ public class RobotPlanningAstar : RobotPlanning {
         }
 
         //assigning precise values to gScore and fScore of the starting position
-        gScore[(int)FixingRound(transform.position.x/squareSize),(int)FixingRound(transform.position.z/squareSize)] = 0;
-        fScore[(int)FixingRound(transform.position.x / squareSize), (int)FixingRound(transform.position.z / squareSize)] = Mathf.Sqrt((transform.position.x - destPos.x) * (transform.position.x - destPos.x) + (transform.position.z - destPos.z) * (transform.position.z - destPos.z));
+        gScore[(int)FixingRound(robot.x/squareSize),(int)FixingRound(robot.z/squareSize)] = 0;
+        fScore[(int)FixingRound(robot.x / squareSize), (int)FixingRound(robot.z / squareSize)] = Mathf.Sqrt((robot.x - destPos.x) * (robot.x - destPos.x) + (robot.z - destPos.z) * (robot.z - destPos.z));
 
 
         while (openSet.Count > 0) //until the list of tiles to visit is not empty
@@ -92,7 +92,7 @@ public class RobotPlanningAstar : RobotPlanning {
 
             if (curr_x == dest_x && curr_z == dest_z)//if the current position is the goal one, we can exit from the procedure
             {
-                return ReconstructPath(cameFrom, current, destPos);
+                return ReconstructPath(robot, cameFrom, current, destPos);
             }
 
             for (int i = -1; i<2; i++) //checking neighbours on left and right
@@ -168,7 +168,7 @@ public class RobotPlanningAstar : RobotPlanning {
         return null;
     }
 
-    private List<Vector3> AstarNumMap(Vector3 destPos) //this method works
+    private List<Vector3> AstarNumMap(Vector3 robot, Vector3 destPos) //this method works
     {
         closedSet = new List<Vector3>();
         openSet = new List<Vector3>();
@@ -176,7 +176,7 @@ public class RobotPlanningAstar : RobotPlanning {
         gScore = new float[numeric_robot_map.GetLength(0), numeric_robot_map.GetLength(1)];
         fScore = new float[numeric_robot_map.GetLength(0), numeric_robot_map.GetLength(1)];
 
-        openSet.Add(transform.position);
+        openSet.Add(robot);
 
         for (int i = 0; i < gScore.GetLength(0); i++)
         {
@@ -187,8 +187,8 @@ public class RobotPlanningAstar : RobotPlanning {
             }
         }
 
-        gScore[(int)FixingRound(transform.position.x / squareSize), (int)FixingRound(transform.position.z / squareSize)] = 0;
-        fScore[(int)FixingRound(transform.position.x / squareSize), (int)FixingRound(transform.position.z / squareSize)] = Mathf.Sqrt((transform.position.x - destPos.x) * (transform.position.x - destPos.x) + (transform.position.z - destPos.z) * (transform.position.z - destPos.z));
+        gScore[(int)FixingRound(robot.x / squareSize), (int)FixingRound(robot.z / squareSize)] = 0;
+        fScore[(int)FixingRound(robot.x / squareSize), (int)FixingRound(robot.z / squareSize)] = Mathf.Sqrt((robot.x - destPos.x) * (robot.x - destPos.x) + (robot.z - destPos.z) * (robot.z - destPos.z));
 
         current = openSet[0];
 
@@ -218,7 +218,7 @@ public class RobotPlanningAstar : RobotPlanning {
 
             if (curr_x == dest_x && curr_z == dest_z)//if the current position is the goal one, we can exit from the procedure
             {
-                return ReconstructPath(cameFrom, current, destPos);
+                return ReconstructPath(robot, cameFrom, current, destPos);
             }
 
             for (int i = -1; i < 2; i++)
@@ -292,7 +292,7 @@ public class RobotPlanningAstar : RobotPlanning {
         return null;
     }
 
-    private List<Vector3> ReconstructPath(Vector3[,] cameFom, Vector3 current, Vector3 destination)
+    private List<Vector3> ReconstructPath(Vector3 robot, Vector3[,] cameFom, Vector3 current, Vector3 destination)
     {
         List<Vector3> total_path = new List<Vector3>();
         //List<Vector3> optimal_path = new List<Vector3>();
@@ -315,7 +315,7 @@ public class RobotPlanningAstar : RobotPlanning {
             }
         }
 
-        while (current != transform.position)
+        while (current != robot)
         {
             //isContained = false;
             current = cameFom[i_curr, j_curr];

@@ -57,6 +57,11 @@ public abstract class MapManager : CoreComponent {
         return objectDisplacerScript.GetObjectsByCategory(spawnPointCategory);
     }
 
+    public List<GameObject> GetTargetPoint()
+    {
+        return objectDisplacerScript.GetObjectsByCategory("Target Points");
+    }
+
     // Loads the map from a text file.
     protected abstract void LoadMapFromText();
 

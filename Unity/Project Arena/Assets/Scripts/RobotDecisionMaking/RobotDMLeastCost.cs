@@ -6,7 +6,7 @@ public class RobotDMLeastCost : RobotDecisionMaking {
 
     private float candidatePathCost;
 
-    private float[] pathCost;
+    private List<float> pathCost;
 
     private List<Vector3> candidatePath;
 
@@ -20,21 +20,25 @@ public class RobotDMLeastCost : RobotDecisionMaking {
 
     public override Vector3 PosToReach(List<Vector3> listFrontierPoints)
     {
-        float betterPathCost = 0f;
+        float betterPathCost;
         int betterOption = 0;
+        pathCost = new List<float>();
         for (int j = 0; j < listFrontierPoints.Count; j++)
         {
-            pathCost[j] = CalculatingPathCost(listFrontierPoints[j]);
+            pathCost.Add(CalculatingPathCost(listFrontierPoints[j]));
         }
 
-        for (int j = 0; j < pathCost.Length; j++)
+        betterPathCost = pathCost[0];
+        for (int j = 0; j < pathCost.Count; j++)
         {
+            //Debug.Log(pathCost[j] + ", " + listFrontierPoints[j]);
             if (pathCost[j] < betterPathCost)
             {
                 betterPathCost = pathCost[j];
                 betterOption = j;
             }
         }
+        
         return listFrontierPoints[betterOption];
     }
 
@@ -44,13 +48,13 @@ public class RobotDMLeastCost : RobotDecisionMaking {
         candidatePath = rPL.CheckVisibility(transform.position, dest);
         if (candidatePath == null)
         {
-            candidatePathCost = Mathf.Sqrt((transform.position.x - dest.x)*(transform.position.x - dest.x) + (transform.position.z - dest.z)*(transform.position.z - dest.z));
+            candidatePathCost = Mathf.Sqrt(((transform.position.x - dest.x)*(transform.position.x - dest.x)) + ((transform.position.z - dest.z)*(transform.position.z - dest.z)));
         }
         else
         {
             for (int i = 0; i < candidatePath.Count-1; i++)
             {
-                candidatePathCost += Mathf.Sqrt((candidatePath[i].x - candidatePath[i+1].x) * (candidatePath[i].x - candidatePath[i+1].x) + (candidatePath[i].z - candidatePath[i+1].z) * (candidatePath[i].z - candidatePath[i+1].z));
+                candidatePathCost += Mathf.Sqrt(((candidatePath[i].x - candidatePath[i+1].x) * (candidatePath[i].x - candidatePath[i+1].x)) + ((candidatePath[i].z - candidatePath[i+1].z) * (candidatePath[i].z - candidatePath[i+1].z)));
             }
         }
 

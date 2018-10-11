@@ -16,7 +16,7 @@ public class RobotSpoofedDest : MonoBehaviour {
         if (collision.gameObject.tag == "Player")
         {
             robot.GetComponent<Robot>().SetTempReached();
-            Debug.Log("An agent has reached my position");
+            //Debug.Log("An agent has reached my position");
         }
     }
 }

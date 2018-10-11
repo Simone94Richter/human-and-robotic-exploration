@@ -73,7 +73,7 @@ public class RobotMovement : MonoBehaviour {
             //Plane[] planes = GeometryUtility.CalculateFrustumPlanes(robotCamera);
             Ray center = new Ray(transform.position, transform.forward);
             Debug.DrawRay(transform.position, transform.forward * rangeRays, Color.red, 0.5f);
-            if (/*GeometryUtility.TestPlanesAABB(planes, tempDestination.GetComponent<BoxCollider>().bounds) &&*/ Physics.Raycast(center, out hit, rangeRays, 1 << 8, QueryTriggerInteraction.Collide)
+            if (/*GeometryUtility.TestPlanesAABB(planes, tempDestination.GetComponent<BoxCollider>().bounds) &&*/ Physics.Raycast(center, out hit, rangeRays, 1 << 13, QueryTriggerInteraction.Collide)
                 && hit.transform.gameObject.name == "New Game Object")
             {
                 goForward = true;
@@ -163,7 +163,7 @@ public class RobotMovement : MonoBehaviour {
         tempDestination.AddComponent<RobotSpoofedDest>();
         tempDestination.GetComponent<RobotSpoofedDest>().robot = this.gameObject;
         tempDestination.tag = "Opponent";
-        tempDestination.layer = 8;
+        tempDestination.layer = 13;
         //goForward = true;
     }
 
@@ -177,7 +177,7 @@ public class RobotMovement : MonoBehaviour {
 
         tempDestination = new GameObject();
 
-        Debug.Log("List: " + goals.Count + ", starting with " + index);
+        //Debug.Log("List: " + goals.Count + ", starting with " + index);
 
         List<Vector3> supplementaryPos = new List<Vector3>();
         float distance = Mathf.Sqrt((transform.position.x - goals[index].x) * (transform.position.x - goals[index].x) + (transform.position.z - goals[index].z) * (transform.position.z - goals[index].z));
@@ -202,7 +202,7 @@ public class RobotMovement : MonoBehaviour {
         tempDestination.GetComponent<RobotSpoofedDestPath>().index = index;
         tempDestination.GetComponent<RobotSpoofedDestPath>().path = goals;
         tempDestination.tag = "Opponent";
-        tempDestination.layer = 8;
+        tempDestination.layer = 13;
     }
 
     public void ApproachingGoal(GameObject target)

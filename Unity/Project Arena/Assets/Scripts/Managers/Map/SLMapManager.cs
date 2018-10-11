@@ -105,7 +105,7 @@ public class SLMapManager : MapManager {
                 for (int y = 0; y < numeric_map.GetLength(1); y++)
                 {
                     numeric_map[x, y] = lines[x][y];
-                    Debug.Log(numeric_map[x, y]);
+                    //Debug.Log(numeric_map[x, y]);
                 }
             }
         }

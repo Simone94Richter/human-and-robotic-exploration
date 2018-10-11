@@ -17,7 +17,7 @@ public class RobotSpoofedDestPath : MonoBehaviour {
                 robot.GetComponent<Robot>().SetTempReached();
             }
             else robot.GetComponent<RobotMovement>().ApproachingPointToReach(path, index+1);
-            Debug.Log("An agent has reached my position (I'm part of a path)");
+            //Debug.Log("An agent has reached my position (I'm part of a path)");
         }
     }
 }

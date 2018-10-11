@@ -119,7 +119,7 @@ public class RobotProgress : MonoBehaviour {
         {
             for (int j = 0; j < robot_map.GetLength(1); j++)
             {
-                if (robot_map[i, j] == 1f)
+                if (robot_map[i, j] == 2f)
                 {
                     gameDataMap.u.Add(i.ToString() + "," + j.ToString());
                 }
@@ -127,11 +127,11 @@ public class RobotProgress : MonoBehaviour {
                 {
                     gameDataMap.r.Add(i.ToString() + "," + j.ToString());
                 }
-                else if (robot_map[i, j] == 2f)
+                else if (robot_map[i, j] == 3f)
                 {
                     gameDataMap.g.Add(i.ToString() + "," + j.ToString());
                 }
-                else if (robot_map[i, j] == 1.5f)
+                else if (robot_map[i, j] == 1f)
                 {
                     gameDataMap.w.Add(i.ToString() + "," + j.ToString());
                 }
@@ -147,7 +147,7 @@ public class RobotProgress : MonoBehaviour {
     public void SavePosChar(int posX, int posZ, Quaternion rotation)
     {
         gameDataPos.position.Add(posX.ToString() + "," + posZ.ToString());
-        gameDataPos.rotationY.Add(rotation.y);
+        gameDataPos.rotationY.Add(rotation.y * Mathf.Rad2Deg);
         posAsJson = JsonUtility.ToJson(gameDataPos);
         File.WriteAllText(filePathPosResChar, posAsJson);
     }
@@ -155,7 +155,7 @@ public class RobotProgress : MonoBehaviour {
     public void SavePosNum(int posX, int posZ, Quaternion rotation)
     {
         gameDataPos.position.Add(posX.ToString() + "," + posZ.ToString());
-        gameDataPos.rotationY.Add(rotation.y);
+        gameDataPos.rotationY.Add(rotation.y * Mathf.Rad2Deg);
         posAsJson = JsonUtility.ToJson(gameDataPos);
         File.WriteAllText(filePathPosResNum, posAsJson);
     }

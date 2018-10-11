@@ -30,22 +30,22 @@ public class RobotPlanningThetaStar : RobotPlanning {
         noPath = false;
         returnedPath = new List<Vector3>();
         this.destination = destination;
-        Debug.DrawLine(robot, destination, Color.green, 4f);
+        //Debug.DrawLine(robot, destination, Color.green, 4f);
         float distance = Mathf.Sqrt((robot.x - destination.x) * (robot.x - destination.x) + (robot.z - destination.z) * (robot.z - destination.z));
         if (Physics.Linecast(transform.position, destination, out hit, layerMask, QueryTriggerInteraction.Collide) || distance > range)
         {
             if (distance <= range)
             {
-               Debug.Log(hit.transform.gameObject);
+               //Debug.Log(hit.transform.gameObject);
                noPath = true;
             }
             if (!isNumeric)
             {
                 returnedPath = ThetaStarCharMap(destination);
-                if (noPath && returnedPath == null)
-                {
-                    mainScipt.noPath = true;
-                }
+                //if (noPath && returnedPath == null)
+                //{
+                    //mainScipt.noPath = true;
+                //}
                 return returnedPath;
             }
             else return ThetaStarNumMap(destination);
@@ -578,7 +578,7 @@ public class RobotPlanningThetaStar : RobotPlanning {
             {
                 float distance = Mathf.Sqrt((path[i].x - path[j - 1].x) * (path[i].x - path[j - 1].x) + (path[i].z - path[j - 1].z) * (path[i].z - path[j - 1].z));
                 //if (Physics.Linecast(path[i], path[j - 1], out hit, layerMask, QueryTriggerInteraction.UseGlobal) || Vector3.Distance(path[i], path[j - 1]) > range)
-                Debug.DrawLine(path[i], path[j - 1], Color.green, 4f);
+                //Debug.DrawLine(path[i], path[j - 1], Color.green, 4f);
                 if (Physics.Linecast(path[i], path[j - 1], layerMask) || distance > range)
                 {
                     //if(Vector3.Distance(path[i], path[j - 1]) <= range)

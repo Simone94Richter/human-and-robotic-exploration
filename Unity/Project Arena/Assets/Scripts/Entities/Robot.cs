@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// This class manages the core functionalities of the robot: it gives start to moving, map analyze, saving data and the other features provided
+/// </summary>
 public class Robot : Entity{
 
     [SerializeField] public Camera robotCamera;
@@ -17,7 +20,7 @@ public class Robot : Entity{
     [Header("Is map to be analyzed numeric or char?")]
     public bool isNumeric;
 
-    public bool noPath;
+    //public bool noPath;
 
     [Header("Arbitrary float used to detect wall after a collision with one of them")]
     public float epsilon = 1f; //for now, 1 is the best
@@ -38,8 +41,8 @@ public class Robot : Entity{
     private List<Ray> landingRay = new List<Ray>();
     private List<Vector3> route;
 
-    private float finishingTime;
-    private float startingTime;
+    private float finishingTime; //the time in seconds when the robot found the goal
+    private float startingTime; //the time in seconds when the robot starts the simulation
     private float squareSize; //dimension of a cell of the floor, used in order to discretize the final map
 
     private char[,] total_map; //the original map, passed by the system
@@ -49,6 +52,8 @@ public class Robot : Entity{
 
     private GameObject tempDestination; //the temp point to reach, expressed as a GameObject
     private GameObject destination; //the target, properly
+
+    private IEnumerator coroutine;
 
     private List<Vector3> goals; //list of frontier points
     private Vector3 tempGoal; //Vector3 of the temp point to reach
@@ -62,7 +67,8 @@ public class Robot : Entity{
     // Use this for initialization
     void Start()
     {
-        noPath = false;
+        coroutine = ChoosingPointToReach();
+        //noPath = false;
         targetFound = false;
         rC = GetComponent<RobotConnection>();
         rDM = GetComponent<RobotDecisionMaking>();
@@ -94,7 +100,7 @@ public class Robot : Entity{
     }
 
     /// <summary>
-    /// Method called by the GameManager to initializ the map of the robot
+    /// Method called by the GameManager to initializ the map of the robot (char case)
     /// </summary>
     /// <param name="map">the original map, held by the GameManaer</param>
     /// <param name="floorSquareSize">Parameter used to discretize the cell of the floor (from Unity world to robot map)</param>
@@ -105,34 +111,27 @@ public class Robot : Entity{
         total_map = map;
         robot_map = map;
         isNumeric = false;
-        //per un mero controllo
         int width = total_map.GetLength(0);
         int height = total_map.GetLength(1);
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                //Debug.Log(total_map[x,y] + "" + x + "" + y);
-                if(!isNumeric)
                 robot_map[x, y] = 'u';
-                else numeric_robot_map[x, y] = numUnknownCell;
             }
         }
 
         startingTime = Time.time;
 
-        if (!isNumeric)
-        {
-            rPl.isNumeric = false;
-            rPl.robot_map = robot_map;
-        }
-        else
-        {
-            rPl.isNumeric = true;
-            rPl.numeric_robot_map = numeric_robot_map;
-        }
+        rPl.isNumeric = false;
+        rPl.robot_map = robot_map;
     }
 
+    /// <summary>
+    /// Method called by the GameManager to initializ the map of the robot (float case)
+    /// </summary>
+    /// <param name="map">the original map, held by the GameManaer</param>
+    /// <param name="floorSquareSize">Parameter used to discretize the cell of the floor (from Unity world to robot map)</param>
     public void SetMap(float[,] map, float floorSquareSize)
     {
         squareSize = floorSquareSize;
@@ -140,36 +139,22 @@ public class Robot : Entity{
         numeric_total_map = map;
         numeric_robot_map = map;
         isNumeric = true;
-        //per un mero controllo
         int width = numeric_total_map.GetLength(0);
         int height = numeric_total_map.GetLength(1);
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                Debug.Log(numeric_total_map[x,y]);
-                if (!isNumeric)
-                    robot_map[x, y] = 'u';
-                else numeric_robot_map[x, y] = numUnknownCell;
-                Debug.Log(numeric_total_map[x, y]);
+                numeric_robot_map[x, y] = numUnknownCell;
             }
         }
 
         startingTime = Time.time;
 
-        if (!isNumeric)
-        {
-            rPl.isNumeric = false;
-            rPl.robot_map = robot_map;
-        }
-        else
-        {
-            rPl.isNumeric = true;
-            rPl.numeric_robot_map = numeric_robot_map;
-        }
+        rPl.isNumeric = true;
+        rPl.numeric_robot_map = numeric_robot_map;
+        
     }
-
-
 
     // parte importata non rilevante
 
@@ -239,41 +224,50 @@ public class Robot : Entity{
     }
 
     // parte rilevante per la tesi
-
+    
+    /// <summary>
+    /// This method is called by the GameManager. It starts the countdown for the robot activation
+    /// </summary>
     public void StartingCountDown()
     {
         StartCoroutine(WaitingBeforeAction());
     }
 
+    /// <summary>
+    /// This method starts all the coroutines of the robot. They are:
+    /// - Saving progress locally 
+    /// - Scanning the environment to get information and update, as following, its map
+    /// - Starts decision making in order to decide the point to reach and how to reach it
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator WaitingBeforeAction()
     {
         yield return new WaitForSeconds(4f);
         StartCoroutine(SavingProgress());
         StartCoroutine(SendingRays());
         yield return new WaitForSeconds(2f);
-        StartCoroutine(ChoosingPointToReach());
+        StartCoroutine(coroutine);
     }
 
+    /// <summary>
+    /// This method sends raycast from itself with a certain range and space in order to get information from the environment.
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator SendingRays()
     {
         while (!targetFound)
         {
             float angle = angleRay;
             landingRay[0] = new Ray(transform.position, transform.forward);
-            //UpdatingSpace(landingRay[0]);
-            Debug.DrawRay(transform.position, transform.forward * rangeRays, Color.red, 2f);
+            //Debug.DrawRay(transform.position, transform.forward * rangeRays, Color.red, 2f);
             for (int i = 1; i < numbRay - 1; i = i + 2) //y rimane invariato, bisogna spaziare intorno a x e z
             {
                 Ray rayRight = new Ray(transform.position, Quaternion.AngleAxis(-angle, transform.up) * transform.forward);
                 landingRay[i] = rayRight;
-                Debug.DrawRay(transform.position, Quaternion.AngleAxis(-angle, transform.up) * transform.forward * rangeRays, Color.red, 2f);
-                //Debug.DrawRay(transform.position, transform.TransformDirection(Quaternion.AngleAxis(-angle, transform.up) * transform.forward * rangeRays), Color.red, 3.0f);
-                //UpdatingSpace(landingRay[i]);
+                //Debug.DrawRay(transform.position, Quaternion.AngleAxis(-angle, transform.up) * transform.forward * rangeRays, Color.red, 2f);
                 Ray rayLeft = new Ray(transform.position, Quaternion.AngleAxis(angle, transform.up) * transform.forward);
                 landingRay[i + 1] = rayLeft;
-                Debug.DrawRay(transform.position, Quaternion.AngleAxis(angle, transform.up) * transform.forward * rangeRays, Color.red, 2f);
-                //Debug.DrawRay(transform.position, transform.TransformDirection(Quaternion.AngleAxis(angle, transform.up) * transform.forward * rangeRays), Color.red, 3.0f);
-                //UpdatingSpace(landingRay[i + 1]);
+                //Debug.DrawRay(transform.position, Quaternion.AngleAxis(angle, transform.up) * transform.forward * rangeRays, Color.red, 2f);
 
                 angle = angle + angleRay;
             }
@@ -282,9 +276,14 @@ public class Robot : Entity{
         }
     }
 
+    /// <summary>
+    /// It assign a type to a tile in the robot's map. A tile can be : free (so the robot can pass on it without problems), adjacent a wall or containing partially 
+    /// it (so the robot is discouraged to pass on it) or containing the goal object (so the robot get maximum priority to approach it)
+    /// </summary>
+    /// <param name="ray">The list of raycast sent by the robot during the scanning</param>
     public void UpdatingSpace(List<Ray> ray)
     {
-        for (int i = 1; i < numbRay - 1; i++)
+        for (int i = 0; i < numbRay - 1; i++)
         {
             if (!Physics.Raycast(ray[i], out hit, rangeRays))
             {
@@ -297,8 +296,8 @@ public class Robot : Entity{
                     x_coord = FixingRound(x_coord);
                     y_coord = FixingRound(y_coord);
                     if(!isNumeric)
-                    robot_map[(int)x_coord, (int)y_coord] = 'r';
-                    else numeric_robot_map[(int)x_coord, (int)y_coord] = numFreeCell; 
+                    if(robot_map[(int)x_coord, (int)y_coord] != 'w') robot_map[(int)x_coord, (int)y_coord] = 'r';
+                    else if (numeric_robot_map[(int)x_coord, (int)y_coord] != numWallCell) numeric_robot_map[(int)x_coord, (int)y_coord] = numFreeCell; 
                     //Debug.Log(robot_map[(int)x_coord, (int)y_coord] + "" + (int)x_coord + "" + (int)y_coord);
                 }
             }
@@ -317,20 +316,20 @@ public class Robot : Entity{
                     float dx = hit.point.x - this.gameObject.transform.position.x;
                     float dz = hit.point.z - this.gameObject.transform.position.z;
                     //float dz = hit.collider.gameObject.transform.position.z - this.gameObject.transform.position.z;
-                    SettingR(hit.point, Mathf.Sqrt((dx*dx) + (dz*dz)), ray[i]);
-                    float angle = Vector3.Angle(transform.right, ray[i].direction);
-                    SettingW(Mathf.Sqrt((dx * dx) + (dz * dz)), ray[i], epsilon, angle);
+                    SettingR(Mathf.Sqrt((dx*dx) + (dz*dz)), ray[i]);
+                    //float angle = Vector3.Angle(transform.right, ray[i].direction);
+                    SettingW(Mathf.Sqrt((dx * dx) + (dz * dz)), ray[i], epsilon/*, angle*/);
                     //Debug.Log(x + "" + y);
                 }
                 else if (hit.collider.gameObject.tag == "Target")
                 {
-                    Debug.Log("Target found!");
+                    //Debug.Log("Target found!");
                     targetFound = true;
                     rM.targetFound = true;
                     rM.squareSize = squareSize;
                     destination = hit.collider.gameObject;
   
-                    SettingR(hit.point, Vector3.Distance(hit.collider.gameObject.transform.position, this.gameObject.transform.position), ray[i]);
+                    SettingR(Vector3.Distance(hit.collider.gameObject.transform.position, this.gameObject.transform.position), ray[i]);
 
                     x = FixingRound(x);
                     y = FixingRound(y);
@@ -340,17 +339,18 @@ public class Robot : Entity{
                     //Debug.Log(x + "" + y);
                     //portarlo dritto al target
                 }
-                else
+                //the following case doesn't work because it adds improper nearWall tiles
+                /*else
                 {
                     //Debug.Log("The ray hit " + hit.transform.name);
                     //robot_map[(int)x, (int)y] = 'r';
                     float dx = hit.collider.gameObject.transform.position.x - this.gameObject.transform.position.x;
                     float dz = hit.collider.gameObject.transform.position.z - this.gameObject.transform.position.z;
-                    SettingR(hit.point, Mathf.Sqrt((dx * dx) + (dz * dz)), ray[i]);
-                    float angle = Vector3.Angle(ray[i].direction, transform.right);
-                    SettingW(Mathf.Sqrt((dx * dx) + (dz * dz)), ray[i], epsilon, angle);
+                    SettingR(Mathf.Sqrt((dx * dx) + (dz * dz)), ray[i]);
+                    //float angle = Vector3.Angle(ray[i].direction, transform.right);
+                    SettingW(Mathf.Sqrt((dx * dx) + (dz * dz)), ray[i], epsilon/*, angle);
                     //Debug.Log(x + "" + y);
-                }
+                }*/
             }
         }
         if (destination)
@@ -383,7 +383,13 @@ public class Robot : Entity{
         }
     }
 
-    private void SettingR(Vector3 collisionPoint, float distance, Ray ray)
+    /// <summary>
+    /// This method sets a tile as a free one, giving the dedicated char or float value to it in the robot's map.
+    /// If the tile has been already set to a 'near wall' one, it cannot be set as a free one
+    /// </summary>
+    /// <param name="distance">The distance from the robot until the last point of the ray</param>
+    /// <param name="ray">The ray along which is considering the tiles analyzed</param>
+    private void SettingR(float distance, Ray ray)
     {
         for (float i = 0; i < distance; i++)
         {
@@ -397,7 +403,13 @@ public class Robot : Entity{
         }
     }
 
-    private void SettingW(float distance, Ray ray, float epsilon, float angle)
+    /// <summary>
+    /// This method sets a tile as a near wall one, giving the dedicated char or float value to it in the robot's map
+    /// </summary>
+    /// <param name="distance">The distance from the robot until the last point of the ray</param>
+    /// <param name="ray">The ray along which is considering the tiles analyzed</param>
+    /// <param name="epsilon">Useless (is set to 0)</param>
+    private void SettingW(float distance, Ray ray, float epsilon/*, float angle*/)
     {
         float robotX = transform.position.x / squareSize;
         float robotz = transform.position.z / squareSize;
@@ -483,6 +495,10 @@ public class Robot : Entity{
         }*/
     }
 
+    /// <summary>
+    /// This method is used to decide which tile the robot has to reach. All the potential tiles are the one that are free and near an unknown one
+    /// </summary>
+    /// <returns></returns>
     public IEnumerator ChoosingPointToReach()
     {
         while (!targetFound)
@@ -528,15 +544,6 @@ public class Robot : Entity{
                 }
             }
 
-            //only for debugging
-            /*for (int x = 0; x < numeric_robot_map.GetLength(0); x++)
-            {
-                for (int y = 0; y < numeric_robot_map.GetLength(1); y++)
-                {
-                    Debug.Log(numeric_robot_map[x,y]);
-                }
-            }*/
-
             if (posToReach.Count != 0)
             {
                 goals = posToReach;
@@ -564,13 +571,21 @@ public class Robot : Entity{
         }
     }
 
+    /// <summary>
+    /// This method is called to choose another point to approach if the previous one has been reached
+    /// </summary>
     public void SetTempReached()
     {
         rM.tempReached = true;
-        StopCoroutine(ChoosingPointToReach());
-        StartCoroutine(ChoosingPointToReach());
+        StopCoroutine(coroutine);
+        StartCoroutine(coroutine);
     }
 
+    /// <summary>
+    /// This method corrects the round of coordinates of a tile. In this way is avoided to assign values to undesired tiles (for example, a wall tile as a free one)
+    /// </summary>
+    /// <param name="coordinate">The coordinate of a tile</param>
+    /// <returns></returns>
     private float FixingRound(float coordinate)
     {
         if (Mathf.Abs(coordinate - Mathf.Round(coordinate)) >= 0.5f)
@@ -580,6 +595,11 @@ public class Robot : Entity{
         else return Mathf.Round(coordinate);
     }
 
+    /// <summary>
+    /// This method allows to save map information and robot trajectory information on files. When the simulation is ended (the goal is reached), these content
+    /// is saved on a dedicated server
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator SavingProgress()
     {
         while (rM.inGameSession)
@@ -594,7 +614,7 @@ public class Robot : Entity{
             if (!isNumeric)
                 rP.SavePosChar((int)x, (int)z, transform.rotation);
             else rP.SavePosNum((int)x, (int)z, transform.rotation);
-            yield return new WaitForSeconds(1.0f);
+            yield return new WaitForSeconds(0.5f);
         }
         finishingTime = Time.time;
         if (!isNumeric)
@@ -604,6 +624,11 @@ public class Robot : Entity{
 
     }
 
+    /// <summary>
+    /// This method allows the GameManager to know if the data has been correctly loaded on the server. In this way the system can return to the menu (or proceed to
+    /// a new scene)
+    /// </summary>
+    /// <returns></returns>
     public bool TargetReached()
     {
         if (rC.uploadComplete)
