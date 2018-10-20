@@ -201,9 +201,10 @@ public class ExperimentManager : SceneSingleton<ExperimentManager> {
             caseList.Add(survey);
         }
 
-        caseList.Add(new Case {
-            scene = SceneManager.GetActiveScene().name
-        });
+        //caseList.Add(new Case {
+        //    scene = SceneManager.GetActiveScene().name
+        //});
+        caseList.Add(new Case {scene = "Menu" });
 
         currentCase = -1;
     }
@@ -258,7 +259,7 @@ public class ExperimentManager : SceneSingleton<ExperimentManager> {
         }
 
         // Randomize the play order.
-        Shuffle(lessPlayedCases);
+        //Shuffle(lessPlayedCases);
 
         return lessPlayedCases;
     }
@@ -279,7 +280,7 @@ public class ExperimentManager : SceneSingleton<ExperimentManager> {
         }
 
         currentCase++;
-
+        Debug.Log(currentCase);
         Case c = caseList[currentCase];
 
         ParameterManager.Instance.Flip = currentCase % 2 == 0 ? true : false;
@@ -861,6 +862,16 @@ public class ExperimentManager : SceneSingleton<ExperimentManager> {
         }
 
         return new JsonCompletionTracker(0, GetZeroTracker());
+    }
+
+    public List<Case> GetCaseList()
+    {
+        return caseList;
+    }
+
+    public int GetCaseIndex()
+    {
+        return currentCase;
     }
 
 }

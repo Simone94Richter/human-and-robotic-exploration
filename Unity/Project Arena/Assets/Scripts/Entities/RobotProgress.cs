@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using ExperimentObjects;
 
 /// <summary>
 /// This class is responsible for saving relevant data about the exploration. They are:
@@ -40,7 +41,7 @@ public class RobotProgress : MonoBehaviour {
 
         rC = GetComponent<RobotConnection>();
 
-        filePathMapResChar = Application.dataPath + pathMap;
+        /*filePathMapResChar = Application.dataPath + pathMap;
         if (!File.Exists(filePathMapResChar))
         {
             File.Create(filePathMapResChar);
@@ -59,13 +60,15 @@ public class RobotProgress : MonoBehaviour {
         if (!File.Exists(filePathPosResNum))
         {
             File.Create(filePathPosResNum);
-        }
+        }*/
 
         gameDataPos = new JsonRobotObjects();
         gameDataPos.position = new List<string>();
         gameDataPos.rotationY = new List<float>();
         gameDataPos.time = new List<float>();
+        gameDataPos.mapName = new List<string>();
         gameDataMap = new JsonMapObjects();
+        gameDataMap.mapName = new List<string>();
 
         posAsJson = "";
         mapAsJson = "";
@@ -105,7 +108,7 @@ public class RobotProgress : MonoBehaviour {
         }
 
         mapAsJson = JsonUtility.ToJson(gameDataMap);
-        File.WriteAllText(filePathMapResChar, mapAsJson);
+        //File.WriteAllText(filePathMapResChar, mapAsJson);
     }
 
     public void SaveMapNum(float[,] robot_map)
@@ -141,37 +144,47 @@ public class RobotProgress : MonoBehaviour {
         }
 
         mapAsJson = JsonUtility.ToJson(gameDataMap);
-        File.WriteAllText(filePathMapResNum, mapAsJson);
+        //File.WriteAllText(filePathMapResNum, mapAsJson);
     }
 
-    public void SavePosChar(int posX, int posZ, Quaternion rotation)
+    public void SavePosChar(int posX, int posZ, Vector3 rotation)
     {
         gameDataPos.position.Add(posX.ToString() + "," + posZ.ToString());
-        gameDataPos.rotationY.Add(rotation.y * Mathf.Rad2Deg);
+        gameDataPos.rotationY.Add(rotation.y);
         posAsJson = JsonUtility.ToJson(gameDataPos);
-        File.WriteAllText(filePathPosResChar, posAsJson);
+        //File.WriteAllText(filePathPosResChar, posAsJson);
     }
 
-    public void SavePosNum(int posX, int posZ, Quaternion rotation)
+    public void SavePosNum(int posX, int posZ, Vector3 rotation)
     {
         gameDataPos.position.Add(posX.ToString() + "," + posZ.ToString());
-        gameDataPos.rotationY.Add(rotation.y * Mathf.Rad2Deg);
+        gameDataPos.rotationY.Add(rotation.y);
         posAsJson = JsonUtility.ToJson(gameDataPos);
-        File.WriteAllText(filePathPosResNum, posAsJson);
+        //File.WriteAllText(filePathPosResNum, posAsJson);
     }
 
     public void SaveTimeChar(float time)
     {
         gameDataPos.time.Add(time);
         posAsJson = JsonUtility.ToJson(gameDataPos);
-        File.WriteAllText(filePathPosResChar, posAsJson);
+        //File.WriteAllText(filePathPosResChar, posAsJson);
     }
 
     public void SaveTimeNum(float time)
     {
         gameDataPos.time.Add(time);
+        if (ExperimentManager.HasInstance())
+        {
+            int index = ExperimentManager.Instance.GetCaseIndex();
+            Case currentCase = ExperimentManager.Instance.GetCaseList()[index];
+            //Debug.Log(currentCase.GetCurrentMap().name);
+            gameDataPos.mapName.Add(currentCase.GetCurrentMap().name);
+            gameDataMap.mapName.Add(currentCase.GetCurrentMap().name);
+        }
         posAsJson = JsonUtility.ToJson(gameDataPos);
-        File.WriteAllText(filePathPosResNum, posAsJson);
+        //File.WriteAllText(filePathPosResNum, posAsJson);
+        mapAsJson = JsonUtility.ToJson(gameDataMap);
+        //File.WriteAllText(filePathMapResNum, mapAsJson);
     }
 
     public void PreparingForServer()

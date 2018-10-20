@@ -11,5 +11,6 @@ public class JsonMapObjects
     public List<string> r;
     public List<string> g;
     public List<string> w;
+    public List<string> mapName;
 
 }

@@ -80,7 +80,7 @@ public abstract class Gun : MonoBehaviour, ILoggable {
                 UpdateTimers();
             }
 
-            if (aimEnabled) {
+            /*if (aimEnabled) {
                 if (Input.GetButtonDown("Fire2")) {
                     Aim(true);
                 }
@@ -98,7 +98,7 @@ public abstract class Gun : MonoBehaviour, ILoggable {
                 }
             } else if (Input.GetButtonDown("Reload") && CanReload()) {
                 Reload();
-            }
+            }*/
         }
     }
 
@@ -269,7 +269,7 @@ public abstract class Gun : MonoBehaviour, ILoggable {
         EnableAimOverlay(false);
         headCamera.fieldOfView = originalFOV;
         transform.localPosition = Vector3.zero;
-        ownerEntityScript.SlowEntity(1);
+        //ownerEntityScript.SlowEntity(1);
     }
 
     // Reloads.

@@ -20,6 +20,7 @@ public class RobotDownload : MonoBehaviour {
     private List<string> pos = new List<string>();
     private List<float> rot = new List<float>();
     private List<float> time = new List<float>();
+    private List<string> mName = new List<string>();
     //WWW www;
     //WWWForm data;
 
@@ -34,6 +35,7 @@ public class RobotDownload : MonoBehaviour {
         data.position = new List<string>();
         data.rotationY = new List<float>();
         data.time = new List<float>();
+        data.mapName = new List<string>();
         id = 1;
         while (keepGoing)
         {
@@ -79,18 +81,41 @@ public class RobotDownload : MonoBehaviour {
                 {
                     time.Add(float.Parse(timeRob[i]));
                 }
+                gameDataPos.mapname = Regex.Replace(gameDataPos.mapname, @"[()]", "");
+                gameDataPos.mapname = Regex.Replace(gameDataPos.mapname, @"[ ]", "");
+                string[] name = gameDataPos.mapname.Split(',');
+                mName = new List<string>();
+                for (int i = 0; i < name.Length; i++)
+                {
+                    mName.Add(name[i]);
+                }
                 data.position = pos;
                 data.rotationY = rot;
                 data.time = time;
+                data.mapName = mName;
                 File.WriteAllText(downloadedContentPath + "/Result" + id.ToString() + "t.txt", JsonUtility.ToJson(data));
+
+                WriteTupleLog(pos, rot, mName, id);
+
                 id++;
             }
             else
             {
-                Debug.Log("Finished downloaded");
+                Debug.Log("Finished download");
                 keepGoing = false;
             }
         }
+    }
+
+    private void WriteTupleLog(List<string> pos, List<float> rot, List<string> name, int id)
+    {
+        string log;
+        log = "Map Name: " + name[0];
+        for (int i = 0; i < pos.Count; i++)
+        {
+            log = log + " <" + pos[i] + ", " + rot[i] + ", " + i.ToString() + ">,";
+        }
+        File.WriteAllText(downloadedContentPath + "/ResultTuple" + id.ToString() + ".txt", log);
     }
 
     public class IdPost
@@ -108,6 +133,7 @@ public class RobotDownload : MonoBehaviour {
         public string position;
         public string rotation;
         public string timerobot;
+        public string mapname;
     }
 
     public class MapReceived

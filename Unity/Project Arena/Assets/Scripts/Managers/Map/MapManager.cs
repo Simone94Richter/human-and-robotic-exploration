@@ -17,6 +17,8 @@ public abstract class MapManager : CoreComponent {
     protected ObjectDisplacer objectDisplacerScript;
     [SerializeField]
     protected Robot robot;
+    [SerializeField]
+    protected Player player;
 
     [Header("Import")]
     // Do I have to load the map from a .txt?

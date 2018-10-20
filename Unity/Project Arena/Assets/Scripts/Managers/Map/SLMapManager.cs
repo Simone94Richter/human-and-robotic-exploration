@@ -8,6 +8,9 @@ using UnityEngine;
 /// </summary>
 public class SLMapManager : MapManager {
 
+    [Header("The asset of the file containing the map")]
+    public TextAsset mapFile;
+
     private char[,] map;
     private float[,] numeric_map;
 
@@ -48,9 +51,9 @@ public class SLMapManager : MapManager {
             }
         }
 
-        if(robot != null)
+        float floorSize = mapAssemblerScript.GetSquareSize();
+        if (robot != null)
         {
-            float floorSize = mapAssemblerScript.GetSquareSize();
             if (!isNumeric)
             {
                 robot.SetMap(map, floorSize);
@@ -60,18 +63,26 @@ public class SLMapManager : MapManager {
                 robot.SetMap(numeric_map, floorSize);
             }
         }
+        if (player)
+        {
+            player.SetSquareSize(floorSize);
+        }
     }
 
     // Loads the map from a text file.
     protected override void LoadMapFromText() {
         if (seed == null) {
             if (textFilePath == null) {
-                ErrorManager.ErrorBackToMenu(-1);
+                /*if (mapFile == null)
+                {
+                    ErrorManager.ErrorBackToMenu(-1);
+                }*/
+                //else ConvertToMatrix(mapFile.text);
             } else if (!File.Exists(textFilePath)) {
                 ErrorManager.ErrorBackToMenu(-1);
             } else {
                 try {
-                    ConvertToMatrix(File.ReadAllLines(textFilePath));
+                    ConvertToMatrix(File.ReadAllLines(@textFilePath));
                 } catch (Exception) {
                     ErrorManager.ErrorBackToMenu(-1);
                 }

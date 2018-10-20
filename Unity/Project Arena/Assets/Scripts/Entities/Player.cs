@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
+using System.Collections;
 
 /// <summary>
 /// Player is an implementation of Entity with a ILoggable interface, which allows its actions
@@ -59,6 +61,15 @@ public class Player : Entity, ILoggable {
     private float lastSwitched = 0f;
     private float switchWait = 0.05f;
 
+    private bool inGameSession;
+
+    private float squareSize;
+    private float startingTime;
+    private float previousTime = 0;
+    private float timeCompletion;
+
+    private RobotProgress rP;
+
     private void Start() {
         controller = GetComponent<CharacterController>();
         playerUIManagerScript = GetComponent<PlayerUIManager>();
@@ -69,6 +80,8 @@ public class Player : Entity, ILoggable {
         } else {
             SetSensibility(ParameterManager.Instance.DefaultSensibility);
         }
+
+        rP = GetComponent<RobotProgress>();
     }
 
     private void Update() {
@@ -248,7 +261,7 @@ public class Player : Entity, ILoggable {
     // Enables or disables the input.
     internal void EnableInput(bool b) {
         inputEnabled = b;
-        guns[currentGun].GetComponent<Gun>().EnableInput(b);
+        //guns[currentGun].GetComponent<Gun>().EnableInput(b);
 
         if (b) {
             Cursor.lockState = CursorLockMode.Locked;
@@ -292,14 +305,14 @@ public class Player : Entity, ILoggable {
     public override void SetInGame(bool b) {
         if (b) {
             playerUIManagerScript.SetPlayerUIVisible(true);
-            ActivateGun(currentGun);
+            //ActivateGun(currentGun);
             // Disable the input of the gun I just activated if the input is disabled.
             if (!inputEnabled) {
                 guns[currentGun].GetComponent<Gun>().EnableInput(false);
             }
         } else {
             playerUIManagerScript.SetPlayerUIVisible(false);
-            DeactivateGun(currentGun);
+            //DeactivateGun(currentGun);
         }
 
         inGame = b;
@@ -318,9 +331,9 @@ public class Player : Entity, ILoggable {
     // Shows current guns
     public void ShowGun(bool b) {
         if (b) {
-            ActivateGun(currentGun);
+            //ActivateGun(currentGun);
         } else {
-            DeactivateGun(currentGun);
+            //DeactivateGun(currentGun);
         }
     }
 
@@ -337,4 +350,67 @@ public class Player : Entity, ILoggable {
         loggingGame = true;
     }
 
+    public void StartRecordingData()
+    {
+        inGameSession = true;
+        StartCoroutine(Recording());
+    }
+
+    private IEnumerator Recording()
+    {
+        if (rP)
+        {
+            while (inGameSession)
+            {
+                float x = FixingRound(transform.position.x / squareSize);
+                float z = FixingRound(transform.position.z / squareSize);
+                rP.SavePosNum((int)x, (int)z, transform.eulerAngles);
+                yield return new WaitForSeconds(1f);
+            }
+            float finishingTime = Time.time;
+            rP.SaveTimeNum(finishingTime - startingTime + previousTime);
+            timeCompletion = finishingTime - startingTime + previousTime;
+            Debug.Log(finishingTime - startingTime + previousTime);
+            rP.PreparingForServer();
+        }
+    }
+
+    /// <summary>
+    /// This method corrects the round of coordinates of a tile. In this way is avoided to assign values to undesired tiles (for example, a wall tile as a free one)
+    /// </summary>
+    /// <param name="coordinate">The coordinate of a tile</param>
+    /// <returns></returns>
+    private float FixingRound(float coordinate)
+    {
+        if (Mathf.Abs(coordinate - Mathf.Round(coordinate)) >= 0.5f)
+        {
+            return (Mathf.Round(coordinate) - 1);
+        }
+        else return Mathf.Round(coordinate);
+    }
+
+    public void SetSquareSize(float size)
+    {
+        squareSize = size;
+    }
+
+    public void StartTime()
+    {
+        startingTime = Time.time;
+    }
+
+    public void UpdateStartingTime(float passedTime)
+    {
+        previousTime = previousTime + passedTime;
+    }
+
+    public void SetGameEnd()
+    {
+        inGameSession = false;
+    }
+
+    public float GetFinalTime()
+    {
+        return timeCompletion;
+    }
 }

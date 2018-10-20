@@ -15,10 +15,17 @@ public class TutorialGameManager : GameManager {
 
     [Header("Tutorial variables")] [SerializeField] protected TutorialGameUIManager tutorialGameUIManagerScript;
 
+    public float goalDistance = 5f;
+    public GameObject headPlayer;
+
+    private RaycastHit hit;
+
     private Player playerScript;
     private Robot robotScript;
     private bool tutorialCompleted = false;
     private float completionTime;
+
+    private Vector3 targetPos;
 
     void Start() {
         /* #if UNITY_EDITOR
@@ -65,6 +72,29 @@ public class TutorialGameManager : GameManager {
             {
                 tutorialCompleted = robotScript.TargetReached();
             }
+            else if (playerScript && !tutorialCompleted)
+            {
+                Vector3 localDownVector = Quaternion.AngleAxis(headPlayer.transform.eulerAngles.x, player.transform.right) * player.transform.forward;
+                //Vector3 downDirection = headPlayer.transform.TransformDirection(localDownVector);
+                Ray center = new Ray(headPlayer.transform.position, localDownVector);
+                //Debug.DrawRay(headPlayer.transform.position, player.transform.forward * 20f, Color.green, 0.5f);
+                Debug.DrawRay(headPlayer.transform.position, localDownVector * 20f, Color.red, 0.5f);
+                if (Physics.Raycast(center, out hit, 20f))
+                {
+                    Debug.Log(hit.transform.gameObject.name);
+                    Debug.Log(Mathf.Sqrt((player.transform.position.x - targetPos.x) * (player.transform.position.x - targetPos.x) + (player.transform.position.z - targetPos.z) * (player.transform.position.z - targetPos.z)));
+                    if (hit.transform.gameObject.tag == "Target" && Mathf.Sqrt((player.transform.position.x - targetPos.x) * (player.transform.position.x - targetPos.x) + (player.transform.position.z - targetPos.z) * (player.transform.position.z - targetPos.z)) <= goalDistance)
+                    {
+                        tutorialCompleted = true;
+                    }
+                    else tutorialCompleted = false;
+                }
+                else
+                {
+                    tutorialCompleted = false;
+                }
+            }
+            Debug.Log(gamePhase);
             ManageGame();
         }
     }
@@ -139,6 +169,7 @@ public class TutorialGameManager : GameManager {
         //newTarget.transform.position = spawnPointManagerScript.GetSpawnPosition();
         newTarget.transform.position = new Vector3(spawnPointManagerScript.GetTargetPosition().x, 0.3f, spawnPointManagerScript.GetTargetPosition().z);
         newTarget.GetComponent<Entity>().SetupEntity(0, null, this, 0);
+        targetPos = newTarget.transform.position;
         if (player.GetComponent<RobotDMUtilityBased>())
         {
             player.GetComponent<RobotDMUtilityBased>().SetTargetPosition(newTarget.transform.position);

@@ -17,14 +17,10 @@ public class MainMenuUIManager : MonoBehaviour {
     Mode[] singleplayerModes;
     [SerializeField]
     Mode[] multiplayerModes;
-    [SerializeField]
-    Mode[] robot_explorationModes;
 
     [Header("UI sections")] [SerializeField] private GameObject main;
     [SerializeField]
     private GameObject singleplayer;
-    [SerializeField]
-    private GameObject robot_exploration;
     [SerializeField]
     private GameObject multiplayer;
     [SerializeField]
@@ -221,7 +217,7 @@ public class MainMenuUIManager : MonoBehaviour {
 
     // Loads a scene.
     public void LoadScene(string scene) {
-        ParameterManager.Instance.BackgroundRotation = backgroundScript.GetRotation();
+        //ParameterManager.Instance.BackgroundRotation = backgroundScript.GetRotation();
         SceneManager.LoadScene(scene);
     }
 
@@ -274,15 +270,6 @@ public class MainMenuUIManager : MonoBehaviour {
         ResetValues();
         UpdateSingleplayerModes();
         ActivateCurrentModeSP();
-    }
-
-    public void OpenRobotExperiment()
-    {
-        exportRE.isOn = false;
-        OpenSection(robot_exploration);
-        ResetValues();
-        UpdateRobotExpModes();
-        ActivateCurrentModeRE();
     }
 
     // Opens the multiplayer menu.
@@ -442,19 +429,6 @@ public class MainMenuUIManager : MonoBehaviour {
             inputSP.placeholder.GetComponent<Text>().text = singleplayerModes[currentMode].
                 maps[currentMap].enabledGenerations[currentGeneration].placeholder;
         }
-    }
-
-    /* ROBOT EXPERIMENTS */
-
-    private void UpdateRobotExpModes()
-    {
-        previousMapRE.GetComponent<Button>().interactable = false;
-        nextMapRE.GetComponent<Button>().interactable = false;
-    }
-
-    private void ActivateCurrentModeRE()
-    {
-
     }
 
     /* MULTIPLAYER */

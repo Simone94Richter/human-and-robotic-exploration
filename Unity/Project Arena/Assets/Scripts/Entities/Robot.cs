@@ -14,7 +14,7 @@ public class Robot : Entity{
     [SerializeField] [Range(0f, 1f)] public float angleRay;
     //[SerializeField] [Range(0f, 5f)] public float timeBetweenRays;
     //[SerializeField] private float gravity = 100f;
-    [SerializeField] [Range(100f, 1000f)] public float rangeRays;
+    [SerializeField] [Range(0f, 1000f)] public float rangeRays;
     [SerializeField] [Range(1.0f, 10.0f)] public float rayCertainty = 8.0f;
 
     [Header("Is map to be analyzed numeric or char?")]
@@ -325,7 +325,6 @@ public class Robot : Entity{
                 {
                     //Debug.Log("Target found!");
                     targetFound = true;
-                    rM.targetFound = true;
                     rM.squareSize = squareSize;
                     destination = hit.collider.gameObject;
   
@@ -612,9 +611,9 @@ public class Robot : Entity{
             float z = transform.position.z /squareSize;
             z = FixingRound(z);
             if (!isNumeric)
-                rP.SavePosChar((int)x, (int)z, transform.rotation);
-            else rP.SavePosNum((int)x, (int)z, transform.rotation);
-            yield return new WaitForSeconds(0.5f);
+                rP.SavePosChar((int)x, (int)z, transform.eulerAngles);
+            else rP.SavePosNum((int)x, (int)z, transform.eulerAngles);
+            yield return new WaitForSeconds(1f);
         }
         finishingTime = Time.time;
         if (!isNumeric)

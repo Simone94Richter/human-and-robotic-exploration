@@ -5,7 +5,7 @@ using UnityEngine;
 public class RobotMovement : MonoBehaviour {
 
     [SerializeField] public Camera robotCamera;
-    [SerializeField] [Range(100f, 1000f)] public float rangeRays;
+    [SerializeField] [Range(0f, 1000f)] public float rangeRays;
     [SerializeField] [Range(10f, 100f)] public float rotationSpeed;
     [SerializeField] public float speed = 10f;
 
@@ -103,7 +103,7 @@ public class RobotMovement : MonoBehaviour {
                 //float y = hit.transform.position.z / squareSize;
                 float dx = target.transform.position.x - transform.position.x;
                 float dz = target.transform.position.z - transform.position.z;
-                if (Mathf.Sqrt((dx * dx) + (dz * dz)) <= 5.5f)
+                if (Mathf.Sqrt((dx * dx) + (dz * dz)) <= 10.0f)
                 {
                     transform.position = transform.position;
                     transform.rotation = transform.rotation;

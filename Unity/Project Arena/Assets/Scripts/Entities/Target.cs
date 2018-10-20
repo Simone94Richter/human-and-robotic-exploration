@@ -37,7 +37,7 @@ public class Target : Entity, ILoggable {
 
         meshList = gameObject.GetComponentsInChildren<MeshRenderer>();
         foreach (MeshRenderer mr in meshList) {
-            mr.material.shader = Shader.Find("Transparent/Diffuse");
+            mr.material.shader = Shader.Find("Standard");
             mr.material.color = SetAlpha(mr.material.color, 0f);
         }
 

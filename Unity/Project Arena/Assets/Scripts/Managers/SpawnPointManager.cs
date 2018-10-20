@@ -85,6 +85,12 @@ public class SpawnPointManager : CoreComponent {
         }
     }
 
+    public Vector3 GetTargetPosition(int index)
+    {
+        List<SpawnPoint> spawnPoints = targetPoints;
+        return spawnPoints[index].spawnPosition;
+    }
+
     // Returns a random spawn point from a list.
     private SpawnPoint GetRandomSpawnPoint(List<SpawnPoint> SPs) {
         int index = UnityEngine.Random.Range(0, SPs.Count);
