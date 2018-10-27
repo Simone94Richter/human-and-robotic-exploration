@@ -1,11 +1,17 @@
 ﻿using MapManipulation;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 /// <summary>
 /// SLPrefabMapAssembler is an implementation of PrefabMapAssembler for single-level maps.
 /// </summary>
 public class SLPrefabMapAssembler : PrefabMapAssembler {
+
+    [SerializeField]
+    private List<ColoredTilesPrefab> coloredTiles;
+
+    private List<ProcessedColoredTilePrefab> processedColoredTilePrefabs;
 
     // Char Map.
     private char[,] map;
@@ -64,20 +70,60 @@ public class SLPrefabMapAssembler : PrefabMapAssembler {
 
     public override void AssembleMap(float[,] m, float wNumb, float rNumb)
     {
-        wallNumb = wNumb; 
-        roomNumb = rNumb; 
+        wallNumb = wNumb;
+        roomNumb = rNumb;
         width = m.GetLength(0);
         height = m.GetLength(1);
         numeric_map = m;
 
         //Process all the tiles
         ProcessTilesNumb();
+        ProcessColoredTiles();
 
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                if (numeric_map[x, y] != wallNumb)
+                if (numeric_map[x, y] == 53)
+                {
+                    string currentMask = GetNeighbourhoodMaskNumb(x, y);
+                    foreach (ProcessedTilePrefab p in processedColoredTilePrefabs[0].coloredProcessedTilePrefabs)
+                    {
+                        //Debug.Log(p.mask + ", " + currentMask);
+                        if (p.mask == currentMask)
+                        {
+                            AddPrefab(p.prefab, x, y, squareSize, p.rotation, wallHeight);
+                            break;
+                        }
+                    }
+                }
+                else if (numeric_map[x, y] == 54)
+                {
+                    string currentMask = GetNeighbourhoodMaskNumb(x, y);
+                    foreach (ProcessedTilePrefab p in processedColoredTilePrefabs[1].coloredProcessedTilePrefabs)
+                    {
+                        //Debug.Log(p.mask);
+                        if (p.mask == currentMask)
+                        {
+                            AddPrefab(p.prefab, x, y, squareSize, p.rotation, wallHeight);
+                            break;
+                        }
+                    }
+                }
+                else if (numeric_map[x, y] == 55)
+                {
+                    string currentMask = GetNeighbourhoodMaskNumb(x, y);
+                    foreach (ProcessedTilePrefab p in processedColoredTilePrefabs[2].coloredProcessedTilePrefabs)
+                    {
+                        //Debug.Log(p.mask);
+                        if (p.mask == currentMask)
+                        {
+                            AddPrefab(p.prefab, x, y, squareSize, p.rotation, wallHeight);
+                            break;
+                        }
+                    }
+                }
+                else if (numeric_map[x, y] != wallNumb)
                 {
                     string currentMask = GetNeighbourhoodMaskNumb(x, y);
                     foreach (ProcessedTilePrefab p in processedTilePrefabs)
@@ -98,6 +144,35 @@ public class SLPrefabMapAssembler : PrefabMapAssembler {
             floorHeight, false);
         ceilCollider.sharedMesh = CreateFlatMesh(width, height, squareSize, wallHeight +
             ceilHeight, true);
+    }
+
+    private void ProcessColoredTiles()
+    {
+        processedColoredTilePrefabs = new List<ProcessedColoredTilePrefab>();
+
+        foreach (ColoredTilesPrefab c in coloredTiles)
+        {
+            List<ProcessedTilePrefab> list = new List<ProcessedTilePrefab>();
+
+            foreach (TilePrefab cT in c.coloredTilePrefabs)
+            {
+                string convertedMask = cT.binaryMask;
+                list.Add(new ProcessedTilePrefab(convertedMask, cT.prefab, rotationCorrection));
+
+                if (cT.binaryMask != "0000" && cT.binaryMask != "1111")
+                {
+                    //Debug.Log(cT.binaryMask);
+                    for (int j = 1; j < 4; j++)
+                    {
+                        convertedMask = CircularShiftMask(convertedMask);
+                        //Debug.Log(convertedMask);
+                        list.Add(new ProcessedTilePrefab(convertedMask, cT.prefab, 90 * j + rotationCorrection));
+                    }
+                }
+            }
+
+            processedColoredTilePrefabs.Add(new ProcessedColoredTilePrefab(list));
+        }
     }
 
     public override void AssembleMap(List<char[,]> maps, char wallChar, char roomChar,
@@ -143,6 +218,23 @@ public class SLPrefabMapAssembler : PrefabMapAssembler {
         else
         {
             return 1;
+        }
+    }
+
+    [Serializable]
+    protected class ColoredTilesPrefab
+    {
+        public List<TilePrefab> coloredTilePrefabs;
+    }
+
+    [Serializable]
+    protected class ProcessedColoredTilePrefab
+    {
+        public List<ProcessedTilePrefab> coloredProcessedTilePrefabs;
+
+        public ProcessedColoredTilePrefab(List<ProcessedTilePrefab> list)
+        {
+            coloredProcessedTilePrefabs = list;
         }
     }
 }

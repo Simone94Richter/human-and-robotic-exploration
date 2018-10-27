@@ -350,12 +350,19 @@ public class Player : Entity, ILoggable {
         loggingGame = true;
     }
 
+    /// <summary>
+    /// This method initialize the recording of data to be sent to the server
+    /// </summary>
     public void StartRecordingData()
     {
         inGameSession = true;
         StartCoroutine(Recording());
     }
 
+    /// <summary>
+    /// This method is responsible for recording data about agent trajectory to be sent to the server
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator Recording()
     {
         if (rP)
@@ -394,16 +401,26 @@ public class Player : Entity, ILoggable {
         squareSize = size;
     }
 
+    /// <summary>
+    /// This method simply initialize the starting time to the time when it's called
+    /// </summary>
     public void StartTime()
     {
         startingTime = Time.time;
     }
 
+    /// <summary>
+    /// This method update the effective time spent by the agent during exploration removing Pause time
+    /// </summary>
+    /// <param name="passedTime">The time Time.time when the agent resume the exploration</param>
     public void UpdateStartingTime(float passedTime)
     {
-        previousTime = previousTime + passedTime;
+        previousTime = previousTime + (passedTime - startingTime);
     }
 
+    /// <summary>
+    /// This method set the condition of end game in order to proceed to the next game phase
+    /// </summary>
     public void SetGameEnd()
     {
         inGameSession = false;

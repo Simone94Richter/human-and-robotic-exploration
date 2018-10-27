@@ -107,8 +107,8 @@ public class RobotMovement : MonoBehaviour {
                 {
                     transform.position = transform.position;
                     transform.rotation = transform.rotation;
-                    Debug.Log("Mission Complete!");
-                    inGameSession = false;
+                    //Debug.Log("Mission Complete!");
+                    //inGameSession = false;
                 }else
                 {
                     transform.position += transform.forward * Time.deltaTime * speed;
@@ -211,5 +211,10 @@ public class RobotMovement : MonoBehaviour {
         targetFound = true;
         if (tempDestination)
             Destroy(tempDestination);
+    }
+
+    public void ResetMovement()
+    {
+        targetFound = false;
     }
 }

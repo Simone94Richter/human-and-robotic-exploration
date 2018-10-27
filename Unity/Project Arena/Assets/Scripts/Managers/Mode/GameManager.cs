@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 /// <summary>
 /// GameManager is an abstract class used to define and manage a game mode. It implements an 
@@ -16,6 +17,7 @@ public abstract class GameManager : CoreComponent, ILoggable {
     [SerializeField] protected int readyDuration = 3;
     [SerializeField] protected int scoreDuration = 10;
     [SerializeField] protected float respawnDuration = 3;
+    [SerializeField] protected Slider loadingBar;
 
     // Time at which the game started.
     protected float startTime;
@@ -63,6 +65,7 @@ public abstract class GameManager : CoreComponent, ILoggable {
     // Loads the next scene
     private void LoadNextScene(string def) {
         if (ExperimentManager.HasInstance() && ParameterManager.HasInstance()) {
+            ExperimentManager.Instance.SetSlider(loadingBar);
             ExperimentManager.Instance.LoadNextScene();
         } else {
             SceneManager.LoadScene(def);

@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// This class is responsible to manage the scrolling of the instructions at the beginning of the experiment phase and its start
+/// </summary>
 public class InstructionScrollerUI : MonoBehaviour {
 
     [Header("Button used to go to next instructions")]

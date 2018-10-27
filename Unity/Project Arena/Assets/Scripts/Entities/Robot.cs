@@ -20,8 +20,6 @@ public class Robot : Entity{
     [Header("Is map to be analyzed numeric or char?")]
     public bool isNumeric;
 
-    //public bool noPath;
-
     [Header("Arbitrary float used to detect wall after a collision with one of them")]
     public float epsilon = 1f; //for now, 1 is the best
 
@@ -35,34 +33,34 @@ public class Robot : Entity{
     public float timeForScan;
     public float timeForDecision;
 
-    private bool targetFound; //is the objective detected by mapping?
+    protected bool targetFound; //is the objective detected by mapping?
 
     private RaycastHit hit;
-    private List<Ray> landingRay = new List<Ray>();
-    private List<Vector3> route;
+    protected List<Ray> landingRay = new List<Ray>();
+    protected List<Vector3> route;
 
-    private float finishingTime; //the time in seconds when the robot found the goal
-    private float startingTime; //the time in seconds when the robot starts the simulation
-    private float squareSize; //dimension of a cell of the floor, used in order to discretize the final map
+    protected float finishingTime; //the time in seconds when the robot found the goal
+    protected float startingTime; //the time in seconds when the robot starts the simulation
+    protected float squareSize; //dimension of a cell of the floor, used in order to discretize the final map
 
-    private char[,] total_map; //the original map, passed by the system
-    private float[,] numeric_total_map; //the original numeric map, passed by the system
-    private char[,] robot_map; //the char map updated by the robot
-    private float [,] numeric_robot_map; //the numeric map updated by the robot
+    protected char[,] total_map; //the original map, passed by the system
+    protected float[,] numeric_total_map; //the original numeric map, passed by the system
+    protected char[,] robot_map; //the char map updated by the robot
+    protected float [,] numeric_robot_map; //the numeric map updated by the robot
 
-    private GameObject tempDestination; //the temp point to reach, expressed as a GameObject
-    private GameObject destination; //the target, properly
+    protected GameObject tempDestination; //the temp point to reach, expressed as a GameObject
+    protected GameObject destination; //the target, properly
 
-    private IEnumerator coroutine;
+    protected IEnumerator coroutine;
 
-    private List<Vector3> goals; //list of frontier points
-    private Vector3 tempGoal; //Vector3 of the temp point to reach
+    protected List<Vector3> goals; //list of frontier points
+    protected Vector3 tempGoal; //Vector3 of the temp point to reach
 
-    private RobotConnection rC;
-    private RobotDecisionMaking rDM;
-    private RobotMovement rM;
-    private RobotProgress rP;
-    private RobotPlanning rPl;
+    protected RobotConnection rC;
+    protected RobotDecisionMaking rDM;
+    protected RobotMovement rM;
+    protected RobotProgress rP;
+    protected RobotPlanning rPl;
 
     // Use this for initialization
     void Start()
@@ -240,7 +238,7 @@ public class Robot : Entity{
     /// - Starts decision making in order to decide the point to reach and how to reach it
     /// </summary>
     /// <returns></returns>
-    private IEnumerator WaitingBeforeAction()
+    protected IEnumerator WaitingBeforeAction()
     {
         yield return new WaitForSeconds(4f);
         StartCoroutine(SavingProgress());
@@ -250,10 +248,22 @@ public class Robot : Entity{
     }
 
     /// <summary>
+    /// Thies method is responsible to restart the Scanning & Decision phase if the agent, after reaching a target, has not finished the game session
+    /// Used in Multi-Target Maps
+    /// </summary>
+    /// <returns></returns>
+    protected IEnumerator RestartAfterReachingObjective()
+    {
+        StartCoroutine(SendingRays());
+        yield return new WaitForSeconds(2f);
+        StartCoroutine(coroutine);
+    }
+
+    /// <summary>
     /// This method sends raycast from itself with a certain range and space in order to get information from the environment.
     /// </summary>
     /// <returns></returns>
-    private IEnumerator SendingRays()
+    protected IEnumerator SendingRays()
     {
         while (!targetFound)
         {
@@ -388,7 +398,7 @@ public class Robot : Entity{
     /// </summary>
     /// <param name="distance">The distance from the robot until the last point of the ray</param>
     /// <param name="ray">The ray along which is considering the tiles analyzed</param>
-    private void SettingR(float distance, Ray ray)
+    protected void SettingR(float distance, Ray ray)
     {
         for (float i = 0; i < distance; i++)
         {
@@ -408,7 +418,7 @@ public class Robot : Entity{
     /// <param name="distance">The distance from the robot until the last point of the ray</param>
     /// <param name="ray">The ray along which is considering the tiles analyzed</param>
     /// <param name="epsilon">Useless (is set to 0)</param>
-    private void SettingW(float distance, Ray ray, float epsilon/*, float angle*/)
+    protected void SettingW(float distance, Ray ray, float epsilon/*, float angle*/)
     {
         float robotX = transform.position.x / squareSize;
         float robotz = transform.position.z / squareSize;
@@ -585,7 +595,7 @@ public class Robot : Entity{
     /// </summary>
     /// <param name="coordinate">The coordinate of a tile</param>
     /// <returns></returns>
-    private float FixingRound(float coordinate)
+    protected float FixingRound(float coordinate)
     {
         if (Mathf.Abs(coordinate - Mathf.Round(coordinate)) >= 0.5f)
         {
@@ -599,7 +609,7 @@ public class Robot : Entity{
     /// is saved on a dedicated server
     /// </summary>
     /// <returns></returns>
-    private IEnumerator SavingProgress()
+    protected IEnumerator SavingProgress()
     {
         while (rM.inGameSession)
         {
@@ -635,5 +645,17 @@ public class Robot : Entity{
             return true;
         }
         else return false;
+    }
+
+    /// <summary>
+    /// This method is responsible to reset the target found condition to the default one and the Scanning & Decision phase, in order to continue finding 
+    /// other targets if deployed in the map.
+    /// Used in Multi-Target Maps
+    /// </summary>
+    public void ResetTargetFound()
+    {
+        targetFound = false;
+        rM.targetFound = false;
+        StartCoroutine(RestartAfterReachingObjective());
     }
 }

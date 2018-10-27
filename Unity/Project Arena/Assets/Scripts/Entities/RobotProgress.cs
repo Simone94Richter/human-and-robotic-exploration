@@ -41,7 +41,9 @@ public class RobotProgress : MonoBehaviour {
 
         rC = GetComponent<RobotConnection>();
 
-        /*filePathMapResChar = Application.dataPath + pathMap;
+        //disattivare questo blocco se web build
+#if UNITY_EDITOR
+        filePathMapResChar = Application.dataPath + pathMap;
         if (!File.Exists(filePathMapResChar))
         {
             File.Create(filePathMapResChar);
@@ -60,7 +62,8 @@ public class RobotProgress : MonoBehaviour {
         if (!File.Exists(filePathPosResNum))
         {
             File.Create(filePathPosResNum);
-        }*/
+        }
+#endif
 
         gameDataPos = new JsonRobotObjects();
         gameDataPos.position = new List<string>();
@@ -108,7 +111,9 @@ public class RobotProgress : MonoBehaviour {
         }
 
         mapAsJson = JsonUtility.ToJson(gameDataMap);
-        //File.WriteAllText(filePathMapResChar, mapAsJson);
+#if UNITY_EDITOR
+        File.WriteAllText(filePathMapResChar, mapAsJson); //disattivare se web build
+#endif
     }
 
     public void SaveMapNum(float[,] robot_map)
@@ -144,7 +149,9 @@ public class RobotProgress : MonoBehaviour {
         }
 
         mapAsJson = JsonUtility.ToJson(gameDataMap);
-        //File.WriteAllText(filePathMapResNum, mapAsJson);
+#if UNITY_EDITOR
+        File.WriteAllText(filePathMapResNum, mapAsJson); //disattivare se web build
+#endif
     }
 
     public void SavePosChar(int posX, int posZ, Vector3 rotation)
@@ -152,7 +159,9 @@ public class RobotProgress : MonoBehaviour {
         gameDataPos.position.Add(posX.ToString() + "," + posZ.ToString());
         gameDataPos.rotationY.Add(rotation.y);
         posAsJson = JsonUtility.ToJson(gameDataPos);
-        //File.WriteAllText(filePathPosResChar, posAsJson);
+# if UNITY_EDITOR
+        File.WriteAllText(filePathPosResChar, posAsJson); //disattivare se web build
+#endif
     }
 
     public void SavePosNum(int posX, int posZ, Vector3 rotation)
@@ -160,14 +169,18 @@ public class RobotProgress : MonoBehaviour {
         gameDataPos.position.Add(posX.ToString() + "," + posZ.ToString());
         gameDataPos.rotationY.Add(rotation.y);
         posAsJson = JsonUtility.ToJson(gameDataPos);
-        //File.WriteAllText(filePathPosResNum, posAsJson);
+#if UNITY_EDITOR
+        File.WriteAllText(filePathPosResNum, posAsJson); //disattivare se web build
+#endif
     }
 
     public void SaveTimeChar(float time)
     {
         gameDataPos.time.Add(time);
         posAsJson = JsonUtility.ToJson(gameDataPos);
-        //File.WriteAllText(filePathPosResChar, posAsJson);
+#if UNITY_EDITOR
+        File.WriteAllText(filePathPosResChar, posAsJson); //disattivare se web build
+#endif
     }
 
     public void SaveTimeNum(float time)
@@ -182,9 +195,11 @@ public class RobotProgress : MonoBehaviour {
             gameDataMap.mapName.Add(currentCase.GetCurrentMap().name);
         }
         posAsJson = JsonUtility.ToJson(gameDataPos);
-        //File.WriteAllText(filePathPosResNum, posAsJson);
+# if UNITY_EDITOR
+        File.WriteAllText(filePathPosResNum, posAsJson); //disattivare se web build
         mapAsJson = JsonUtility.ToJson(gameDataMap);
-        //File.WriteAllText(filePathMapResNum, mapAsJson);
+        File.WriteAllText(filePathMapResNum, mapAsJson); //disattivare se web build
+# endif
     }
 
     public void PreparingForServer()

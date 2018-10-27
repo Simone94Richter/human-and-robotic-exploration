@@ -5,37 +5,45 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
-/// TutorialGameManager is an implementation of GameManager. The tutorial game mode consists in 
-/// finding and destroying a single target.
+/// ExperimentingTest2GameManager is a class dedicated entirely to experiments where the agent has to find multiple targets in one instance
 /// </summary>
 public class ExperimentingTest2GameManager : GameManager
 {
+    // --- Public Variables --- //
 
     [Header("Contenders")]
-    [SerializeField]
-    private GameObject player;
+    [SerializeField] private GameObject player;
     [SerializeField] private int totalHealthPlayer = 100;
     [SerializeField] private bool[] activeGunsPlayer;
+    [Header("The set of targets to be found by the agent")]
     [SerializeField] private GameObject[] target;
+    [Header("The text GO where is diplayed the current status of found/not found targets (for Human agent only)")]
     [SerializeField] private Text ScoreOnScreen;
 
     [Header("Tutorial variables")] [SerializeField] protected TutorialGameUIManager tutorialGameUIManagerScript;
     [Header("Part of the UI used to display time")] public Text finalTime;
+    [Header("Part of the UI used to give loading feedback to the player")] public Text loadingText;
 
+    [Header("Distance used to say that the agent is close to the target")]
     public float goalDistance = 5f;
+    [Header("GO containing the camera od the scene (used as head of the agent)")]
     public GameObject headPlayer;
 
     [Header("The level to be loaded after finishing this")]
     public string nextLevel;
 
-    private bool tutorialCompleted = false;
-    private float completionTime;
+    //  --- Private Variables --- //
 
-    private List<bool> targetReached = new List<bool>();
-    private List<GameObject> newTarget = new List<GameObject>();
-    private List<Vector3> targetPos = new List<Vector3>();
+    private bool tutorialCompleted = false; //is the level completed?
+    private bool update = false; //the ending condition has to be updated?
 
-    private RaycastHit hit;
+    private float completionTime; //The time used by the agent to fulfill the task
+
+    private List<bool> targetReached = new List<bool>(); //List saying if a certain target has been reached or not
+    private List<GameObject> newTarget = new List<GameObject>(); //List used to instance the target
+    private List<Vector3> targetPos = new List<Vector3>(); //List containing the updated position of the various targets
+
+    private RaycastHit hit; //hit point of the raycast of the agent
 
     private Player playerScript;
     private Robot robotScript;
@@ -80,6 +88,7 @@ public class ExperimentingTest2GameManager : GameManager
                     playerScript.SetupEntity(totalHealthPlayer, activeGunsPlayer, this, 1);
                     playerScript.LockCursor();
                 }
+                //Robot agent case
                 if (robotScript && !IsReady())
                 {
                     robotScript.StartingCountDown();
@@ -92,9 +101,52 @@ public class ExperimentingTest2GameManager : GameManager
         }
         else if (IsReady() && !generateOnly)
         {
+            //Robot agent case
             if (robotScript)
             {
-                tutorialCompleted = robotScript.TargetReached();
+                //tutorialCompleted = robotScript.TargetReached();
+                Vector3 localDownVector = Quaternion.AngleAxis(headPlayer.transform.eulerAngles.x, player.transform.right) * player.transform.forward;
+                //Vector3 downDirection = headPlayer.transform.TransformDirection(localDownVector);
+                Ray center = new Ray(headPlayer.transform.position, localDownVector);
+                //Debug.DrawRay(headPlayer.transform.position, player.transform.forward * 20f, Color.green, 0.5f);
+                Debug.DrawRay(headPlayer.transform.position, localDownVector * 20f, Color.green, 0.5f);
+                if (Physics.Raycast(center, out hit, 20f))
+                {
+                    for (int i = 0; i < targetPos.Count; i++)
+                    {
+                        //Debug.Log(hit.transform.gameObject.name);
+                        //Debug.Log(Mathf.Sqrt((player.transform.position.x - targetPos[i].x) * (player.transform.position.x - targetPos[i].x) + (player.transform.position.z - targetPos[i].z) * (player.transform.position.z - targetPos[i].z)));
+                        if (hit.transform.gameObject.tag == "Target" && Mathf.Sqrt((player.transform.position.x - targetPos[i].x) * (player.transform.position.x - targetPos[i].x) + (player.transform.position.z - targetPos[i].z) * (player.transform.position.z - targetPos[i].z)) <= goalDistance)
+                        {
+                            targetReached[i] = true;
+                            newTarget[i].SetActive(false);
+                            update = true;
+                            //Debug.Log(true);
+                        }
+                    }
+                }
+
+                bool finished = true;
+
+                for (int i = 0; i < targetReached.Count; i++)
+                {
+                    if (!targetReached[i])
+                    {
+                        finished = false;
+                    }
+                }
+                Debug.Log(targetReached[0] + "," + targetReached[1] + ", " + targetReached[2] + ", " + targetReached[3]);
+
+                if (finished)
+                {
+                    tutorialCompleted = true;
+                }
+                else if(update)
+                {
+                    tutorialCompleted = false;
+                    robotScript.ResetTargetFound();
+                    update = false;
+                }
             }
             else if (playerScript && !tutorialCompleted)
             {
@@ -135,7 +187,7 @@ public class ExperimentingTest2GameManager : GameManager
                     {
                         tutorialCompleted = true;
                     }
-                    else tutorialCompleted = false; 
+                    else tutorialCompleted = false;
                 }
             }
             //Debug.Log(gamePhase);
@@ -200,6 +252,10 @@ public class ExperimentingTest2GameManager : GameManager
         {
             // Disable the player movement and interactions, activate the score UI, set the winner 
             // and set the phase.
+            if (robotScript)
+            {
+                player.GetComponent<RobotMovement>().inGameSession = false;
+            }
             if (playerScript != null)
             {
                 playerScript.SetGameEnd();
@@ -214,11 +270,19 @@ public class ExperimentingTest2GameManager : GameManager
         }
         else if (gamePhase == 2 && Time.time >= completionTime + scoreDuration && (!player.GetComponent<RobotConnection>() || (player.GetComponent<RobotConnection>() && player.GetComponent<RobotConnection>().uploadComplete)))
         {
+            if (loadingText)
+            {
+                loadingText.text = "Returning to menu...";
+            }
             Quit();
             gamePhase = 3;
         }
     }
 
+    /// <summary>
+    /// This method is called to display the score time one second after the agent has completed the task
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator DisplayTime()
     {
         yield return new WaitForSeconds(1f);

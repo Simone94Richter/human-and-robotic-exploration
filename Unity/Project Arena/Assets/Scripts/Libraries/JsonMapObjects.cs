@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-
+/// <summary>
+/// This class defines the JSON containing information about the map explored by robots
+/// </summary>
 [Serializable]
 public class JsonMapObjects
 {

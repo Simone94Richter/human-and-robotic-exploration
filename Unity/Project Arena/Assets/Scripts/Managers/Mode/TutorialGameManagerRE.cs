@@ -19,6 +19,7 @@ public class TutorialGameManagerRE : GameManager
 
     [Header("In Game UI")] [SerializeField] protected TutorialGameUIManager tutorialGameUIManagerScript;
     [Header("Part of the UI used to display time")] public Text finalTime;
+    [Header("Part of the UI used to give loading feedback to the player")] public Text loadingText;
 
     public float goalDistance = 5f;
     public GameObject headPlayer;
@@ -174,6 +175,10 @@ public class TutorialGameManagerRE : GameManager
         {
             // Disable the player movement and interactions, activate the score UI, set the winner 
             // and set the phase.
+            if (robotScript)
+            {
+                player.GetComponent<RobotMovement>().inGameSession = false;
+            }
             if (playerScript != null)
             {
                 playerScript.SetGameEnd();
@@ -186,8 +191,12 @@ public class TutorialGameManagerRE : GameManager
             completionTime = Time.time;
             gamePhase = 2;
         }
-        else if ( gamePhase == 2 && Time.time >= completionTime + scoreDuration && ( !player.GetComponent<RobotConnection>() || (player.GetComponent<RobotConnection>() && player.GetComponent<RobotConnection>().uploadComplete) ) )
+        else if (gamePhase == 2 && Time.time >= completionTime + scoreDuration && (!player.GetComponent<RobotConnection>() || (player.GetComponent<RobotConnection>() && player.GetComponent<RobotConnection>().uploadComplete)))
         {
+            if (loadingText)
+            {
+                loadingText.text = "Loading next stage...";
+            }
             Quit();
             gamePhase = 3;
         }

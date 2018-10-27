@@ -125,6 +125,7 @@ public class ObjectDisplacer : CoreComponent {
                         heightDirCorrection * (heightCorrection + height +
                         currentObject.heightCorrection), squareSize * y);
                     childObject.transform.localScale *= sizeCorrection;
+                    childObject.transform.localEulerAngles = new Vector3(currentObject.rotationCorrection, 0, 0);
 
                     if (categoryObjectsDictionary.ContainsKey(currentObject.category))
                     {
@@ -172,8 +173,12 @@ public class ObjectDisplacer : CoreComponent {
         public string category;
         // Prefab of the object.
         public GameObject prefab;
-        // Heigth correction factor.
+        [Header("Height correction factor")]
         public float heightCorrection;
+        [Header("Rotation correction factor")]
+        public float rotationCorrection;
+        [Header("Width correction factor")]
+        public float widthCorrection;
     }
 
     // List of custom objects which share the same char. 

@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 /// <summary>
 /// ExperimentManager allows to manage experiments. An experiment is composed of different studies 
@@ -94,6 +95,8 @@ public class ExperimentManager : SceneSingleton<ExperimentManager> {
 
     private bool loggingGame = false;
     private bool loggingStatistics = false;
+
+    private Slider loadingBar;
 
     void Awake() {
         DontDestroyOnLoad(transform.gameObject);
@@ -245,6 +248,21 @@ public class ExperimentManager : SceneSingleton<ExperimentManager> {
             }
         } else {
             for (int i = 0; i < studies[currentStudy].cases.Count; i++) {
+                /*
+                string mapName;
+                List<int> numMapResults = new List<int>();
+
+                for (int j = 0; j < studies[currentStudy].cases[i].maps.Count; j++)
+                {
+                    while()
+                    {
+                
+                    }
+
+                    mapName = studies[currentStudy].cases[i].maps[j].name;
+                    StartCoroutine(GetNumRecord(mapName));
+                }
+                */
                 studies[currentStudy].cases[i].RandomizeCurrentMap();
                 lessPlayedCases.Add(studies[currentStudy].cases[i]);
                 studyCompletionTrackers[currentStudy].casesCompletion[i]++;
@@ -288,7 +306,30 @@ public class ExperimentManager : SceneSingleton<ExperimentManager> {
         ParameterManager.Instance.MapDNA = (c.maps == null || c.maps.Count == 0) ? "" :
             c.GetCurrentMap().text;
 
-        SceneManager.LoadScene(c.scene);
+        //SceneManager.LoadScene(c.scene);
+        StartCoroutine(LoadAsynchronously(c));
+    }
+
+    /// <summary>
+    /// This coroutine method is responsible for displaying a loading bar on screen while loading asynchronously the next scene
+    /// </summary>
+    /// <param name="c">The scene to be loaded</param>
+    /// <returns></returns>
+    private IEnumerator LoadAsynchronously(Case c)
+    {
+        AsyncOperation operation = SceneManager.LoadSceneAsync(c.scene);
+
+        if (loadingBar)
+        {
+            while (!operation.isDone)
+            {
+                float progress = Mathf.Clamp01(operation.progress / .9f);
+
+                loadingBar.value = progress;
+
+                yield return null;
+            }
+        }
     }
 
     /* LOGGING */
@@ -872,6 +913,11 @@ public class ExperimentManager : SceneSingleton<ExperimentManager> {
     public int GetCaseIndex()
     {
         return currentCase;
+    }
+
+    public void SetSlider(Slider slider)
+    {
+        loadingBar = slider;
     }
 
 }

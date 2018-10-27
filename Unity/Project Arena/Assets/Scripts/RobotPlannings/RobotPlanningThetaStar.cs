@@ -10,15 +10,15 @@ public class RobotPlanningThetaStar : RobotPlanning {
 
     private int layerMask = 1 << 0;
 
-    private float[,] fScore;
-    private float[,] gScore;
+    private float[,] fScore; //heuristic_cost
+    private float[,] gScore; //cost
 
     private float tentativeGScore;
 
-    private Vector3[,] cameFrom;
+    private Vector3[,] cameFrom; //vertexMap
     private List<Vector3> openNodes; 
     private List<Vector3> closedNodes;
-    private List<Vector3> returnedPath;
+    private List<Vector3> returnedPath; //path_vector
     private List<float> closedNodesValues;
 
     private RaycastHit hit;
