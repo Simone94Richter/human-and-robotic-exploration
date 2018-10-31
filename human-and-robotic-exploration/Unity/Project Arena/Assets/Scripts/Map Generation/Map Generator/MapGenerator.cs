@@ -44,10 +44,10 @@ public abstract class MapGenerator : CoreComponent {
     protected char wallChar = 'w';
     // Float that denotes a room;
     [SerializeField]
-    protected float roomNumb = 50f;
+    protected float roomNumb = 48f;
     // Float that denotes a wall;
     [SerializeField]
-    protected float wallNumb = 48f;
+    protected float wallNumb = 49f;
     // Custom objects that will be added to the map.
     [SerializeField]
     protected MapObject[] mapObjects;

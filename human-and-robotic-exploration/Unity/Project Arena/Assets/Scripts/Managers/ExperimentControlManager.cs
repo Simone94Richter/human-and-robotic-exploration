@@ -235,8 +235,8 @@ public static class ExperimentControlManager {
                 }
 
             }
-        }/* catch {
-        } */finally { }
+        } catch {
+        } finally { }
     }
 
     // Downloads all the logs of the current experiment and creates a dataset for each map with the 
@@ -306,8 +306,8 @@ public static class ExperimentControlManager {
                 File.WriteAllText(downloadDirectory + "/heatmap_" +
                     mapIndexDictionary.FirstOrDefault(x => x.Value == i).Key + ".csv", data);
             }
-        } /*catch {
-        } */finally { }
+        } catch {
+        } finally { }
     }
 
     // Gets the starting index of a log given its identifier.
@@ -334,8 +334,8 @@ public static class ExperimentControlManager {
                     }
                 }
             }
-        } /*catch {
-        } */finally { }
+        } catch {
+        } finally { }
     }
 
 }

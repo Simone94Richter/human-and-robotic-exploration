@@ -93,6 +93,9 @@ public class RobotDownload : MonoBehaviour {
                 data.rotationY = rot;
                 data.time = time;
                 data.mapName = mName;
+                data.ip = gameDataPos.ip;
+                data.os = gameDataPos.os;
+                
                 File.WriteAllText(downloadedContentPath + "/Result" + id.ToString() + "t.txt", JsonUtility.ToJson(data));
 
                 WriteTupleLog(pos, rot, mName, id);
@@ -134,6 +137,8 @@ public class RobotDownload : MonoBehaviour {
         public string rotation;
         public string timerobot;
         public string mapname;
+        public string ip;
+        public string os;
     }
 
     public class MapReceived

@@ -78,6 +78,19 @@ public class CheckboxQuestion : MonoBehaviour {
             GetJsonOptions());
     }
 
+    public string GetAnswer()
+    {
+        int[] activeAnswers = GetActiveAnswers();
+        string markedChoiche = "";
+
+        for (int i = 0; i < activeAnswers.Length; i++)
+        {
+            markedChoiche = markedChoiche + " " + activeAnswers[i].ToString();
+        }
+
+        return markedChoiche;
+    }
+
     // Converts the options in Json format.
     private List<JsonOption> GetJsonOptions() {
         List<JsonOption> jOptions = new List<JsonOption>();

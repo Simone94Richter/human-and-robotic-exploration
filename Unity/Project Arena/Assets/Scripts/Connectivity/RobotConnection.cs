@@ -32,7 +32,6 @@ public class RobotConnection : MonoBehaviour {
     /// <returns></returns>
     private IEnumerator Upload(string json1, string json2)
     {
-        Debug.Log(SystemInfo.operatingSystem);
         var uwr = new UnityWebRequest(url, "POST");
         //Debug.Log(json1);
         byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(json1);

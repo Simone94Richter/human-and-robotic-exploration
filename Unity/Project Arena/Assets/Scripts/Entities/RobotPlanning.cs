@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RobotPlanning : MonoBehaviour {
+public class RobotPlanning_Entity : MonoBehaviour {
 
     public bool isNumeric;
     public bool hasTerminated = false;

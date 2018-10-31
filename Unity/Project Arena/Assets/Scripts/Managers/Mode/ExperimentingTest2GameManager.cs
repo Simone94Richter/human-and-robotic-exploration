@@ -272,7 +272,7 @@ public class ExperimentingTest2GameManager : GameManager
         {
             if (loadingText)
             {
-                loadingText.text = "Returning to menu...";
+                loadingText.text = "Loading Survey...";
             }
             Quit();
             gamePhase = 3;

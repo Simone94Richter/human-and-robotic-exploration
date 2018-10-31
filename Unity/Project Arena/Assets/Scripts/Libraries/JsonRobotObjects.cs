@@ -12,5 +12,7 @@ public class JsonRobotObjects {
     public List<float> rotationY;
     public List<float> time;
     public List<string> mapName;
+    public string ip;
+    public string os;
 
 }

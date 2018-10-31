@@ -194,11 +194,12 @@ public class RobotProgress : MonoBehaviour {
             gameDataPos.mapName.Add(currentCase.GetCurrentMap().name);
             gameDataMap.mapName.Add(currentCase.GetCurrentMap().name);
         }
+        gameDataPos.os = SystemInfo.operatingSystem;
         posAsJson = JsonUtility.ToJson(gameDataPos);
 # if UNITY_EDITOR
-        File.WriteAllText(filePathPosResNum, posAsJson); //disattivare se web build
+        File.WriteAllText(filePathPosResNum, posAsJson);
         mapAsJson = JsonUtility.ToJson(gameDataMap);
-        File.WriteAllText(filePathMapResNum, mapAsJson); //disattivare se web build
+        File.WriteAllText(filePathMapResNum, mapAsJson);
 # endif
     }
 
