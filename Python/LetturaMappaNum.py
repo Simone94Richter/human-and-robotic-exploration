@@ -3,7 +3,7 @@ import os
 #import pandas as pd
 import matplotlib.pyplot as plt
 
-inputDir = "C:/Users/princ/OneDrive/Documenti/human-and-robotic-exploration/Python"
+inputDir = "C:/Users/princ/OneDrive/Documenti/human-and-robotic-exploration/human-and-robotic-exploration/Python"
 fileName = "MapToRead.txt"
 if os.path.isfile(inputDir + "/" + fileName):
     with open(inputDir + "/" + fileName) as f:

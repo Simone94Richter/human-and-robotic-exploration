@@ -3,7 +3,7 @@ import os
 #import pandas as pd
 import matplotlib.pyplot as plt
 
-inputDir = "C:/Users/princ/OneDrive/Documenti/human-and-robotic-exploration/Unity/Project Arena/Assets/Results"
+inputDir = "C:/Users/princ/OneDrive/Documenti/human-and-robotic-exploration/human-and-robotic-exploration/Unity/Project Arena/Assets/Results"
 fileName = "resultMapNum.json"
 fileName2 = "resultPositionNum.json"
 if os.path.isfile(inputDir + "/" + fileName) and os.path.isfile(inputDir + "/" + fileName2):

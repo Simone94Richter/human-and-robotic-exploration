@@ -25,9 +25,9 @@ public class Robot : Entity{
 
     [Header("Num paramters for numerical mapping")]
     public float numFreeCell = 0f;
-    public float numWallCell = 1.5f;
-    public float numUnknownCell = 1f;
-    public float numGoalCell = 2f;
+    public float numWallCell = 1f;
+    public float numUnknownCell = 2f;
+    public float numGoalCell = 3f;
 
     [Header("Time for scan and decision making")]
     public float timeForScan;
@@ -144,6 +144,7 @@ public class Robot : Entity{
             for (int y = 0; y < height; y++)
             {
                 numeric_robot_map[x, y] = numUnknownCell;
+                Debug.Log(numeric_robot_map[x, y]);
             }
         }
 
@@ -297,6 +298,7 @@ public class Robot : Entity{
         {
             if (!Physics.Raycast(ray[i], out hit, rangeRays))
             {
+                //Debug.Log("Here!");
                 for (float j = rangeRays; j >= 0; j--)
                 {
                     float x_coord = ray[i].GetPoint(j).x;
@@ -305,10 +307,15 @@ public class Robot : Entity{
                     y_coord = y_coord / squareSize;
                     x_coord = FixingRound(x_coord);
                     y_coord = FixingRound(y_coord);
-                    if(!isNumeric)
-                    if(robot_map[(int)x_coord, (int)y_coord] != 'w') robot_map[(int)x_coord, (int)y_coord] = 'r';
-                    else if (numeric_robot_map[(int)x_coord, (int)y_coord] != numWallCell) numeric_robot_map[(int)x_coord, (int)y_coord] = numFreeCell; 
-                    //Debug.Log(robot_map[(int)x_coord, (int)y_coord] + "" + (int)x_coord + "" + (int)y_coord);
+                    if (!isNumeric)
+                    {
+                        if (robot_map[(int)x_coord, (int)y_coord] != 'w') robot_map[(int)x_coord, (int)y_coord] = 'r';
+                    }
+                    else
+                    {
+                        if (numeric_robot_map[(int)x_coord, (int)y_coord] != numWallCell) numeric_robot_map[(int)x_coord, (int)y_coord] = numFreeCell;
+                    }
+                    //Debug.Log(numeric_robot_map[(int)x_coord, (int)y_coord] + "" + (int)x_coord + "" + (int)y_coord);
                 }
             }
             else
@@ -317,6 +324,7 @@ public class Robot : Entity{
                 float y = hit.transform.position.z / squareSize;
                 if (hit.collider.gameObject.tag == "Environment")
                 {
+                    //Debug.Log("Here!");
                     //Debug.Log("Environment hit!");
                     //Debug.Log("You hit " + hit.collider.gameObject.tag);
                     //Debug.Log(hit.collider.gameObject.transform.position);
