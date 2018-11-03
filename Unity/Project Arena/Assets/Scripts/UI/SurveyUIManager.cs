@@ -102,13 +102,6 @@ public class SurveyUIManager : MonoBehaviour {
     // Shows the next question.
     public void NextQuestion() {
         //UpdateValues();
-        if(currentQuestion == 2)
-        {
-            foreach (GameObject g in mapsSet[setOfMapSelected].maps)
-            {
-                g.SetActive(false);
-            }
-        }
 
         answers.choices.Add(questions[currentQuestion].GetComponent<CheckboxQuestion>().GetAnswer());
 
@@ -124,10 +117,19 @@ public class SurveyUIManager : MonoBehaviour {
             finalQuestion = true;
             thanks.SetActive(true);
         }
+
+        if (currentQuestion != 3 || finalQuestion)
+        {
+            foreach (GameObject g in mapsSet[setOfMapSelected].maps)
+            {
+                g.SetActive(false);
+            }
+        }
     }
 
     public void PrevPage()
     {
+
         if (currentQuestion > 0)
         {
             if (!finalQuestion)
@@ -147,12 +149,20 @@ public class SurveyUIManager : MonoBehaviour {
             }
 
             CheckIfImageQuestion();
+
+            if (currentQuestion != 3 || finalQuestion)
+            {
+                foreach (GameObject g in mapsSet[setOfMapSelected].maps)
+                {
+                    g.SetActive(false);
+                }
+            }
         }
     }
 
     private void CheckIfImageQuestion()
     {
-        if (currentQuestion == 2)
+        if (currentQuestion == 3)
         {
             string name;
             if (ExperimentManager.HasInstance())
