@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// This class defines the common elements for every decision making component in each robot agent
+/// </summary>
 public abstract class RobotDecisionMaking : MonoBehaviour {
 
     protected Vector3 target;

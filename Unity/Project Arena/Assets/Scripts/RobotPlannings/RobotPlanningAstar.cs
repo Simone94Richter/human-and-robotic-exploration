@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// This class is responsible to manage a planning of type A*
+/// </summary>
 public class RobotPlanningAstar : RobotPlanning {
 
     private float[,] fScore;//cost of the path given by gScore and heuristic
@@ -41,6 +44,12 @@ public class RobotPlanningAstar : RobotPlanning {
         return null;
     }
 
+    /// <summary>
+    /// This method explores the tiles of the map in a graph pattern. Character map case
+    /// </summary>
+    /// <param name="robot">Starting position of the robot agent</param>
+    /// <param name="destPos">Destination position of the robot agent</param>
+    /// <returns></returns>
     private List<Vector3> AstarCharMap(Vector3 robot, Vector3 destPos)
     {
         closedSet = new List<Vector3>();
@@ -168,6 +177,12 @@ public class RobotPlanningAstar : RobotPlanning {
         return null;
     }
 
+    /// <summary>
+    /// This method explore the tiles of the map in a graph pattern. Numerical map case
+    /// </summary>
+    /// <param name="robot">Starting position of the robot agent</param>
+    /// <param name="destPos">Destination position of the robot agent</param>
+    /// <returns></returns>
     private List<Vector3> AstarNumMap(Vector3 robot, Vector3 destPos) //this method works
     {
         closedSet = new List<Vector3>();
@@ -292,6 +307,15 @@ public class RobotPlanningAstar : RobotPlanning {
         return null;
     }
 
+    /// <summary>
+    /// This method takes the explored nodes and, starting from the goal node, goes up until the the starting one is found, in order to create the path
+    /// to be given to the robot agent
+    /// </summary>
+    /// <param name="robot">Starting position</param>
+    /// <param name="cameFom">Array containing the parent of a node</param>
+    /// <param name="current">Goal position</param>
+    /// <param name="destination">Goal position</param>
+    /// <returns></returns>
     private List<Vector3> ReconstructPath(Vector3 robot, Vector3[,] cameFom, Vector3 current, Vector3 destination)
     {
         List<Vector3> total_path = new List<Vector3>();
@@ -359,6 +383,12 @@ public class RobotPlanningAstar : RobotPlanning {
 
     }
 
+    /// <summary>
+    /// This method returns the heuristic cost of a node of the graph. The heuristic cost is equal between the current and the destination points
+    /// </summary>
+    /// <param name="current">Starting destination point</param>
+    /// <param name="destination">Destination point to reach</param>
+    /// <returns></returns>
     private float GetHeuristic(Vector3 current, Vector3 destination)
     {
         int currentx = (int)FixingRound(current.x);

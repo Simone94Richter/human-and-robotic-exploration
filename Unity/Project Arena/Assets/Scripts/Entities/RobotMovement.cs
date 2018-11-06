@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// This class is responsible to manage the movement of the robot agent
+/// </summary>
 public class RobotMovement : MonoBehaviour {
 
     [SerializeField] public Camera robotCamera;
@@ -9,21 +12,21 @@ public class RobotMovement : MonoBehaviour {
     [SerializeField] [Range(10f, 100f)] public float rotationSpeed;
     [SerializeField] public float speed = 10f;
 
-    bool goForward;
-    bool goRotation;
     public bool targetFound;
     public bool tempReached;
-
     public bool inGameSession = true;
 
     public float squareSize;
 
+    private bool goForward;
+    private bool goRotation;
+
     private int layerMask = 1 << 0;
 
-    GameObject tempDestination;
-    GameObject target;
+    private GameObject tempDestination;
+    private GameObject target;
 
-    RaycastHit hit;
+    private RaycastHit hit;
 
     private Vector3 tempRelatedToRobot;
     private RobotPlanning rPL;
@@ -41,7 +44,6 @@ public class RobotMovement : MonoBehaviour {
 	void Update () {
         if (tempDestination && !targetFound)
         {
-            //Debug.Log(transform.InverseTransformPoint(tempDestination.transform.position));
             if (!targetFound && goForward && !goRotation && !tempReached)
             {
                 transform.position += transform.forward * Time.deltaTime * speed;
@@ -140,6 +142,10 @@ public class RobotMovement : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// This method instantiates the destination point in the world space
+    /// </summary>
+    /// <param name="goals"></param>
     public void ApproachingPointToReach(Vector3 goals)
     {
         //goApproach = false;
@@ -167,6 +173,11 @@ public class RobotMovement : MonoBehaviour {
         //goForward = true;
     }
 
+    /// <summary>
+    /// This method instantiates one of the destination points of a trajectory line. The DP is chosen according to index value 
+    /// </summary>
+    /// <param name="goals">The list of destination points of the trajectory line</param>
+    /// <param name="index">The position, in the list, of the destination point to instantiate</param>
     public void ApproachingPointToReach(List<Vector3> goals, int index)
     {
         if (tempDestination)
@@ -205,6 +216,10 @@ public class RobotMovement : MonoBehaviour {
         tempDestination.layer = 13;
     }
 
+    /// <summary>
+    /// This method focuses the movement of the robot to reach the target GO and not, if existent, a possible destination point
+    /// </summary>
+    /// <param name="target">The target GO</param>
     public void ApproachingGoal(GameObject target)
     {
         this.target = target;
@@ -213,6 +228,10 @@ public class RobotMovement : MonoBehaviour {
             Destroy(tempDestination);
     }
 
+    /// <summary>
+    /// This method re-activate the movement of the robot if there are other targets to find.
+    /// Usefull for multi target scenarios
+    /// </summary>
     public void ResetMovement()
     {
         targetFound = false;

@@ -5,6 +5,10 @@ using UnityEngine.Networking;
 using System.Text.RegularExpressions;
 using System.IO;
 
+/// <summary>
+/// This class is responsible for downloading trajectory results from the server. These results will be written in txt files into two format:
+/// a JSON format and a triple format
+/// </summary>
 public class RobotDownload : MonoBehaviour {
 
     [Header("The URL used to download data from the webserver")]
@@ -21,14 +25,20 @@ public class RobotDownload : MonoBehaviour {
     private List<float> rot = new List<float>();
     private List<float> time = new List<float>();
     private List<string> mName = new List<string>();
-    //WWW www;
-    //WWWForm data;
 
+    /// <summary>
+    /// This method calls the coroutine to start the procedure to download data
+    /// </summary>
     public void DownloadData()
     {
         StartCoroutine(Download());
     } 
 
+    /// <summary>
+    /// This method sends a POST request to get the desired data to download and writes them in the created txt file
+    /// Not usable in Web build
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator Download()
     {
         data = new JsonRobotObjects();
@@ -37,13 +47,11 @@ public class RobotDownload : MonoBehaviour {
         data.time = new List<float>();
         data.mapName = new List<string>();
         id = 1;
-        while (keepGoing)
+        while (keepGoing) //until there are other results to download
         {
             var uwr = UnityWebRequest.Post(url, "POST");
             idObject = new IdPost(id.ToString());
-            //Debug.Log(json1);
             byte[] idToSend = new System.Text.UTF8Encoding().GetBytes(JsonUtility.ToJson(idObject));
-            //Debug.Log(jsonToSend);
             uwr.uploadHandler = (UploadHandler)new UploadHandlerRaw(idToSend);
             uwr.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
             //uwr.SetRequestHeader("Content-Type", "application/json");
@@ -55,14 +63,12 @@ public class RobotDownload : MonoBehaviour {
             {
                 Debug.Log(uwr.downloadHandler.text);
                 gameDataPos = JsonUtility.FromJson<TrajectoryReceived>(uwr.downloadHandler.text);
-                //Debug.Log(gameDataPos.timerobot);
                 gameDataPos.position = Regex.Replace(gameDataPos.position, @"[()]", "");
                 gameDataPos.position = Regex.Replace(gameDataPos.position, @"[ ]", "");
                 string[] positions = gameDataPos.position.Split(',');
                 pos = new List<string>();
                 for (int i = 0; i< positions.Length; i=i+2)
                 {
-                    //Debug.Log(positions[i] + " " + positions[i+1]);
                     pos.Add(positions[i]+","+positions[i+1]);    
                 }
                 gameDataPos.rotation = Regex.Replace(gameDataPos.rotation, @"[()]", "");
@@ -110,6 +116,13 @@ public class RobotDownload : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// This method takes positions, rotations and a map name paramters to be written a triple-format text 
+    /// </summary>
+    /// <param name="pos">List of positions of the JSON</param>
+    /// <param name="rot">List of rotations of the JSON</param>
+    /// <param name="name">Name of the map explored by the player/robot</param>
+    /// <param name="id">Id of the results according to the database</param>
     private void WriteTupleLog(List<string> pos, List<float> rot, List<string> name, int id)
     {
         string log;
@@ -120,7 +133,10 @@ public class RobotDownload : MonoBehaviour {
         }
         File.WriteAllText(downloadedContentPath + "/ResultTuple" + id.ToString() + ".txt", log);
     }
-
+    
+    /// <summary>
+    /// Class defining an id object to be sent for the POST request
+    /// </summary>
     public class IdPost
     {
         public string id;
@@ -131,6 +147,9 @@ public class RobotDownload : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Class defining all the components of the JSON downloaded from the server in the trajectory case
+    /// </summary>
     public class TrajectoryReceived
     {
         public string position;
@@ -141,6 +160,9 @@ public class RobotDownload : MonoBehaviour {
         public string os;
     }
 
+    /// <summary>
+    /// Class defining all the components of the JSON downloaded from the server in the map case
+    /// </summary>
     public class MapReceived
     {
         public string uknown;

@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// This class defines the main features of the robot agent's planning
+/// </summary>
 public class RobotPlanning : MonoBehaviour {
 
     [Header("Is the map used numeric or char?")]
@@ -24,13 +27,20 @@ public class RobotPlanning : MonoBehaviour {
     public char[,] robot_map;
     public float[,] numeric_robot_map;
 
-    protected Robot mainScipt;
+    protected Robot mainScipt; //The core component (the one responsible for scanning and decisioning)
 
     private void Start()
     {
         mainScipt = GetComponent<Robot>();
     }
 
+    /// <summary>
+    /// This method checks if the destination is in line of sight with the robot agent. If it is, the robot just set to movement steps to reach it
+    /// Otherwise, the planning manager defines a path, made of destination points, that the agent has to follow in order to reach it
+    /// </summary>
+    /// <param name="robot">The robot agent's position</param>
+    /// <param name="destination">The desired destination to reach</param>
+    /// <returns></returns>
     public virtual List<Vector3> CheckVisibility(Vector3 robot, Vector3 destination)
     {
         return null;

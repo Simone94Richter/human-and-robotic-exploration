@@ -5,22 +5,30 @@ using UnityEngine.Networking;
 using System.IO;
 using System.Text.RegularExpressions;
 
+/// <summary>
+/// This class is responsible for downloading map results from the server
+/// </summary>
 public class RobotDownloadMap : RobotDownload {
 
-    //private int id;
-    //private bool keepGoing = true;
-    //private IdPost idObject;
     private MapReceived gameDataMap;
     private JsonMapObjects dataMap;
     private List<string> uCell = new List<string>();
     private List<string> wCell = new List<string>();
     private List<string> gCell = new List<string>();
 
+    /// <summary>
+    /// This method calls the coroutine to start the procedure to download data
+    /// </summary>
     public void DownloadMap()
     {
         StartCoroutine(Download());
     }
 
+    /// <summary>
+    /// This method sends a POST request to get the desired data to download and writes them in the created txt file
+    /// Not usable in Web build
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator Download()
     {
         dataMap = new JsonMapObjects();
@@ -32,9 +40,7 @@ public class RobotDownloadMap : RobotDownload {
         {
             var uwr = UnityWebRequest.Post(url, "POST");
             idObject = new IdPost(id.ToString());
-            //Debug.Log(json1);
             byte[] idToSend = new System.Text.UTF8Encoding().GetBytes(JsonUtility.ToJson(idObject));
-            //Debug.Log(jsonToSend);
             uwr.uploadHandler = (UploadHandler)new UploadHandlerRaw(idToSend);
             uwr.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
             //uwr.SetRequestHeader("Content-Type", "application/json");
@@ -46,7 +52,6 @@ public class RobotDownloadMap : RobotDownload {
             {
                 Debug.Log(uwr.downloadHandler.text);
                 gameDataMap = JsonUtility.FromJson<MapReceived>(uwr.downloadHandler.text);
-                //Debug.Log(gameDataPos.timerobot);
                 gameDataMap.uknown = Regex.Replace(gameDataMap.uknown, @"[()]", "");
                 gameDataMap.uknown = Regex.Replace(gameDataMap.uknown, @"[ ]", "");
                 string[] u = gameDataMap.uknown.Split(',');
@@ -74,7 +79,6 @@ public class RobotDownloadMap : RobotDownload {
                 gameDataMap.goal = Regex.Replace(gameDataMap.goal, @"[()]", "");
                 gameDataMap.goal = Regex.Replace(gameDataMap.goal, @"[ ]", "");
                 string[] g = gameDataMap.goal.Split(',');
-                //Debug.Log(g.Length);
                 gCell = new List<string>();
                 if (g.Length >= 2) // just to be sure that two coordinates exists
                 {

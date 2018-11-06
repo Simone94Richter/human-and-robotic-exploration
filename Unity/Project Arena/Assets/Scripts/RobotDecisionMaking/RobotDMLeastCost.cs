@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// This class defines a decision making process where the point is taken according to the cost for the robot agent to reach it. The least one is the chosen one
+/// </summary>
 public class RobotDMLeastCost : RobotDecisionMaking {
 
     private float candidatePathCost;
@@ -18,6 +21,11 @@ public class RobotDMLeastCost : RobotDecisionMaking {
         rPL = GetComponent<RobotPlanning>();
     }
 
+    /// <summary>
+    /// This method returns the point to be chosen
+    /// </summary>
+    /// <param name="listFrontierPoints">The list of possible poins to reach</param>
+    /// <returns></returns>
     public override Vector3 PosToReach(List<Vector3> listFrontierPoints)
     {
         float betterPathCost;
@@ -42,6 +50,11 @@ public class RobotDMLeastCost : RobotDecisionMaking {
         return listFrontierPoints[betterOption];
     }
 
+    /// <summary>
+    /// This method returns the lest cost for the robot agent to reach a certain point 
+    /// </summary>
+    /// <param name="dest"></param>
+    /// <returns></returns>
     private float CalculatingPathCost(Vector3 dest)
     {
         candidatePathCost = 0f;

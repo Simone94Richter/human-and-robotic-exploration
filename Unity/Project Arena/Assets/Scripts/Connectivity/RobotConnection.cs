@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -32,16 +31,14 @@ public class RobotConnection : MonoBehaviour {
     /// <returns></returns>
     private IEnumerator Upload(string json1, string json2)
     {
+        //Setting the POST request what should be sent and returned
         var uwr = new UnityWebRequest(url, "POST");
-        //Debug.Log(json1);
         byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(json1);
-        //Debug.Log(jsonToSend);
         uwr.uploadHandler = (UploadHandler)new UploadHandlerRaw(jsonToSend);
         uwr.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
         //uwr.SetRequestHeader("Content-Type", "application/json");
 
         //Send the request then wait here until it returns
-        //yield return uwr.SendWebRequest();
         AsyncOperation operation = uwr.SendWebRequest();
 
         if (loadingBar)
@@ -58,6 +55,7 @@ public class RobotConnection : MonoBehaviour {
         }
         else yield return uwr.SendWebRequest();
 
+        //Display error in case the request was not arrived; otherwise, publish the return message
         if (uwr.isNetworkError)
         {
             Debug.Log("Error While Sending: " + uwr.error);
@@ -67,16 +65,15 @@ public class RobotConnection : MonoBehaviour {
             Debug.Log("Received: " + uwr.downloadHandler.text);
         }
 
+        //Same as before
+
         var uwr2 = new UnityWebRequest(url2, "POST");
-        //Debug.Log(json2);
         byte[] jsonToSend2 = new System.Text.UTF8Encoding().GetBytes(json2);
-        //Debug.Log(jsonToSend2);
         uwr2.uploadHandler = (UploadHandler)new UploadHandlerRaw(jsonToSend2);
         uwr2.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
         //uwr.SetRequestHeader("Content-Type", "application/json");
 
         //Send the request then wait here until it returns
-        //yield return uwr2.SendWebRequest();
         AsyncOperation operation2 = uwr2.SendWebRequest();
 
         if (loadingBar)
@@ -102,6 +99,7 @@ public class RobotConnection : MonoBehaviour {
             Debug.Log("Received: " + uwr2.downloadHandler.text);
         }
 
+        //Everything has been sent, so the manager needs to know that the upload is finished
         uploadComplete = true;
     }
 

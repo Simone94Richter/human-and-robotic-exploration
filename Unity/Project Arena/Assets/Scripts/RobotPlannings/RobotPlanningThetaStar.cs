@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// This class is responsible to manage a planning of type Thetha*
+/// </summary>
 public class RobotPlanningThetaStar : RobotPlanning {
 
     public Vector3 destination;
@@ -265,6 +268,12 @@ public class RobotPlanningThetaStar : RobotPlanning {
 
     */
 
+    /// <summary>
+    /// This method explores the tiles of the map in a graph pattern. Character map case
+    /// </summary>
+    /// <param name="robot">Starting position of the robot agent</param>
+    /// <param name="destPos">Destination position of the robot agent</param>
+    /// <returns></returns>
     private List<Vector3> ThetaStarCharMap(Vector3 destPos)
     {
         closedNodes = new List<Vector3>();
@@ -382,6 +391,12 @@ public class RobotPlanningThetaStar : RobotPlanning {
         return null;
     }
 
+    /// <summary>
+    /// This method explores the tiles of the map in a graph pattern. Numerical map case
+    /// </summary>
+    /// <param name="robot">Starting position of the robot agent</param>
+    /// <param name="destPos">Destination position of the robot agent</param>
+    /// <returns></returns>
     private List<Vector3> ThetaStarNumMap(Vector3 destPos) //this method works
     {
         closedNodes = new List<Vector3>();
@@ -494,6 +509,15 @@ public class RobotPlanningThetaStar : RobotPlanning {
         return null;
     }
 
+    /// <summary>
+    /// This method takes the explored nodes and, starting from the goal node, goes up until the the starting one is found, in order to create the path
+    /// to be given to the robot agent
+    /// </summary>
+    /// <param name="robot">Starting position</param>
+    /// <param name="cameFom">Array containing the parent of a node</param>
+    /// <param name="current">Goal position</param>
+    /// <param name="destination">Goal position</param>
+    /// <returns></returns>
     private List<Vector3> ReconstructPath(Vector3[,] cameFom, Vector3 current, Vector3 destination)
     {
         List<Vector3> total_path = new List<Vector3>();
@@ -562,6 +586,11 @@ public class RobotPlanningThetaStar : RobotPlanning {
 
     }
 
+    /// <summary>
+    /// This method takes an optimal A* path and reduces the step in order to get only the angle nodes of the path, in orderto compute a correct Thetha* path
+    /// </summary>
+    /// <param name="path">The A* path</param>
+    /// <returns></returns>
     private List<Vector3> TrulyUpdateVertexPath(List<Vector3> path)
     {
         //Debug.Log(path.Count);
@@ -596,6 +625,12 @@ public class RobotPlanningThetaStar : RobotPlanning {
         return optimal_path;
     }
 
+    /// <summary>
+    /// This method returns the heuristic cost of a node of the graph. The heuristic cost is equal between the current and the destination points
+    /// </summary>
+    /// <param name="current">Starting destination point</param>
+    /// <param name="destination">Destination point to reach</param>
+    /// <returns></returns>
     private float GetHeuristic(Vector3 current, Vector3 destination)
     {
         int currentx = (int)FixingRound(current.x);

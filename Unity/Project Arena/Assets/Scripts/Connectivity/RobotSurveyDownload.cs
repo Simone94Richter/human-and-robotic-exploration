@@ -1,9 +1,11 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
+/// <summary>
+/// This class is responsible to send data taken with the survey to the server database
+/// </summary>
 public class RobotSurveyDownload : MonoBehaviour {
 
     [Header("URL for loading the map information")]
@@ -13,6 +15,10 @@ public class RobotSurveyDownload : MonoBehaviour {
     [Header("The Slider object used to show the sending data progress")]
     public Slider loadingBar;
 
+    /// <summary>
+    /// This method starts the procedure to send data to the server
+    /// </summary>
+    /// <param name="json">The JSON containing survey data</param>
     public void SendDataToServer(string json)
     {
         StartCoroutine(Upload(json));
@@ -28,13 +34,11 @@ public class RobotSurveyDownload : MonoBehaviour {
         var uwr = new UnityWebRequest(url, "POST");
         Debug.Log(json);
         byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(json);
-        //Debug.Log(jsonToSend);
         uwr.uploadHandler = (UploadHandler)new UploadHandlerRaw(jsonToSend);
         uwr.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
         //uwr.SetRequestHeader("Content-Type", "application/json");
 
         //Send the request then wait here until it returns
-        //yield return uwr.SendWebRequest();
         if (loadingBar)
         {
             AsyncOperation operation = uwr.SendWebRequest();
