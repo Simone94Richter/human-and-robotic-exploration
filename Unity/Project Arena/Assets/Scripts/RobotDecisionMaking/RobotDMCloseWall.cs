@@ -15,20 +15,32 @@ public class RobotDMCloseWall : RobotDecisionMaking {
     private List<Vector3> wallList = new List<Vector3>();
 
     //private Vector3 tempWall;
+    private float wallX;
+    private float wallY;
 
     public override Vector3 PosToReach(List<Vector3> listFrontierPoints)
     {
         //obatining position of the wall close to the player
         closestWall = CalculatingClosestWall();
 
+        Vector3 frontierCell;
+        frontierCell = listFrontierPoints[0];
+        distance = Mathf.Sqrt((GetXCoordinateWall(closestWall) - frontierCell.x) * (GetXCoordinateWall(closestWall) - frontierCell.x) + (GetZCoordinateWall(closestWall) - frontierCell.z) * (GetZCoordinateWall(closestWall) - frontierCell.z));
         //obtaining position of the frontier point close to the wall found before
         for (int i = 0; i < listFrontierPoints.Count; i++)
         {
             //find the closest one
+            tempDistance = Mathf.Sqrt((GetXCoordinateWall(closestWall) - listFrontierPoints[i].x) * (GetXCoordinateWall(closestWall) - listFrontierPoints[i].x) + (GetZCoordinateWall(closestWall) - listFrontierPoints[i].z) * (GetZCoordinateWall(closestWall) - listFrontierPoints[i].z));
+
+            if (distance > tempDistance)
+            {
+                distance = tempDistance;
+                frontierCell = listFrontierPoints[i];
+            }
         }
 
         //returning the point
-        return new Vector3(0,0,0);
+        return frontierCell;
     }
 
     private List<Vector3> CalculatingClosestWall()
@@ -74,11 +86,14 @@ public class RobotDMCloseWall : RobotDecisionMaking {
         {
             x = (int)FixingRound(cell.x / squareSize);
             z = (int)FixingRound(cell.z / squareSize);
-            if (numeric_map[x + i, z] == 1 && !wall.Contains(new Vector3(squareSize * (x+i), transform.position.y, squareSize * z)))
+            if (x + i >= 0 && x + i <= numeric_map.GetLength(0) - 1)
             {
-                Vector3 newWall = new Vector3(squareSize * (x + i), transform.position.y, squareSize * z);
-                wall.Add(newWall);
-                AddNeighbourWalls(newWall, wall);
+                if (numeric_map[x + i, z] == 1 && !wall.Contains(new Vector3(squareSize * (x + i), transform.position.y, squareSize * z)))
+                {
+                    Vector3 newWall = new Vector3(squareSize * (x + i), transform.position.y, squareSize * z);
+                    wall.Add(newWall);
+                    AddNeighbourWalls(newWall, wall);
+                }
             }
         }
 
@@ -86,13 +101,42 @@ public class RobotDMCloseWall : RobotDecisionMaking {
         {
             x = (int)FixingRound(cell.x / squareSize);
             z = (int)FixingRound(cell.z / squareSize);
-            if (numeric_map[x, z + j] == 1 && !wall.Contains(new Vector3(squareSize * x, transform.position.y, squareSize * (z + j))))
+            if (z + j >= 0 && z + j <= numeric_map.GetLength(1) -1)
             {
-                Vector3 newWall = new Vector3(squareSize * x, transform.position.y, squareSize * (z + j));
-                wall.Add(newWall);
-                AddNeighbourWalls(newWall, wall);
+                if (numeric_map[x, z + j] == 1 && !wall.Contains(new Vector3(squareSize * x, transform.position.y, squareSize * (z + j))))
+                {
+                    Vector3 newWall = new Vector3(squareSize * x, transform.position.y, squareSize * (z + j));
+                    wall.Add(newWall);
+                    AddNeighbourWalls(newWall, wall);
+                }
             }
         }
+    }
+
+    private float GetXCoordinateWall(List<Vector3> wall) 
+    {
+        float x = 0;
+        for (int i = 0; i < wall.Count; i++)
+        {
+            x = x + wall[i].x;
+        }
+
+        x = x / wall.Count;
+
+        return x;
+    }
+
+    private float GetZCoordinateWall(List<Vector3> wall)
+    {
+        float z = 0;
+        for (int i = 0; i < wall.Count; i++)
+        {
+            z = z + wall[i].z;
+        }
+
+        z = z / wall.Count;
+
+        return z;
     }
 
     public void SetMap(float[,] map)
@@ -122,6 +166,11 @@ public class RobotDMCloseWall : RobotDecisionMaking {
             return (Mathf.Round(coordinate) - 1);
         }
         else return Mathf.Round(coordinate);
+    }
+
+    public void SetNumericMap(float[,] map)
+    {
+        numeric_map = map;
     }
 
 }

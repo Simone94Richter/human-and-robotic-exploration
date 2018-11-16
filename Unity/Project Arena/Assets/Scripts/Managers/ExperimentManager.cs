@@ -59,6 +59,8 @@ public class ExperimentManager : SceneSingleton<ExperimentManager> {
     private int statisticsLogLength;
     // Start time of the log.
     private float logStart;
+    // Current ip address.
+    private string ip;
 
     // Completion trackers.
     private List<StudyCompletionTracker> studyCompletionTrackers;
@@ -918,6 +920,16 @@ public class ExperimentManager : SceneSingleton<ExperimentManager> {
     public void SetSlider(Slider slider)
     {
         loadingBar = slider;
+    }
+
+    public void SetIpAddress(string add)
+    {
+        ip = add;
+    }
+
+    public string GetIpAddress()
+    {
+        return ip;
     }
 
 }

@@ -152,6 +152,10 @@ public class Robot : Entity{
 
         rPl.isNumeric = true;
         rPl.numeric_robot_map = numeric_robot_map;
+        if (GetComponent<RobotDMCloseWall>())
+        {
+            GetComponent<RobotDMCloseWall>().SetNumericMap(numeric_robot_map);
+        }
         
     }
 

@@ -97,6 +97,10 @@ public class RobotConnection : MonoBehaviour {
         else
         {
             Debug.Log("Received: " + uwr2.downloadHandler.text);
+            if (!uwr2.downloadHandler.text.Contains("something")) //every error message contains that word. If not, it's an IP address
+            {
+                ExperimentManager.Instance.SetIpAddress(uwr2.downloadHandler.text);
+            }
         }
 
         //Everything has been sent, so the manager needs to know that the upload is finished

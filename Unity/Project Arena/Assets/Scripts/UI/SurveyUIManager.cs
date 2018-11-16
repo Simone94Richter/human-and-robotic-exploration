@@ -62,6 +62,7 @@ public class SurveyUIManager : MonoBehaviour {
         if (ExperimentManager.HasInstance())
         {
             survey.mapname = ExperimentManager.Instance.GetCaseList()[2].GetCurrentMap().name;
+            survey.ip = ExperimentManager.Instance.GetIpAddress();
         }
 
         rSD.SendDataToServer(JsonUtility.ToJson(survey));
@@ -195,6 +196,7 @@ public class SurveyUIManager : MonoBehaviour {
     {
         public List<string> choices;
         public string mapname;
+        public string ip;
     }
 
     [Serializable]

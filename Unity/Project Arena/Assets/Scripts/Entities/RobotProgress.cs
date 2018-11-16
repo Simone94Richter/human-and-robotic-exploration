@@ -193,6 +193,11 @@ public class RobotProgress : MonoBehaviour {
             //Debug.Log(currentCase.GetCurrentMap().name);
             gameDataPos.mapName.Add(currentCase.GetCurrentMap().name);
             gameDataMap.mapName.Add(currentCase.GetCurrentMap().name);
+
+            if (!string.IsNullOrEmpty(ExperimentManager.Instance.GetIpAddress()))
+            {
+                gameDataPos.ip = ExperimentManager.Instance.GetIpAddress();
+            }
         }
         gameDataPos.os = SystemInfo.operatingSystem;
         posAsJson = JsonUtility.ToJson(gameDataPos);
