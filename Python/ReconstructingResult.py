@@ -34,7 +34,10 @@ def rotate(x,y, origin=(0,0)):
             if(array_name[0] == "open1.map"):
                 # shift back
                 x3 = x2
-                y3 = y2 +48 
+                y3 = y2 +48
+            if(array_name[0] == "uffici1.map"):
+                x3 = x2
+                y3 = y2 +54 
 
     return x3, y3
 
