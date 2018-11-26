@@ -74,6 +74,9 @@ if os.path.isfile(inputDir + "/" + fileName) and os.path.isfile(inputDir2 + "/" 
         array_pos = data['position']
         #fig, (ax1, ax2) = plt.subplots(1,2, figsize=(7,3.3))
 
+        #frag = 1
+        #pos = 0
+
         for k in range(len(array_pos)):
             for s in array_pos[k].split():
                 x,z = s.split(",")
@@ -87,7 +90,25 @@ if os.path.isfile(inputDir + "/" + fileName) and os.path.isfile(inputDir2 + "/" 
                     a, b = rotate(int(a),int(b), origin )
                     #a = int(a)
                     #b = int(b)
+                    #if(frag == 1):
                     plt.plot([x, a], [z, b], 'k-')
+                    #if(frag == 2):
+                    #    plt.plot([x, a], [z, b], 'r-')
+                    #if(frag == 3):
+                    #    plt.plot([x, a], [z, b], 'b-')
+                    #if(frag == 4):
+                    #    plt.plot([x, a], [z, b], 'm-')
+                    #if(frag == 5):
+                    #    plt.plot([x, a], [z, b], 'c-')
+                    #if(frag == 6):
+                    #    plt.plot([x, a], [z, b], 'y-')
+                    #pos = pos + 1
+                    
+                    #if(pos == 6):
+                    #    pos = 0
+                    #    frag = frag + 1
+                    #    if(frag == 7):
+                    #        frag = 1
 
     #plt.axis([0, 50, 0, 50])
     plt.show()
