@@ -8,7 +8,13 @@ using UnityEngine;
 public abstract class RobotDecisionMaking : MonoBehaviour {
 
     protected Vector3 target;
+    protected float squareSize;
 
     public abstract Vector3 PosToReach(List<Vector3> listFrontierPoints);
+
+    public void SetSquareSize(float size)
+    {
+        squareSize = size;
+    }
 
 }

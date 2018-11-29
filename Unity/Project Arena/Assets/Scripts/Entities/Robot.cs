@@ -106,6 +106,7 @@ public class Robot : Entity{
     {
         squareSize = floorSquareSize;
         rPl.squareSize = floorSquareSize;
+        rDM.SetSquareSize(floorSquareSize);
         total_map = map;
         robot_map = map;
         isNumeric = false;
@@ -134,6 +135,7 @@ public class Robot : Entity{
     {
         squareSize = floorSquareSize;
         rPl.squareSize = floorSquareSize;
+        rDM.SetSquareSize(floorSquareSize);
         numeric_total_map = map;
         numeric_robot_map = map;
         isNumeric = true;
@@ -536,11 +538,11 @@ public class Robot : Entity{
                     {
                         if (robot_map[x, y] == 'r')
                         {
-                            if (robot_map[x + 1, y] == 'u' || robot_map[x - 1, y] == 'u' || robot_map[x, y + 1] == 'u' || robot_map[x, y - 1] == 'u')
+                            if (robot_map[x + 1, y] == 'u' || robot_map[x - 1, y] == 'u' || robot_map[x, y + 1] == 'u' || robot_map[x, y - 1] == 'u'
+                                || robot_map[x + 1, y + 1] == 'u' || robot_map[x - 1, y - 1] == 'u' || robot_map[x - 1, y + 1] == 'u' || robot_map[x + 1, y - 1] == 'u')
                             {
                                 posToReach.Add(new Vector3(x * squareSize, transform.position.y, y * squareSize));
                             }
-                            //optionalPosToReach.Add(new Vector3(x * squareSize, transform.position.y , y * squareSize));
                         }
                     }
                 }
@@ -555,15 +557,18 @@ public class Robot : Entity{
                     {
                         if (numeric_robot_map[x, y] == numFreeCell && x+1 < width && x-1 >= 0 && y+1 < height && y-1 >= 0)
                         {
-                            if (numeric_robot_map[x + 1, y] == numUnknownCell || numeric_robot_map[x - 1, y] == numUnknownCell || numeric_robot_map[x, y + 1] == numUnknownCell || numeric_robot_map[x, y - 1] == numUnknownCell)
+                            if (numeric_robot_map[x + 1, y] == numUnknownCell || numeric_robot_map[x - 1, y] == numUnknownCell || numeric_robot_map[x, y + 1] == numUnknownCell || numeric_robot_map[x, y - 1] == numUnknownCell
+                                || numeric_robot_map[x + 1, y + 1] == numUnknownCell || numeric_robot_map[x - 1, y - 1] == numUnknownCell || numeric_robot_map[x - 1, y + 1] == numUnknownCell || numeric_robot_map[x + 1, y - 1] == numUnknownCell)
                             {
                                 posToReach.Add(new Vector3(x * squareSize, transform.position.y, y * squareSize));
                             }
-                            //optionalPosToReach.Add(new Vector3(x * squareSize, transform.position.y, y * squareSize));
                         }
                     }
                 }
             }
+
+            //remove the point where the agent stands (sometimes it could be a frontier point)
+            posToReach.Remove(transform.position);
 
             if (posToReach.Count != 0)
             {

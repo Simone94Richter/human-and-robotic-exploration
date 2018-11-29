@@ -94,7 +94,7 @@ public class TutorialGameManager : GameManager {
                     tutorialCompleted = false;
                 }
             }
-            Debug.Log(gamePhase);
+            //Debug.Log(gamePhase);
             ManageGame();
         }
     }

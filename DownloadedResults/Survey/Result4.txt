@@ -1,0 +1,1 @@
+{"id":"10.150.134.248 19-11-2018, 16:26:38","choiceone":" 1","choicetwo":" 3","choicethree":" 3","choicefour":" 2","created_at":"19-11-2018, 16:26:38","updated_at":"19-11-2018, 16:26:38","mapname":"uffici1.map","ip":"10.150.134.248"}

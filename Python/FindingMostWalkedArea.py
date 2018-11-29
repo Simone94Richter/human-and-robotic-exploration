@@ -92,10 +92,10 @@ for pos in dictionary_positions:
         if(dictionary_positions[s] >= 1 and dictionary_positions[s] <= 3):
             pos_lst_visited.append(pos)
             #plt.plot(int(x), int(z), 'ys')
-        if(dictionary_positions[s] >= 4 and dictionary_positions[s] <= 7):
+        if(dictionary_positions[s] >= 4 and dictionary_positions[s] <= 6):
             #plt.plot(int(x), int(z), 'bs')
             pos_avg_visited.append(pos)
-        if(dictionary_positions[s] >= 8):
+        if(dictionary_positions[s] >= 7):
             #plt.plot(int(x), int(z), 'rs')
             pos_mst_visited.append(pos)
 

@@ -2,13 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// This class defines a decision making process where the point chosen is the one belonging to the closest frontier to the player.
+/// The point is the closest one to a wall
+/// </summary>
 public class RobotDMCloseWall : RobotDecisionMaking {
 
     private char[,] char_map;
     private float[,] numeric_map;
 
     private float distance;
-    private float squareSize;
     private float tempDistance;
 
     private List<Vector3> closestWall = new List<Vector3>();
@@ -31,24 +34,33 @@ public class RobotDMCloseWall : RobotDecisionMaking {
         DefiningFrontierZones(listFrontierPoints);
         Debug.Log(frontierZones.Count);
 
+        //only for testing purpose
+        /*for (int i = 0; i < frontierZones.Count; i++)
+        {
+            Debug.Log(frontierZones[i].Count);
+        }*/
+
         //choosing the frontier zone closer to the selected wall
         closestFrontier = CalculatingClosestFrontier();
         Debug.Log(GetXCoordinateFrontier(closestFrontier) + ", " + GetZCoordinateFrontier(closestFrontier));
 
         //choosing the frontier point (of the chosen zone) closer to the chosen wall
+        //for each point of the frontier, we inspect each point of the wall and check the distance. The frontier point which stand the least, is the chosen one
         Vector3 frontierCell;
         frontierCell = closestFrontier[0];
         Debug.Log(frontierCell);
-        distance = Mathf.Sqrt((GetXCoordinateWall(closestWall) - frontierCell.x) * (GetXCoordinateWall(closestWall) - frontierCell.x) + (GetZCoordinateWall(closestWall) - frontierCell.z) * (GetZCoordinateWall(closestWall) - frontierCell.z));
+        distance = Mathf.Sqrt((closestFrontier[0].x - closestWall[0].x) * (closestFrontier[0].x - closestWall[0].x) - (closestFrontier[0].z - closestWall[0].z) * (closestFrontier[0].z - closestWall[0].z));
         for (int i = 0; i < closestFrontier.Count; i++)
         {
             //find the closest one
-            tempDistance = Mathf.Sqrt((GetXCoordinateWall(closestWall) - closestFrontier[i].x) * (GetXCoordinateWall(closestWall) - closestFrontier[i].x) + (GetZCoordinateWall(closestWall) - closestFrontier[i].z) * (GetZCoordinateWall(closestWall) - closestFrontier[i].z));
-
-            if (distance > tempDistance)
+            for (int j = 0; j < closestWall.Count; j++)
             {
-                distance = tempDistance;
-                frontierCell = closestFrontier[i];
+                tempDistance = Mathf.Sqrt( (closestFrontier[i].x - closestWall[j].x)*(closestFrontier[i].x - closestWall[j].x) - (closestFrontier[i].z - closestWall[j].z)*(closestFrontier[i].z - closestWall[j].z) );
+                if (distance > tempDistance)
+                {
+                    distance = tempDistance;
+                    frontierCell = closestFrontier[i];
+                }
             }
         }
 
@@ -97,13 +109,14 @@ public class RobotDMCloseWall : RobotDecisionMaking {
         List<Vector3> currentZone = new List<Vector3>();
         for (int i = 0; i < frontierPoints.Count; i++)
         {
-            if (frontierZones.Count == 0 || !currentZone.Contains(frontierPoints[i]))
+            //if (frontierZones.Count == 0 || !currentZone.Contains(frontierPoints[i])) //la seconda condizione non va bene
+            if(frontierZones.Count == 0 || !PosAlreadyExplored(frontierPoints[i]))
             {
                 currentZone = new List<Vector3>();
                 currentZone.Add(frontierPoints[i]);
                 frontierZones.Add(currentZone);
 
-                AddNeighbourFrontier(frontierPoints[i], currentZone);
+                AddNeighbourFrontier(frontierPoints[i], currentZone, frontierPoints);
             }
         }
     }
@@ -111,10 +124,10 @@ public class RobotDMCloseWall : RobotDecisionMaking {
     private List<Vector3> CalculatingClosestFrontier()
     {
         List<Vector3> frontier = frontierZones[0];
-        distance = Mathf.Sqrt( (GetXCoordinateFrontier(frontierZones[0]) - GetXCoordinateWall(closestWall)) * (GetXCoordinateFrontier(frontierZones[0]) - GetXCoordinateWall(closestWall)) + (GetZCoordinateFrontier(frontierZones[0]) - GetZCoordinateWall(closestWall)) * (GetZCoordinateFrontier(frontierZones[0]) - GetZCoordinateWall(closestWall)) );
+        distance = Mathf.Sqrt( (GetXCoordinateFrontier(frontierZones[0]) - transform.position.x) * (GetXCoordinateFrontier(frontierZones[0]) - transform.position.x) + (GetZCoordinateFrontier(frontierZones[0]) - transform.position.z) * (GetZCoordinateFrontier(frontierZones[0]) - transform.position.z) );
         for (int i = 0; i < frontierZones.Count; i++)
         {
-            tempDistance = Mathf.Sqrt((GetXCoordinateFrontier(frontierZones[i]) - GetXCoordinateWall(closestWall)) * (GetXCoordinateFrontier(frontierZones[i]) - GetXCoordinateWall(closestWall)) + (GetZCoordinateFrontier(frontierZones[i]) - GetZCoordinateWall(closestWall)) * (GetZCoordinateFrontier(frontierZones[i]) - GetZCoordinateWall(closestWall)));
+            tempDistance = Mathf.Sqrt((GetXCoordinateFrontier(frontierZones[i]) - transform.position.x) * (GetXCoordinateFrontier(frontierZones[i]) - transform.position.x) + (GetZCoordinateFrontier(frontierZones[i]) - transform.position.z) * (GetZCoordinateFrontier(frontierZones[i]) - transform.position.z));
             if (tempDistance < distance)
             {
                 distance = tempDistance;
@@ -125,35 +138,29 @@ public class RobotDMCloseWall : RobotDecisionMaking {
         return frontier;
     }
 
-    private void AddNeighbourFrontier(Vector3 frontierPoint, List<Vector3> frontierZone)
+    private void AddNeighbourFrontier(Vector3 frontierPoint, List<Vector3> frontierZone, List<Vector3> frontierPoints)
     {
         int x, z;
+        x = (int)FixingRound(frontierPoint.x / squareSize);
+        z = (int)FixingRound(frontierPoint.z / squareSize);
+
+        //Debug.Log(frontierPoint.x / squareSize);
+        //Debug.Log(frontierPoint.z / squareSize);
+        //Debug.Log(x);
+
         for (int i = -1; i < 2; i++)
         {
-            x = (int)FixingRound(frontierPoint.x / squareSize);
-            z = (int)FixingRound(frontierPoint.z / squareSize);
-            if (x + i >= 0 && x + i <= numeric_map.GetLength(0) - 1)
+            for (int j = -1; j < 2; j++)
             {
-                if (numeric_map[x + i, z] == 1 && !frontierZone.Contains(new Vector3(squareSize * (x + i), transform.position.y, squareSize * z)))
+                if (z + j >= 0 && z + j <= numeric_map.GetLength(1) - 1 && x + i >= 0 && x + i <= numeric_map.GetLength(0) - 1 && (i != 0 || j != 0) )
                 {
-                    Vector3 newFrontPoint = new Vector3(squareSize * (x + i), transform.position.y, squareSize * z);
-                    frontierZone.Add(newFrontPoint);
-                    AddNeighbourWalls(newFrontPoint, frontierZone);
-                }
-            }
-        }
-
-        for (int j = -1; j < 2; j++)
-        {
-            x = (int)FixingRound(frontierPoint.x / squareSize);
-            z = (int)FixingRound(frontierPoint.z / squareSize);
-            if (z + j >= 0 && z + j <= numeric_map.GetLength(1) - 1)
-            {
-                if (numeric_map[x, z + j] == 1 && !frontierZone.Contains(new Vector3(squareSize * x, transform.position.y, squareSize * (z + j))))
-                {
-                    Vector3 newFrontPoint = new Vector3(squareSize * x, transform.position.y, squareSize * (z + j));
-                    frontierZone.Add(newFrontPoint);
-                    AddNeighbourWalls(newFrontPoint, frontierZone);
+                    //Debug.Log(numeric_map[x + 1, z + j]);
+                    if (numeric_map[x + i, z + j] == 0 && !frontierZone.Contains(new Vector3(squareSize * (x + i), transform.position.y, squareSize * (z + j))) && frontierPoints.Contains(new Vector3(squareSize * (x + i), transform.position.y, squareSize * (z + j))))
+                    {
+                        Vector3 newFrontPoint = new Vector3(squareSize * (x + i), transform.position.y, squareSize * (z + j));
+                        frontierZone.Add(newFrontPoint);
+                        AddNeighbourFrontier(newFrontPoint, frontierZone, frontierPoints);
+                    }
                 }
             }
         }
@@ -191,6 +198,22 @@ public class RobotDMCloseWall : RobotDecisionMaking {
                 }
             }
         }
+    }
+
+    private bool PosAlreadyExplored(Vector3 frontierPoint)
+    {
+        for (int i = 0; i < frontierZones.Count; i++)
+        {
+            for (int j = 0; j < frontierZones[i].Count; j++)
+            {
+                if(frontierZones[i][j].x == frontierPoint.x && frontierZones[i][j].z == frontierPoint.z)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private float GetXCoordinateWall(List<Vector3> wall) 
@@ -253,11 +276,6 @@ public class RobotDMCloseWall : RobotDecisionMaking {
     public void SetMap(char[,] map)
     {
         char_map = map;
-    }
-
-    public void SetSquareSize(float size)
-    {
-        squareSize = size;
     }
 
     /// <summary>
