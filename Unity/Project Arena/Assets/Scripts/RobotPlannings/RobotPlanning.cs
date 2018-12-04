@@ -13,6 +13,8 @@ public class RobotPlanning : MonoBehaviour {
     public float unknownCell;
     [Header("The number used to simbolize near-wall tile")]
     public float nearWallCell;
+    [Header("The number used to simbolize free tile")]
+    public float freeCell;
 
     [Header("The range of the robot")]
     public float range;

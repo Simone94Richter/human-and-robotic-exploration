@@ -34,19 +34,25 @@ public class ExperimentingTest2GameManager : GameManager
 
     //  --- Private Variables --- //
 
+    private bool finished = true; //are all targets found?
     private bool tutorialCompleted = false; //is the level completed?
     private bool update = false; //the ending condition has to be updated?
 
     private float completionTime; //The time used by the agent to fulfill the task
 
+    private int targetsFound; //how many target have been found
+
     private List<bool> targetReached = new List<bool>(); //List saying if a certain target has been reached or not
     private List<GameObject> newTarget = new List<GameObject>(); //List used to instance the target
     private List<Vector3> targetPos = new List<Vector3>(); //List containing the updated position of the various targets
 
+    private Ray center; // the ray starting from the human agent and moving along the direction given by the localDownVector
     private RaycastHit hit; //hit point of the raycast of the agent
 
     private Player playerScript;
     private Robot robotScript;
+
+    private Vector3 localDownVector; // vector used to give the angular direction of the camera
 
     void Start()
     {
@@ -104,12 +110,9 @@ public class ExperimentingTest2GameManager : GameManager
             //Robot agent case
             if (robotScript)
             {
-                //tutorialCompleted = robotScript.TargetReached();
-                Vector3 localDownVector = Quaternion.AngleAxis(headPlayer.transform.eulerAngles.x, player.transform.right) * player.transform.forward;
-                //Vector3 downDirection = headPlayer.transform.TransformDirection(localDownVector);
-                Ray center = new Ray(headPlayer.transform.position, localDownVector);
-                //Debug.DrawRay(headPlayer.transform.position, player.transform.forward * 20f, Color.green, 0.5f);
-                Debug.DrawRay(headPlayer.transform.position, localDownVector * 20f, Color.green, 0.5f);
+                localDownVector = Quaternion.AngleAxis(headPlayer.transform.eulerAngles.x, player.transform.right) * player.transform.forward;
+                center = new Ray(headPlayer.transform.position, localDownVector);
+                //Debug.DrawRay(headPlayer.transform.position, localDownVector * 20f, Color.green, 0.5f);
                 if (Physics.Raycast(center, out hit, 20f))
                 {
                     for (int i = 0; i < targetPos.Count; i++)
@@ -126,7 +129,7 @@ public class ExperimentingTest2GameManager : GameManager
                     }
                 }
 
-                bool finished = true;
+                finished = true;
 
                 for (int i = 0; i < targetReached.Count; i++)
                 {
@@ -135,7 +138,7 @@ public class ExperimentingTest2GameManager : GameManager
                         finished = false;
                     }
                 }
-                Debug.Log(targetReached[0] + "," + targetReached[1] + ", " + targetReached[2] + ", " + targetReached[3]);
+                //Debug.Log(targetReached[0] + "," + targetReached[1] + ", " + targetReached[2] + ", " + targetReached[3]);
 
                 if (finished)
                 {
@@ -150,11 +153,10 @@ public class ExperimentingTest2GameManager : GameManager
             }
             else if (playerScript && !tutorialCompleted)
             {
-                Vector3 localDownVector = Quaternion.AngleAxis(headPlayer.transform.eulerAngles.x, player.transform.right) * player.transform.forward;
+                localDownVector = Quaternion.AngleAxis(headPlayer.transform.eulerAngles.x, player.transform.right) * player.transform.forward;
                 //Vector3 downDirection = headPlayer.transform.TransformDirection(localDownVector);
-                Ray center = new Ray(headPlayer.transform.position, localDownVector);
-                //Debug.DrawRay(headPlayer.transform.position, player.transform.forward * 20f, Color.green, 0.5f);
-                Debug.DrawRay(headPlayer.transform.position, localDownVector * 20f, Color.red, 0.5f);
+                center = new Ray(headPlayer.transform.position, localDownVector);
+                //Debug.DrawRay(headPlayer.transform.position, localDownVector * 20f, Color.red, 0.5f);
                 if (Physics.Raycast(center, out hit, 20f))
                 {
                     for (int i = 0; i < targetPos.Count; i++)
@@ -169,8 +171,8 @@ public class ExperimentingTest2GameManager : GameManager
                         }
                     }
 
-                    bool finished = true;
-                    int targetsFound = 0;
+                    finished = true;
+                    targetsFound = 0;
 
                     for (int i = 0; i < targetReached.Count; i++)
                     {

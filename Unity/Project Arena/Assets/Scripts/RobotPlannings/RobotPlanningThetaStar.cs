@@ -351,9 +351,18 @@ public class RobotPlanningThetaStar : RobotPlanning {
                     }
 
                     //we have found a best path
-                    cameFrom[curr_x + i, curr_z] = current;
-                    gScore[curr_x + i, curr_z] = tentativeGScore;
-                    fScore[curr_x + i, curr_z] = gScore[curr_x + i, curr_z] + GetHeuristic(current, destPos);
+                    if (robot_map[curr_x + i, curr_z] == 'r')// in this way the robot is encouraged to take tiles close to the wall
+                    {
+                        cameFrom[curr_x + i, curr_z] = current;
+                        gScore[curr_x + i, curr_z] = tentativeGScore + penaltyCost;
+                        fScore[curr_x + i, curr_z] = gScore[curr_x + i, curr_z] + GetHeuristic(current, destPos);
+                    }
+                    else
+                    {
+                        cameFrom[curr_x + i, curr_z] = current;
+                        gScore[curr_x + i, curr_z] = tentativeGScore;
+                        fScore[curr_x + i, curr_z] = gScore[curr_x + i, curr_z] + GetHeuristic(current, destPos);
+                    }
                 }
 
             }
@@ -381,9 +390,18 @@ public class RobotPlanningThetaStar : RobotPlanning {
                     }
 
                     //we have found a best path
-                    cameFrom[curr_x, curr_z + j] = current;
-                    gScore[curr_x, curr_z + j] = tentativeGScore;
-                    fScore[curr_x, curr_z + j] = gScore[curr_x, curr_z + j] + GetHeuristic(current, destPos);
+                    if (robot_map[curr_x, curr_z + j] == 'r')// in this way the robot is encouraged to take tiles close to the wall
+                    {
+                        cameFrom[curr_x, curr_z + j] = current;
+                        gScore[curr_x, curr_z + j] = tentativeGScore + penaltyCost;
+                        fScore[curr_x, curr_z + j] = gScore[curr_x, curr_z + j] + GetHeuristic(current, destPos);
+                    }
+                    else
+                    {
+                        cameFrom[curr_x, curr_z + j] = current;
+                        gScore[curr_x, curr_z + j] = tentativeGScore;
+                        fScore[curr_x, curr_z + j] = gScore[curr_x, curr_z + j] + GetHeuristic(current, destPos);
+                    }
                 }
             }
         }
@@ -471,9 +489,18 @@ public class RobotPlanningThetaStar : RobotPlanning {
                         continue;
                     }
 
-                    cameFrom[curr_x + i, curr_z] = current;
-                    gScore[curr_x + i, curr_z] = tentativeGScore;
-                    fScore[curr_x + i, curr_z] = gScore[curr_x + i, curr_z] + GetHeuristic(current, destPos);
+                    if (numeric_robot_map[curr_x + i, curr_z] == freeCell)
+                    {
+                        cameFrom[curr_x + i, curr_z] = current;
+                        gScore[curr_x + i, curr_z] = tentativeGScore + penaltyCost;
+                        fScore[curr_x + i, curr_z] = gScore[curr_x + i, curr_z] + GetHeuristic(current, destPos);
+                    }
+                    else
+                    {
+                        cameFrom[curr_x + i, curr_z] = current;
+                        gScore[curr_x + i, curr_z] = tentativeGScore;
+                        fScore[curr_x + i, curr_z] = gScore[curr_x + i, curr_z] + GetHeuristic(current, destPos);
+                    }
                 }
 
             }
@@ -499,9 +526,18 @@ public class RobotPlanningThetaStar : RobotPlanning {
                         continue;
                     }
 
-                    cameFrom[curr_x, curr_z + j] = current;
-                    gScore[curr_x, curr_z + j] = tentativeGScore;
-                    fScore[curr_x, curr_z + j] = gScore[curr_x, curr_z + j] + GetHeuristic(current, destPos);
+                    if (numeric_robot_map[curr_x, curr_z + j] == freeCell)
+                    {
+                        cameFrom[curr_x, curr_z + j] = current;
+                        gScore[curr_x, curr_z + j] = tentativeGScore + penaltyCost;
+                        fScore[curr_x, curr_z + j] = gScore[curr_x, curr_z + j] + GetHeuristic(current, destPos);
+                    }
+                    else
+                    {
+                        cameFrom[curr_x, curr_z + j] = current;
+                        gScore[curr_x, curr_z + j] = tentativeGScore;
+                        fScore[curr_x, curr_z + j] = gScore[curr_x, curr_z + j] + GetHeuristic(current, destPos);
+                    }
                 }
             }
         }

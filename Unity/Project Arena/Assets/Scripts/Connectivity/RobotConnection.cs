@@ -18,6 +18,17 @@ public class RobotConnection : MonoBehaviour {
     [Header("The Slider object used to show the sending data progress")]
     public Slider loadingBar;
 
+    private AsyncOperation operation; //forse se ne puo' usare uno solo
+    private AsyncOperation operation2;
+
+    private byte[] jsonToSend;  //forse se ne puo' usare uno solo
+    private byte[] jsonToSend2;
+
+    private float progress;
+
+    private UnityWebRequest postMapRequest;
+    private UnityWebRequest postTrajectoryRequest;
+
     public void SendDataToServer(string jsonMap, string jsonPositions)
     {
         StartCoroutine(Upload(jsonMap, jsonPositions));
@@ -32,20 +43,20 @@ public class RobotConnection : MonoBehaviour {
     private IEnumerator Upload(string json1, string json2)
     {
         //Setting the POST request what should be sent and returned
-        var uwr = new UnityWebRequest(url, "POST");
-        byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(json1);
-        uwr.uploadHandler = (UploadHandler)new UploadHandlerRaw(jsonToSend);
-        uwr.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+        postMapRequest = new UnityWebRequest(url, "POST");
+        jsonToSend = new System.Text.UTF8Encoding().GetBytes(json1);
+        postMapRequest.uploadHandler = (UploadHandler)new UploadHandlerRaw(jsonToSend);
+        postMapRequest.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
         //uwr.SetRequestHeader("Content-Type", "application/json");
 
         //Send the request then wait here until it returns
-        AsyncOperation operation = uwr.SendWebRequest();
+        operation = postMapRequest.SendWebRequest();
 
         if (loadingBar)
         {
             while (!operation.isDone)
             {
-                float progress = Mathf.Clamp01(operation.progress / .9f);
+                progress = Mathf.Clamp01(operation.progress / .9f);
 
                 loadingBar.value = progress;
 
@@ -53,34 +64,34 @@ public class RobotConnection : MonoBehaviour {
             }
             loadingBar.value = 0;
         }
-        else yield return uwr.SendWebRequest();
+        else yield return postMapRequest.SendWebRequest();
 
         //Display error in case the request was not arrived; otherwise, publish the return message
-        if (uwr.isNetworkError)
+        if (postMapRequest.isNetworkError)
         {
-            Debug.Log("Error While Sending: " + uwr.error);
+            Debug.Log("Error While Sending: " + postMapRequest.error);
         }
         else
         {
-            Debug.Log("Received: " + uwr.downloadHandler.text);
+            Debug.Log("Received: " + postMapRequest.downloadHandler.text);
         }
 
         //Same as before
 
-        var uwr2 = new UnityWebRequest(url2, "POST");
-        byte[] jsonToSend2 = new System.Text.UTF8Encoding().GetBytes(json2);
-        uwr2.uploadHandler = (UploadHandler)new UploadHandlerRaw(jsonToSend2);
-        uwr2.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+        postTrajectoryRequest = new UnityWebRequest(url2, "POST");
+        jsonToSend2 = new System.Text.UTF8Encoding().GetBytes(json2);
+        postTrajectoryRequest.uploadHandler = (UploadHandler)new UploadHandlerRaw(jsonToSend2);
+        postTrajectoryRequest.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
         //uwr.SetRequestHeader("Content-Type", "application/json");
 
         //Send the request then wait here until it returns
-        AsyncOperation operation2 = uwr2.SendWebRequest();
+        operation2 = postTrajectoryRequest.SendWebRequest();
 
         if (loadingBar)
         {
             while (!operation2.isDone)
             {
-                float progress = Mathf.Clamp01(operation2.progress / .9f);
+                progress = Mathf.Clamp01(operation2.progress / .9f);
 
                 loadingBar.value = progress;
 
@@ -88,18 +99,18 @@ public class RobotConnection : MonoBehaviour {
             }
             loadingBar.value = 0;
         }
-        else yield return uwr2.SendWebRequest();
+        else yield return postTrajectoryRequest.SendWebRequest();
 
-        if (uwr2.isNetworkError)
+        if (postTrajectoryRequest.isNetworkError)
         {
-            Debug.Log("Error While Sending: " + uwr2.error);
+            Debug.Log("Error While Sending: " + postTrajectoryRequest.error);
         }
         else
         {
-            Debug.Log("Received: " + uwr2.downloadHandler.text);
-            if (!uwr2.downloadHandler.text.Contains("something")) //every error message contains that word. If not, it's an IP address
+            Debug.Log("Received: " + postTrajectoryRequest.downloadHandler.text);
+            if (!postTrajectoryRequest.downloadHandler.text.Contains("something")) //every error message contains that word. If not, it's an IP address
             {
-                ExperimentManager.Instance.SetIpAddress(uwr2.downloadHandler.text);
+                ExperimentManager.Instance.SetIpAddress(postTrajectoryRequest.downloadHandler.text);
             }
         }
 
