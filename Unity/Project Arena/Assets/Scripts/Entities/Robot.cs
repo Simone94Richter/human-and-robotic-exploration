@@ -23,6 +23,9 @@ public class Robot : Entity{
     [Header("Arbitrary float used to detect wall after a collision with one of them")]
     public float epsilon = 1f; //for now, 1 is the best
 
+    [Header("Forgetting Factor")]
+    public float forgettingFactor;
+
     [Header("Num paramters for numerical mapping")]
     public float numFreeCell = 0f;
     public float numWallCell = 1f;
@@ -60,6 +63,7 @@ public class Robot : Entity{
     private float[,] numeric_total_map; //the original numeric map, passed by the system
     private char[,] robot_map; //the char map updated by the robot
     private float [,] numeric_robot_map; //the numeric map updated by the robot
+    private float[,] forgettingCounterCell; //the number of seconds, or scans until putting again the cell as unknown
 
     private GameObject tempDestination; //the temp point to reach, expressed as a GameObject
     private GameObject destination; //the target, properly
@@ -130,6 +134,7 @@ public class Robot : Entity{
         rDM.SetSquareSize(floorSquareSize);
         total_map = map;
         robot_map = map;
+        forgettingCounterCell = new float[map.GetLength(0), map.GetLength(1)];
         isNumeric = false;
         width = total_map.GetLength(0);
         height = total_map.GetLength(1);
@@ -165,6 +170,7 @@ public class Robot : Entity{
         rDM.SetSquareSize(floorSquareSize);
         numeric_total_map = map;
         numeric_robot_map = map;
+        forgettingCounterCell = new float[map.GetLength(0), map.GetLength(1)];
         isNumeric = true;
         width = numeric_total_map.GetLength(0);
         height = numeric_total_map.GetLength(1);
@@ -175,6 +181,14 @@ public class Robot : Entity{
             {
                 numeric_robot_map[x, y] = numUnknownCell;
                 Debug.Log(numeric_robot_map[x, y]);
+            }
+        }
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                forgettingCounterCell[x, y] = -1; 
             }
         }
 
@@ -318,6 +332,7 @@ public class Robot : Entity{
                 angle = angle + angleRay;
             }
             UpdatingSpace(landingRay);
+            ForgivingMemory();
             yield return new WaitForSeconds(timeForScan);
         }
     }
@@ -350,6 +365,7 @@ public class Robot : Entity{
                     {
                         if (numeric_robot_map[(int)pointX, (int)pointZ] != numWallCell) numeric_robot_map[(int)pointX, (int)pointZ] = numFreeCell;
                     }
+                    forgettingCounterCell[(int)pointX, (int)pointZ] = forgettingFactor;
                     //Debug.Log(numeric_robot_map[(int)x_coord, (int)y_coord] + "" + (int)x_coord + "" + (int)y_coord);
                 }
             }
@@ -388,21 +404,10 @@ public class Robot : Entity{
                     if (!isNumeric)
                         robot_map[(int)robotX, (int)robotZ] = 'g';
                     else numeric_robot_map[(int)robotX, (int)robotZ] = numGoalCell;
+                    forgettingCounterCell[(int)robotX, (int)robotZ] = forgettingFactor;
                     //Debug.Log(x + "" + y);
                     //portarlo dritto al target
                 }
-                //the following case doesn't work because it adds improper nearWall tiles
-                /*else
-                {
-                    //Debug.Log("The ray hit " + hit.transform.name);
-                    //robot_map[(int)x, (int)y] = 'r';
-                    float dx = hit.collider.gameObject.transform.position.x - this.gameObject.transform.position.x;
-                    float dz = hit.collider.gameObject.transform.position.z - this.gameObject.transform.position.z;
-                    SettingR(Mathf.Sqrt((dx * dx) + (dz * dz)), ray[i]);
-                    //float angle = Vector3.Angle(ray[i].direction, transform.right);
-                    SettingW(Mathf.Sqrt((dx * dx) + (dz * dz)), ray[i], epsilon/*, angle);
-                    //Debug.Log(x + "" + y);
-                }*/
             }
         }
         if (destination)
@@ -412,6 +417,7 @@ public class Robot : Entity{
             if (!isNumeric)
                 robot_map[(int)robotX, (int)robotZ] = 'g';
             else numeric_robot_map[(int)robotX, (int)robotZ] = numGoalCell;
+            forgettingCounterCell[(int)robotX, (int)robotZ] = forgettingFactor;
         }
         /*robotX = transform.position.x; //maybe these six lines can be omitted
         robotZ = transform.position.z;
@@ -452,6 +458,7 @@ public class Robot : Entity{
             if (!isNumeric && robot_map[(int)pointX, (int)pointZ] != 'w')
                 robot_map[(int)pointX, (int)pointZ] = 'r';
             else if(isNumeric && numeric_robot_map[(int)pointX, (int)pointZ] != numWallCell) numeric_robot_map[(int)pointX, (int)pointZ] = numFreeCell;
+            forgettingCounterCell[(int)pointX, (int)pointZ] = forgettingFactor;
         }
     }
 
@@ -480,7 +487,8 @@ public class Robot : Entity{
         if (!isNumeric /*&& robot_map[(int)wallPointX,(int)wallPointZ] != 'r'*/)
             robot_map[(int)wallPointX, (int)wallPointZ] = 'w';
         else if(isNumeric /*&& numeric_robot_map[(int)wallPointX, (int)wallPointZ] != numFreeCell*/) numeric_robot_map[(int)wallPointX, (int)wallPointZ] = numWallCell;
-        
+        forgettingCounterCell[(int)wallPointX, (int)wallPointZ] = forgettingFactor;
+
         //method 2
         /*if (dx >= 0 && dz >= 0) //primo quadrante
         {
@@ -545,6 +553,32 @@ public class Robot : Entity{
             }
             i++;
         }*/
+    }
+
+    /// <summary>
+    /// This method lowers by one the counter of the memory of a cell to be "resetted" to the standard value, that is the unknown one
+    /// </summary>
+    private void ForgivingMemory()
+    {
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (forgettingCounterCell[x, y] > -1)
+                {
+                    forgettingCounterCell[x, y]--;
+                }
+
+                if (forgettingCounterCell[x, y] == -1)
+                {
+                    if (isNumeric)
+                    {
+                        numeric_robot_map[x, y] = numUnknownCell;
+                    }
+                    else robot_map[x, y] = 'u';
+                }
+            }
+        }
     }
 
     /// <summary>

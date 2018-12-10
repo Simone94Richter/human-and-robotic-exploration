@@ -4,6 +4,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.spatial
+from scipy.cluster.hierarchy import dendrogram, linkage
 
 inputDir = "C:/Users/princ/OneDrive/Documenti/human-and-robotic-exploration/human-and-robotic-exploration/DownloadedResults"
 inputDir2 = "C:/Users/princ/OneDrive/Documenti/human-and-robotic-exploration/human-and-robotic-exploration/Python"
@@ -65,8 +66,88 @@ while(finish == False):
     else:
         finish = True
 
+##### Using cdist #####
+### uncondensed matrix ###
+
 i = 0
 len_array = len(dictionary_path)
+dist_array = [[0 for x in range(len_array)] for y in range(len_array)]
+
+while(i < len_array):
+    path1 = dictionary_path[i]
+    j = 0
+    while(j < len_array):
+        path2 = dictionary_path[j]
+        len1 = len(path1) 
+        len2 = len(path2)
+
+        if len1 > len2:
+            len_ = len2
+        else:
+            len_ = len1
+        
+        k = 0
+        coord1Array = []
+        coord2Array = []
+        dist = []
+
+        while (k < len_):
+            pos1 = path1[k]
+            pos2 = path2[k]
+            x1, y1 = pos1.split(",")
+            x2, y2 = pos2.split(",")
+            #coord1.append((float(x1), float(y1)))
+            #coord2.append((float(x2), float(y2)))
+            coord1Array.append((float(x1), float(y1))) 
+            coord2Array.append((float(x2), float(y2)))
+            coord1 = [(float(x1), float(y1))]
+            coord2 = [(float(x2), float(y2))]
+            dist.append(scipy.spatial.distance.cdist(coord1, coord2, 'euclidean')[0][0])
+            k = k + 1
+
+        if len_ == len1:
+            while(k < len2):
+                pos = path2[k]
+                x, y = pos.split(",")
+                coord2Array.append((float(x), float(y)))
+                dist.append(maximum_dist)
+                k = k + 1
+        else:
+            while(k < len1):
+                pos = path1[k]
+                x, y = pos.split(",")
+                coord1Array.append((float(x), float(y)))
+                dist.append(maximum_dist)
+                k = k + 1
+
+        advise = "Simple distance between the path " + str(i) + " and " + str(j) + " :"
+        advise_time = "Time of the paths taken in consideration: " + str(dictionary_time_path[i]) + " " + str(dictionary_time_path[j])
+        print(advise)
+        #print(coord1Array)
+        #print(coord2Array)
+
+        total_dist = 0
+        for num in dist:
+            total_dist = total_dist + num
+
+        print(total_dist)
+        print(advise_time)
+
+        dist_array[i][j] = total_dist
+        #dist_array.append(total_dist)
+
+        j = j + 1
+    
+    i = i + 1 
+
+for x in range(len_array):
+    print(dist_array[x])
+
+##### Using cdist #####
+### condensed matrix ###
+
+i = 0
+dist_array = []
 
 while(i < len_array):
     path1 = dictionary_path[i]
@@ -128,56 +209,21 @@ while(i < len_array):
         print(total_dist)
         print(advise_time)
 
+        #dist_array[i][j] = total_dist
+        dist_array.append(total_dist)
+
         j = j + 1
     
     i = i + 1 
 
+for x in range(len(dist_array)):
+    print(dist_array[x])
 
-#path1 = dictionary_path[0]
-#path2 = dictionary_path[1]
-#len1 = len(path1) 
-#len2 = len(path2)
+##### clustering part #####
 
-#if len1 > len2:
-#    len = len2
-#else:
-#    len = len1
-
-#k = 0
-#coord1Array = []
-#coord2Array = []
-#dist = []
-
-#while (k < len):
-#    pos1 = path1[k]
-#    pos2 = path2[k]
-#    x1, y1 = pos1.split(",")
-#    x2, y2 = pos2.split(",")
-    #coord1.append((float(x1), float(y1)))
-    #coord2.append((float(x2), float(y2)))
-#    coord1Array.append((float(x1), float(y1))) 
-#    coord2Array.append((float(x2), float(y2)))
-#    coord1 = [(float(x1), float(y1))]
-#    coord2 = [(float(x2), float(y2))]
-#    dist.append(scipy.spatial.distance.cdist(coord1, coord2, 'euclidean')[0][0])
-#    k = k + 1
-
-#if len == len1:
-#    while(k < len2):
-#        pos = path2[k]
-#        x, y = pos.split(",")
-#        coord2Array.append((float(x), float(y)))
-#        dist.append(50)
-#        k = k + 1
-#else:
-#    while(k < len1):
-#        pos = path1[k]
-#        x, y = pos.split(",")
-#        coord1Array.append((float(x), float(y)))
-#        dist.append(50)
-#        k = k + 1
-
-
-#print(coord1Array)
-#print(coord2Array)
-#print(dist)
+Z = linkage(dist_array, 'ward')
+#plt.title('Hierarchical Clustering Dendrogram')
+#plt.xlabel('sample index')
+#plt.ylabel('distance')
+#dendrogram(Z)
+#plt.show()
