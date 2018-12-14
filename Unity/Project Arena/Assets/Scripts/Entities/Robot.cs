@@ -43,8 +43,8 @@ public class Robot : Entity{
     private RaycastHit hit;
 
     private List<Ray> landingRay = new List<Ray>();
-    private List<Vector3> posToReach; //list of frontier points
-    private List<Vector3> route;
+    private List<Vector3> posToReach = new List<Vector3>(); //list of frontier points
+    private List<Vector3> route = new List<Vector3>();
 
     private float angle;
     private float dx; // delta between X coordinate of the hit point of the raycast sent by the robot agent and the X coordinate of the robot agent itself
@@ -56,6 +56,8 @@ public class Robot : Entity{
     private float robotZ; //Z coordinate of the robot agent
     private float startingTime; //the time in seconds when the robot starts the simulation
     private float squareSize; //dimension of a cell of the floor, used in order to discretize the final map
+    private float targetX;
+    private float targetZ;
     private float wallPointX; //X coordinate of the collision point between the ray and a collider
     private float wallPointZ; //Z coordinate of the collision point between the ray and a collider
 
@@ -68,6 +70,7 @@ public class Robot : Entity{
     private GameObject tempDestination; //the temp point to reach, expressed as a GameObject
     private GameObject destination; //the target, properly
 
+    private int indexRays;
     private int width; //width of the map given by the manager to the robot
     private int height; //height og the map given by the manager to the robot
 
@@ -101,16 +104,8 @@ public class Robot : Entity{
         rPl.range = rangeRays;
         landingRay.Add(new Ray(transform.position, Vector3.forward));
         angle = angleRay;
-        for (int i = 1; i < numbRay-1; i=i+2) //y rimane invariato, bisogna spaziare intorno a x e z
-        {
-            rayRight = new Ray(transform.position, Quaternion.AngleAxis(-angle, transform.up) * transform.forward);
-            landingRay.Add(rayRight);
-            
-            rayLeft = new Ray(transform.position, Quaternion.AngleAxis(angle, transform.up) * transform.forward);
-            landingRay.Add(rayLeft);
 
-            angle = angle + angleRay;
-        }
+        InitializeRays();
     }
 
     // Update is called once per frame
@@ -119,6 +114,23 @@ public class Robot : Entity{
         if (targetFound)
         {
             rM.ApproachingGoal(destination);
+        }
+    }
+
+    /// <summary>
+    /// This method initialize the rays casted by the robot agent to scan the world around it
+    /// </summary>
+    private void InitializeRays()
+    {
+        for (indexRays = 1; indexRays < numbRay - 1; indexRays = indexRays + 2)
+        {
+            rayRight = new Ray(transform.position, Quaternion.AngleAxis(-angle, transform.up) * transform.forward);
+            landingRay.Add(rayRight);
+
+            rayLeft = new Ray(transform.position, Quaternion.AngleAxis(angle, transform.up) * transform.forward);
+            landingRay.Add(rayLeft);
+
+            angle = angle + angleRay;
         }
     }
 
@@ -147,15 +159,21 @@ public class Robot : Entity{
             }
         }
 
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                forgettingCounterCell[x, y] = -1;
+            }
+        }
+
         startingTime = Time.time;
 
         rPl.isNumeric = false;
         rPl.robot_map = robot_map;
 
-        if (GetComponent<RobotDMCloseWall>())       // probabilmente questo si puo' ottimizzare
-        {
-            GetComponent<RobotDMCloseWall>().SetCharMap(robot_map);
-        }
+        rDM.SetCharMap(robot_map);
+        
     }
 
     /// <summary>
@@ -180,7 +198,6 @@ public class Robot : Entity{
             for (int y = 0; y < height; y++)
             {
                 numeric_robot_map[x, y] = numUnknownCell;
-                Debug.Log(numeric_robot_map[x, y]);
             }
         }
 
@@ -197,11 +214,8 @@ public class Robot : Entity{
         rPl.isNumeric = true;
         rPl.numeric_robot_map = numeric_robot_map;
 
-        if (GetComponent<RobotDMCloseWall>())       // probabilmente questo si puo' ottimizzare
-        {
-            GetComponent<RobotDMCloseWall>().SetNumericMap(numeric_robot_map);
-        }
-        
+        rDM.SetNumericMap(numeric_robot_map);
+
     }
 
     // parte importata non rilevante
@@ -342,7 +356,7 @@ public class Robot : Entity{
     /// it (so the robot is discouraged to pass on it) or containing the goal object (so the robot get maximum priority to approach it)
     /// </summary>
     /// <param name="ray">The list of raycast sent by the robot during the scanning</param>
-    public void UpdatingSpace(List<Ray> ray)
+    private void UpdatingSpace(List<Ray> ray)
     {
         for (int i = 0; i < numbRay - 1; i++)
         {
@@ -351,12 +365,12 @@ public class Robot : Entity{
                 //Debug.Log("Here!");
                 for (float j = rangeRays; j >= 0; j--)
                 {
-                    pointX = ray[i].GetPoint(j).x;
-                    pointZ = ray[i].GetPoint(j).z;
-                    pointX = pointX / squareSize;
-                    pointZ = pointZ / squareSize;
-                    pointX = FixingRound(pointX);
-                    pointZ = FixingRound(pointZ);
+                    pointX = FixingRound(ray[i].GetPoint(j).x / squareSize);
+                    pointZ = FixingRound(ray[i].GetPoint(j).z / squareSize);
+                    //pointX = pointX / squareSize;
+                    //pointZ = pointZ / squareSize;
+                    //pointX = FixingRound(pointX);
+                    //pointZ = FixingRound(pointZ);
                     if (!isNumeric)
                     {
                         if (robot_map[(int)pointX, (int)pointZ] != 'w') robot_map[(int)pointX, (int)pointZ] = 'r';
@@ -371,8 +385,8 @@ public class Robot : Entity{
             }
             else
             {
-                robotX = hit.transform.position.x / squareSize;
-                robotZ = hit.transform.position.z / squareSize;
+                robotX = hit.transform.position.x / squareSize; //nome variabile non consono?
+                robotZ = hit.transform.position.z / squareSize; //nome variabile non consono?
                 if (hit.collider.gameObject.tag == "Environment")
                 {
                     //Debug.Log("Here!");
@@ -380,14 +394,12 @@ public class Robot : Entity{
                     //Debug.Log("You hit " + hit.collider.gameObject.tag);
                     //Debug.Log(hit.collider.gameObject.transform.position);
                     //Debug.Log(hit.point);
-                    //robot_map[(int)x, (int)y] = 'r';
-                    //float dx = hit.collider.gameObject.transform.position.x - this.gameObject.transform.position.x;
                     dx = hit.point.x - this.gameObject.transform.position.x;
                     dz = hit.point.z - this.gameObject.transform.position.z;
-                    //float dz = hit.collider.gameObject.transform.position.z - this.gameObject.transform.position.z;
+
                     SettingR(Mathf.Sqrt((dx*dx) + (dz*dz)), ray[i]);
-                    //float angle = Vector3.Angle(transform.right, ray[i].direction);
-                    SettingW(Mathf.Sqrt((dx * dx) + (dz * dz)), ray[i], epsilon/*, angle*/);
+                    
+                    SettingW(Mathf.Sqrt((dx * dx) + (dz * dz)), ray[i], epsilon);
                     //Debug.Log(x + "" + y);
                 }
                 else if (hit.collider.gameObject.tag == "Target")
@@ -412,31 +424,23 @@ public class Robot : Entity{
         }
         if (destination)
         {
-            robotX = FixingRound(destination.transform.position.x/squareSize);
-            robotZ = FixingRound(destination.transform.position.z/squareSize);
+            targetX = FixingRound(destination.transform.position.x/squareSize);
+            targetZ = FixingRound(destination.transform.position.z/squareSize);
             if (!isNumeric)
-                robot_map[(int)robotX, (int)robotZ] = 'g';
-            else numeric_robot_map[(int)robotX, (int)robotZ] = numGoalCell;
-            forgettingCounterCell[(int)robotX, (int)robotZ] = forgettingFactor;
+                robot_map[(int)targetX, (int)targetZ] = 'g';
+            else numeric_robot_map[(int)targetX, (int)targetZ] = numGoalCell;
+
+            forgettingCounterCell[(int)targetX, (int)targetZ] = forgettingFactor;
         }
-        /*robotX = transform.position.x; //maybe these six lines can be omitted
-        robotZ = transform.position.z;
-        robotX = robotX / squareSize;
-        robotZ = robotZ / squareSize;
-        robotX = FixingRound(robotX);
-        robotZ = FixingRound(robotZ);*/
-        //if (!isNumeric)
-        //    robot_map[(int)robot_x, (int)robot_z] = 'r';
-        //else numeric_robot_map[(int)robot_x, (int)robot_z] = numFreeCell;
 
         if (!isNumeric)
         {
-            rPl.isNumeric = false;
+            rPl.isNumeric = false;      //questa chiamata è necessaria?
             rPl.robot_map = robot_map;
         }
         else
         {
-            rPl.isNumeric = true;
+            rPl.isNumeric = true;       //questa chiamata è necessaria?
             rPl.numeric_robot_map = numeric_robot_map;
         }
     }
@@ -470,7 +474,7 @@ public class Robot : Entity{
     /// <param name="epsilon">Useless (is set to 0)</param>
     protected void SettingW(float distance, Ray ray, float epsilon/*, float angle*/)
     {
-        robotX = transform.position.x / squareSize;
+        /*robotX = transform.position.x / squareSize;
         robotZ = transform.position.z / squareSize;
         pointX = ray.GetPoint(distance).x / squareSize;
         pointZ = ray.GetPoint(distance).z / squareSize;
@@ -478,7 +482,7 @@ public class Robot : Entity{
         robotX = FixingRound(robotX);
         robotZ = FixingRound(robotZ);
         pointX = FixingRound(pointX);
-        pointZ = FixingRound(pointZ);
+        pointZ = FixingRound(pointZ);*/
         
         //method 1
         wallPointX = FixingRound(ray.GetPoint(distance + epsilon).x / squareSize);
@@ -589,58 +593,21 @@ public class Robot : Entity{
     {
         while (!targetFound)
         {
-            posToReach = new List<Vector3>();
-            //List<Vector3> optionalPosToReach = new List<Vector3>();
-            if (!isNumeric)
-            {
-                width = robot_map.GetLength(0);
-                height = robot_map.GetLength(1);
-                for (int x = 0; x < width; x++)
-                {
-                    for (int y = 0; y < height; y++)
-                    {
-                        if (robot_map[x, y] == 'r')
-                        {
-                            if (robot_map[x + 1, y] == 'u' || robot_map[x - 1, y] == 'u' || robot_map[x, y + 1] == 'u' || robot_map[x, y - 1] == 'u'
-                                || robot_map[x + 1, y + 1] == 'u' || robot_map[x - 1, y - 1] == 'u' || robot_map[x - 1, y + 1] == 'u' || robot_map[x + 1, y - 1] == 'u')
-                            {
-                                posToReach.Add(new Vector3(x * squareSize, transform.position.y, y * squareSize));
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                width = numeric_robot_map.GetLength(0);
-                height = numeric_robot_map.GetLength(1);
-                for (int x = 0; x < width; x++)
-                {
-                    for (int y = 0; y < height; y++)
-                    {
-                        if (numeric_robot_map[x, y] == numFreeCell && x+1 < width && x-1 >= 0 && y+1 < height && y-1 >= 0)
-                        {
-                            if (numeric_robot_map[x + 1, y] == numUnknownCell || numeric_robot_map[x - 1, y] == numUnknownCell || numeric_robot_map[x, y + 1] == numUnknownCell || numeric_robot_map[x, y - 1] == numUnknownCell
-                                || numeric_robot_map[x + 1, y + 1] == numUnknownCell || numeric_robot_map[x - 1, y - 1] == numUnknownCell || numeric_robot_map[x - 1, y + 1] == numUnknownCell || numeric_robot_map[x + 1, y - 1] == numUnknownCell)
-                            {
-                                posToReach.Add(new Vector3(x * squareSize, transform.position.y, y * squareSize));
-                            }
-                        }
-                    }
-                }
-            }
-
-            //remove the point where the agent stands (sometimes it could be a frontier point)
-            posToReach.Remove(transform.position);
+            DetectingFrontierPoints();
 
             if (posToReach.Count != 0)
             {
                 goals = posToReach;
                 tempGoal = rDM.PosToReach(goals);
 
-                route = new List<Vector3>();
+                if (route != null)
+                {
+                    route.Clear();
+                }
+
                 route = rPl.CheckVisibility(transform.position, tempGoal);
                 rM.tempReached = false;
+
                 if (route == null)
                 {
                     rM.ApproachingPointToReach(tempGoal);
@@ -657,6 +624,56 @@ public class Robot : Entity{
 
             yield return new WaitForSeconds(timeForDecision);
         }
+    }
+
+    /// <summary>
+    /// This method searches around the map created by the robot agent all the points that can be classified ad "frontier" points, adding them in a dedicated list
+    /// </summary>
+    private void DetectingFrontierPoints()
+    {
+        posToReach.Clear();
+
+        if (!isNumeric)
+        {
+            width = robot_map.GetLength(0);
+            height = robot_map.GetLength(1);
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    if (robot_map[x, y] == 'r')
+                    {
+                        if (robot_map[x + 1, y] == 'u' || robot_map[x - 1, y] == 'u' || robot_map[x, y + 1] == 'u' || robot_map[x, y - 1] == 'u'
+                            || robot_map[x + 1, y + 1] == 'u' || robot_map[x - 1, y - 1] == 'u' || robot_map[x - 1, y + 1] == 'u' || robot_map[x + 1, y - 1] == 'u')
+                        {
+                            posToReach.Add(new Vector3(x * squareSize, transform.position.y, y * squareSize));
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            width = numeric_robot_map.GetLength(0);
+            height = numeric_robot_map.GetLength(1);
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    if (numeric_robot_map[x, y] == numFreeCell && x + 1 < width && x - 1 >= 0 && y + 1 < height && y - 1 >= 0)
+                    {
+                        if (numeric_robot_map[x + 1, y] == numUnknownCell || numeric_robot_map[x - 1, y] == numUnknownCell || numeric_robot_map[x, y + 1] == numUnknownCell || numeric_robot_map[x, y - 1] == numUnknownCell
+                            || numeric_robot_map[x + 1, y + 1] == numUnknownCell || numeric_robot_map[x - 1, y - 1] == numUnknownCell || numeric_robot_map[x - 1, y + 1] == numUnknownCell || numeric_robot_map[x + 1, y - 1] == numUnknownCell)
+                        {
+                            posToReach.Add(new Vector3(x * squareSize, transform.position.y, y * squareSize));
+                        }
+                    }
+                }
+            }
+        }
+
+        //remove the point where the agent stands (sometimes it could be a frontier point)
+        posToReach.Remove(transform.position);
     }
 
     /// <summary>
@@ -695,19 +712,23 @@ public class Robot : Entity{
             if (!isNumeric)
                 rP.SaveMapChar(robot_map);
             else rP.SaveMapNum(numeric_robot_map);
-            robotX = transform.position.x / squareSize;
-            robotX = FixingRound(robotX);
-            robotZ = transform.position.z /squareSize;
-            robotZ = FixingRound(robotZ);
+
+            robotX = FixingRound(transform.position.x / squareSize);
+            robotZ = FixingRound(transform.position.z / squareSize);
+
             if (!isNumeric)
                 rP.SavePosChar((int)robotX, (int)robotZ, transform.eulerAngles);
             else rP.SavePosNum((int)robotX, (int)robotZ, transform.eulerAngles);
+
             yield return new WaitForSeconds(1f);
         }
+
         finishingTime = Time.time;
+
         if (!isNumeric)
             rP.SaveTimeChar(finishingTime - startingTime);
         else rP.SaveTimeNum(finishingTime - startingTime);
+
         rP.PreparingForServer();
 
     }

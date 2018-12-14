@@ -8,9 +8,6 @@ using UnityEngine;
 /// </summary>
 public class RobotDMCloseWall : RobotDecisionMaking {
 
-    private char[,] char_map;
-    private float[,] numeric_map;
-
     private float distance;
     private float tempDistance;
     private float wallX;
@@ -52,11 +49,14 @@ public class RobotDMCloseWall : RobotDecisionMaking {
 
         //defining frontier zones
         DefiningFrontierZones(listFrontierPoints);
-        Debug.Log(frontierZones.Count);
 
         //removing frontier zones considered too little to be taken in consideration
         //RemovingUselessFrontierZones();
         //Debug.Log(frontierZones.Count);
+
+        FixingOverlappingZones();
+
+        Debug.Log(frontierZones.Count);
 
         //only for testing purpose
         for (int i = 0; i < frontierZones.Count; i++)
@@ -182,6 +182,56 @@ public class RobotDMCloseWall : RobotDecisionMaking {
         }
     }
 
+    private void FixingOverlappingZones()
+    {
+        bool pointFound = false;
+        List<List<Vector3>> fixedZones = new List<List<Vector3>>();
+
+        foreach (List<Vector3> zone in frontierZones)
+        {
+            if(fixedZones.Count == 0)
+            {
+                fixedZones.Add(zone);
+            }
+            else
+            {
+                for (int a = 0; a < zone.Count; a++)
+                {
+                    if (!pointFound)
+                    {
+                        foreach (List<Vector3> newZone in fixedZones)
+                        {
+                            if (newZone.Contains(zone[a]))
+                            {
+                                pointFound = true;
+                                MergingZones(newZone, zone);
+                            }
+                        }
+                    }
+                }
+
+                if (!pointFound)
+                {
+                    fixedZones.Add(zone);
+                }
+                else pointFound = false;
+            }
+        }
+
+        frontierZones = fixedZones;
+    }
+
+    private void MergingZones(List<Vector3> newZone, List<Vector3> oldZone)
+    {
+        foreach (Vector3 point in oldZone)
+        {
+            if (!newZone.Contains(point))
+            {
+                newZone.Add(point);
+            }
+        }
+    }
+
     /// <summary>
     /// This method removes frontier zones considered too little to be taken in consideration
     /// </summary>
@@ -240,8 +290,6 @@ public class RobotDMCloseWall : RobotDecisionMaking {
     /// <param name="frontierPoints">The list of all frontier points</param>
     private void AddNeighbourFrontier(Vector3 frontierPoint, List<Vector3> frontierZone, List<Vector3> frontierPoints)
     {
-        //THIS METHOD WORKS AS IT IS. DON'T TOUCH IT
-
         //List<Vector3> openList = frontierZone;
         frontierXCoord = (int)FixingRound(frontierPoint.x / squareSize);
         frontierZcoord = (int)FixingRound(frontierPoint.z / squareSize);
@@ -430,16 +478,6 @@ public class RobotDMCloseWall : RobotDecisionMaking {
             return (Mathf.Round(coordinate) - 1);
         }
         else return Mathf.Round(coordinate);
-    }
-
-    public void SetNumericMap(float[,] map)
-    {
-        numeric_map = map;
-    }
-
-    public void SetCharMap(char[,] map)
-    {
-        char_map = map;
     }
 
 }

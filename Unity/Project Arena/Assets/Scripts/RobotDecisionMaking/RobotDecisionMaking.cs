@@ -7,6 +7,9 @@ using UnityEngine;
 /// </summary>
 public abstract class RobotDecisionMaking : MonoBehaviour {
 
+    protected char[,] char_map;
+    protected float[,] numeric_map;
+
     protected Vector3 target;
     protected float squareSize;
 
@@ -15,6 +18,16 @@ public abstract class RobotDecisionMaking : MonoBehaviour {
     public void SetSquareSize(float size)
     {
         squareSize = size;
+    }
+
+    public void SetNumericMap(float[,] map)
+    {
+        numeric_map = map;
+    }
+
+    public void SetCharMap(char[,] map)
+    {
+        char_map = map;
     }
 
 }
