@@ -101,7 +101,8 @@ while(i < len_array):
 
             while(m < len_max):
                 count = 0
-                l = m
+                l1 = k
+                l2 = m
                 keepGoing = False
                 #print(len_max)
                 #print(m)
@@ -110,10 +111,11 @@ while(i < len_array):
                     count = count + 1
                     keepGoing = True
 
-                while(keepGoing == True and (l + 1) < len_):
-                    l = l + 1
-                    pos1 = path_min[l]
-                    pos2 = path_max[l]
+                while(keepGoing == True and (l1 + 1) < len_ and (l2 + 1) < len_max):
+                    l1 = l1 + 1
+                    l2 = l2 + 1
+                    pos1 = path_min[l1]
+                    pos2 = path_max[l2]
                     if(pos1 != pos2):
                         keepGoing = False
                     else:    
@@ -132,7 +134,9 @@ while(i < len_array):
         #print(coord1Array)
         #print(coord2Array)
 
+        advise_concat = "Maximum concatenation : " + str(max_concat) + " Lenght of the longest path : " + str(len_max)
         print( float(str(float(max_concat/len_max))[:5]) )
+        print(advise_concat)
         print(advise_time)
 
         dist_array[i][j] = float(str(float(max_concat/len_max))[:5])
@@ -201,13 +205,6 @@ while(i < len_array):
                 m = m + 1
 
             k = k + 1
-
-        #advise = "Simple distance between the path " + str(i) + " and " + str(j) + " :"
-        #advise_time = "Time of the paths taken in consideration: " + str(dictionary_time_path[i]) + " " + str(dictionary_time_path[j])
-        #print(advise)
-
-        #print( float(str(float(max_concat/len_max))[:5]) )
-        #print(advise_time)
 
         dist_array.append(float(str(float(max_concat/len_max))[:5]))
 
