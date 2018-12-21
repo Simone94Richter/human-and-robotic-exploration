@@ -4,6 +4,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.spatial
+import math
 from scipy.cluster.hierarchy import dendrogram, linkage
 
 inputDir = "C:/Users/princ/OneDrive/Documenti/human-and-robotic-exploration/human-and-robotic-exploration/DownloadedResults"
@@ -64,6 +65,53 @@ def rotate(x,y, origin=(0,0)):
         y3 = y2 +54 
 
     return x3, y3
+
+def euc_dist(pt1,pt2):
+
+    return scipy.spatial.distance.cdist(pt1, pt2, 'euclidean')[0][0]
+    #return math.sqrt((pt2[0]-pt1[0])*(pt2[0]-pt1[0])+(pt2[1]-pt1[1])*(pt2[1]-pt1[1]))
+
+def _c(ca,i,j,p,q):
+
+    x1, y1 = p[i].split(",")
+    x2, y2 = q[j].split(",")
+    if ca[i,j] > -1:
+        return ca[i,j]
+    elif i == 0 and j == 0:
+        ca[i,j] = euc_dist([(int(x1),int(y1))], [(int(x2),int(y2))])
+    elif i > 0 and j == 0:
+        ca[i,j] = max( _c(ca,i-1,0,p,q), euc_dist([(int(x1),int(y1))], [(int(x2),int(y2))]))
+    elif i == 0 and j > 0:
+        ca[i,j] = max( _c(ca,0,j-1,p,q), euc_dist([(int(x1),int(y1))], [(int(x2),int(y2))]))
+    elif i > 0 and j > 0:
+        ca[i,j] = max(                                                     \
+            min(                                                           \
+                _c(ca,i-1,j,p,q),                                          \
+                _c(ca,i-1,j-1,p,q),                                        \
+                _c(ca,i,j-1,p,q)                                           \
+            ),                                                             \
+            euc_dist([(int(x1),int(y1))], [(int(x2),int(y2))])                                           \
+            )                                                          
+    else:
+        ca[i,j] = float('inf')
+
+    return ca[i,j]
+
+def frechetDist(p,q):
+
+    len_p = len(p)
+    len_q = len(q)
+
+    if len_p == 0 or len_q == 0:
+        raise ValueError('Input curves are empty.')
+
+    if len_p != len_q or len(p[0]) != len(q[0]):
+        raise ValueError('Input curves do not have the same dimensions.')
+
+    ca    = ( np.ones((len_p,len_q), dtype=np.float64) * -1 ) 
+    dist = _c(ca,len_p-1,len_q-1,p,q)
+
+    return dist
 
 if os.path.isfile(inputDir2 + "/" + fileName2):
     with open(inputDir2 + "/" + fileName2) as map_file:
@@ -127,7 +175,6 @@ while(i < len_array):
         print(str(re_scale_factor))
         #re-scaling both path
         v = 0.0 
-        w = 0.0
         path1_rescaled = []
         path2_rescaled = []
         
@@ -137,41 +184,15 @@ while(i < len_array):
             v = float(v) + re_scale_factor
 
         path2_rescaled = path_max
-        print(len(path1_rescaled))
-        print(len(path2_rescaled))
-        k = 0
-        #coord1Array = []
-        #coord2Array = []
-        dist = []
 
-        while (k < len_max):
-            pos1 = path1_rescaled[k]
-            pos2 = path2_rescaled[k]
-            x1, y1 = pos1.split(",")
-            x2, y2 = pos2.split(",")
-            #coord1.append((float(x1), float(y1)))
-            #coord2.append((float(x2), float(y2)))
-            #coord1Array.append((float(x1), float(y1))) 
-            #coord2Array.append((float(x2), float(y2)))
-            coord1 = [(float(x1), float(y1))]
-            coord2 = [(float(x2), float(y2))]
-            dist.append(scipy.spatial.distance.cdist(coord1, coord2, 'euclidean')[0][0])
-            k = k + 1
+        #because sometimes one of the path (rescaled) is longer by one than the other, we add to the shortest a copy of the last element
+        if(len(path1_rescaled) > len(path2_rescaled)):
+            path2_rescaled.append(path2_rescaled[len(path2_rescaled)-1])
 
-        #if len_ == len1:
-        #    while(k < len2):
-        #        pos = path2[k]
-        #        x, y = pos.split(",")
-        #        coord2Array.append((float(x), float(y)))
-        #        dist.append(maximum_dist)
-        #        k = k + 1
-        #else:
-        #    while(k < len1):
-        #        pos = path1[k]
-        #        x, y = pos.split(",")
-        #        coord1Array.append((float(x), float(y)))
-        #        dist.append(maximum_dist)
-        #        k = k + 1
+        if(len(path2_rescaled) > len(path1_rescaled)):
+            path1_rescaled.append(path1_rescaled[len(path1_rescaled)-1])
+
+        distance = round(frechetDist(path1_rescaled, path2_rescaled), 5)
 
         advise = "Simple distance between the path " + str(i) + " and " + str(j) + " :"
         advise_time = "Time of the paths taken in consideration: " + str(dictionary_time_path[i]) + " " + str(dictionary_time_path[j])
@@ -179,14 +200,14 @@ while(i < len_array):
         #print(coord1Array)
         #print(coord2Array)
 
-        total_dist = 0
-        for num in dist:
-            total_dist = total_dist + num
+        #total_dist = 0
+        #for num in dist:
+        #    total_dist = total_dist + num
 
-        print(total_dist)
+        print(distance)
         print(advise_time)
 
-        dist_array[i][j] = total_dist
+        dist_array[i][j] = distance
         #dist_array.append(total_dist)
 
         #inserire qui il plot dei due path
@@ -245,7 +266,7 @@ while(i < len_array):
                     #if(frag == 1):
                     plt.plot([x, a], [z, b], 'r-')
 
-        plt.title('Distance: ' + str(int(total_dist)), fontsize = 8)
+        plt.title('Distance: ' + str(distance), fontsize = 8)
         j = j + 1
         c = c + 1
     
@@ -256,85 +277,9 @@ for x in range(len_array):
 
 plt.show()
 
-##### Using cdist #####
-### condensed matrix ###
-
-i = 0
-dist_array = []
-
-while(i < len_array):
-    path1 = dictionary_path[i]
-    j = i + 1
-    while(j < len_array):
-        path2 = dictionary_path[j]
-        len1 = len(path1) 
-        len2 = len(path2)
-
-        if len1 > len2:
-            len_ = len2
-        else:
-            len_ = len1
-        
-        k = 0
-        coord1Array = []
-        coord2Array = []
-        dist = []
-
-        while (k < len_):
-            pos1 = path1[k]
-            pos2 = path2[k]
-            x1, y1 = pos1.split(",")
-            x2, y2 = pos2.split(",")
-            #coord1.append((float(x1), float(y1)))
-            #coord2.append((float(x2), float(y2)))
-            coord1Array.append((float(x1), float(y1))) 
-            coord2Array.append((float(x2), float(y2)))
-            coord1 = [(float(x1), float(y1))]
-            coord2 = [(float(x2), float(y2))]
-            dist.append(scipy.spatial.distance.cdist(coord1, coord2, 'euclidean')[0][0])
-            k = k + 1
-
-        if len_ == len1:
-            while(k < len2):
-                pos = path2[k]
-                x, y = pos.split(",")
-                coord2Array.append((float(x), float(y)))
-                dist.append(maximum_dist)
-                k = k + 1
-        else:
-            while(k < len1):
-                pos = path1[k]
-                x, y = pos.split(",")
-                coord1Array.append((float(x), float(y)))
-                dist.append(maximum_dist)
-                k = k + 1
-
-        advise = "Simple distance between the path " + str(i) + " and " + str(j) + " :"
-        advise_time = "Time of the paths taken in consideration: " + str(dictionary_time_path[i]) + " " + str(dictionary_time_path[j])
-        print(advise)
-        #print(coord1Array)
-        #print(coord2Array)
-
-        total_dist = 0
-        for num in dist:
-            total_dist = total_dist + num
-
-        print(total_dist)
-        print(advise_time)
-
-        #dist_array[i][j] = total_dist
-        dist_array.append(total_dist)
-
-        j = j + 1
-    
-    i = i + 1 
-
-for x in range(len(dist_array)):
-    print(dist_array[x])
-
 ##### clustering part #####
 
-Z = linkage(dist_array, 'ward')
+#Z = linkage(dist_array, 'ward')
 #plt.title('Hierarchical Clustering Dendrogram')
 #plt.xlabel('sample index')
 #plt.ylabel('distance')
