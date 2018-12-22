@@ -153,7 +153,7 @@ dist_array = [[0 for x in range(len_array)] for y in range(len_array)]
 
 while(i < len_array):
     path1 = dictionary_path[i]
-    j = 0
+    j = i + 1
     while(j < len_array):
         path2 = dictionary_path[j]
         len1 = len(path1) 
@@ -183,7 +183,10 @@ while(i < len_array):
             path1_rescaled.append(path_min[int(v)])
             v = float(v) + re_scale_factor
 
-        path2_rescaled = path_max
+        v = 0.0
+        while(v < float(len_max)):
+            path2_rescaled.append(path_max[int(v)])
+            v = v + 1
 
         #because sometimes one of the path (rescaled) is longer by one than the other, we add to the shortest a copy of the last element
         if(len(path1_rescaled) > len(path2_rescaled)):
@@ -279,9 +282,9 @@ plt.show()
 
 ##### clustering part #####
 
-#Z = linkage(dist_array, 'ward')
-#plt.title('Hierarchical Clustering Dendrogram')
-#plt.xlabel('sample index')
-#plt.ylabel('distance')
-#dendrogram(Z)
-#plt.show()
+Z = linkage(dist_array, 'ward')
+plt.title('Hierarchical Clustering Dendrogram')
+plt.xlabel('sample index')
+plt.ylabel('distance')
+dendrogram(Z)
+plt.show()

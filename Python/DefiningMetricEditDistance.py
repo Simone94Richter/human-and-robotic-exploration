@@ -114,8 +114,7 @@ while(finish == False):
     else:
         finish = True
 
-##### Using cdist #####
-### uncondensed matrix ###
+### Calculating distance
 
 i = 0
 c = 0
@@ -124,7 +123,7 @@ dist_array = [[0 for x in range(len_array)] for y in range(len_array)]
 
 while(i < len_array):
     path1 = dictionary_path[i]
-    j = 0
+    j =  i + 1
     while(j < len_array):
         path2 = dictionary_path[j]
         
@@ -141,8 +140,8 @@ while(i < len_array):
         #    total_dist = total_dist + num
 
         print(distance)
-        print(len(path1))
-        print(len(path2))
+        #print(len(path1))
+        #print(len(path2))
         print(advise_time)
 
         dist_array[i][j] = distance
@@ -218,8 +217,8 @@ plt.show()
 ##### clustering part #####
 
 Z = linkage(dist_array, 'ward')
-#plt.title('Hierarchical Clustering Dendrogram')
-#plt.xlabel('sample index')
-#plt.ylabel('distance')
-#dendrogram(Z)
-#plt.show()
+plt.title('Hierarchical Clustering Dendrogram')
+plt.xlabel('sample index')
+plt.ylabel('distance')
+dendrogram(Z)
+plt.show()

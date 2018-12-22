@@ -105,7 +105,7 @@ dist_array = [[0 for x in range(len_array)] for y in range(len_array)]
 
 while(i < len_array):
     path1 = dictionary_path[i]
-    j = 0
+    j = i + 1
     while(j < len_array):
         path2 = dictionary_path[j]
         len1 = len(path1) 
@@ -127,7 +127,6 @@ while(i < len_array):
         print(str(re_scale_factor))
         #re-scaling both path
         v = 0.0 
-        w = 0.0
         path1_rescaled = []
         path2_rescaled = []
         
@@ -136,9 +135,27 @@ while(i < len_array):
             path1_rescaled.append(path_min[int(v)])
             v = float(v) + re_scale_factor
 
-        path2_rescaled = path_max
+        v = 0.0
+        while(v < float(len_max)):
+            path2_rescaled.append(path_max[int(v)])
+            v = v + 1
+
         print(len(path1_rescaled))
         print(len(path2_rescaled))
+        print(len(path_min))
+        print(len(path_max))
+
+        #because sometimes one of the path (rescaled) is longer by one than the other, we add to the shortest a copy of the last element
+        if(len(path1_rescaled) > len(path2_rescaled)):
+            path2_rescaled.append(path2_rescaled[len(path2_rescaled)-1])
+
+        if(len(path2_rescaled) > len(path1_rescaled)):
+            path1_rescaled.append(path1_rescaled[len(path1_rescaled)-1])
+
+        print(len(path1_rescaled))
+        print(len(path2_rescaled))
+        #print(len(path_min))
+        #print(len(path_max))
         k = 0
         #coord1Array = []
         #coord2Array = []
@@ -259,84 +276,84 @@ plt.show()
 ##### Using cdist #####
 ### condensed matrix ###
 
-i = 0
-dist_array = []
+#i = 0
+#dist_array = []
 
-while(i < len_array):
-    path1 = dictionary_path[i]
-    j = i + 1
-    while(j < len_array):
-        path2 = dictionary_path[j]
-        len1 = len(path1) 
-        len2 = len(path2)
+#while(i < len_array):
+#    path1 = dictionary_path[i]
+#    j = i + 1
+#    while(j < len_array):
+#        path2 = dictionary_path[j]
+#        len1 = len(path1) 
+#        len2 = len(path2)
 
-        if len1 > len2:
-            len_ = len2
-        else:
-            len_ = len1
+#        if len1 > len2:
+#            len_ = len2
+#        else:
+#            len_ = len1
         
-        k = 0
-        coord1Array = []
-        coord2Array = []
-        dist = []
+#        k = 0
+#        coord1Array = []
+#        coord2Array = []
+#        dist = []
 
-        while (k < len_):
-            pos1 = path1[k]
-            pos2 = path2[k]
-            x1, y1 = pos1.split(",")
-            x2, y2 = pos2.split(",")
+#        while (k < len_):
+#            pos1 = path1[k]
+#            pos2 = path2[k]
+#            x1, y1 = pos1.split(",")
+#            x2, y2 = pos2.split(",")
             #coord1.append((float(x1), float(y1)))
             #coord2.append((float(x2), float(y2)))
-            coord1Array.append((float(x1), float(y1))) 
-            coord2Array.append((float(x2), float(y2)))
-            coord1 = [(float(x1), float(y1))]
-            coord2 = [(float(x2), float(y2))]
-            dist.append(scipy.spatial.distance.cdist(coord1, coord2, 'euclidean')[0][0])
-            k = k + 1
+#            coord1Array.append((float(x1), float(y1))) 
+#            coord2Array.append((float(x2), float(y2)))
+#            coord1 = [(float(x1), float(y1))]
+#            coord2 = [(float(x2), float(y2))]
+#            dist.append(scipy.spatial.distance.cdist(coord1, coord2, 'euclidean')[0][0])
+#            k = k + 1
 
-        if len_ == len1:
-            while(k < len2):
-                pos = path2[k]
-                x, y = pos.split(",")
-                coord2Array.append((float(x), float(y)))
-                dist.append(maximum_dist)
-                k = k + 1
-        else:
-            while(k < len1):
-                pos = path1[k]
-                x, y = pos.split(",")
-                coord1Array.append((float(x), float(y)))
-                dist.append(maximum_dist)
-                k = k + 1
+#        if len_ == len1:
+#            while(k < len2):
+#                pos = path2[k]
+#                x, y = pos.split(",")
+#                coord2Array.append((float(x), float(y)))
+#                dist.append(maximum_dist)
+#                k = k + 1
+#        else:
+#            while(k < len1):
+#                pos = path1[k]
+#                x, y = pos.split(",")
+#                coord1Array.append((float(x), float(y)))
+#                dist.append(maximum_dist)
+#                k = k + 1
 
-        advise = "Simple distance between the path " + str(i) + " and " + str(j) + " :"
-        advise_time = "Time of the paths taken in consideration: " + str(dictionary_time_path[i]) + " " + str(dictionary_time_path[j])
-        print(advise)
+#        advise = "Simple distance between the path " + str(i) + " and " + str(j) + " :"
+#        advise_time = "Time of the paths taken in consideration: " + str(dictionary_time_path[i]) + " " + str(dictionary_time_path[j])
+#        print(advise)
         #print(coord1Array)
         #print(coord2Array)
 
-        total_dist = 0
-        for num in dist:
-            total_dist = total_dist + num
+#        total_dist = 0
+#        for num in dist:
+#            total_dist = total_dist + num
 
-        print(total_dist)
-        print(advise_time)
+#        print(total_dist)
+#        print(advise_time)
 
         #dist_array[i][j] = total_dist
-        dist_array.append(total_dist)
+#        dist_array.append(total_dist)
 
-        j = j + 1
+#        j = j + 1
     
-    i = i + 1 
+#    i = i + 1 
 
-for x in range(len(dist_array)):
-    print(dist_array[x])
+#for x in range(len(dist_array)):
+#    print(dist_array[x])
 
 ##### clustering part #####
 
 Z = linkage(dist_array, 'ward')
-#plt.title('Hierarchical Clustering Dendrogram')
-#plt.xlabel('sample index')
-#plt.ylabel('distance')
-#dendrogram(Z)
-#plt.show()
+plt.title('Hierarchical Clustering Dendrogram')
+plt.xlabel('sample index')
+plt.ylabel('distance')
+dendrogram(Z)
+plt.show()

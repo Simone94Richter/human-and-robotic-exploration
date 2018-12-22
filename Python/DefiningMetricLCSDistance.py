@@ -130,7 +130,7 @@ dist_array = [[0 for x in range(len_array)] for y in range(len_array)]
 
 while(i < len_array):
     path1 = dictionary_path[i]
-    j = 0
+    j = i + 1
     while(j < len_array):
         path2 = dictionary_path[j]
         
@@ -216,8 +216,8 @@ plt.show()
 ##### clustering part #####
 
 Z = linkage(dist_array, 'ward')
-#plt.title('Hierarchical Clustering Dendrogram')
-#plt.xlabel('sample index')
-#plt.ylabel('distance')
-#dendrogram(Z)
-#plt.show()
+plt.title('Hierarchical Clustering Dendrogram')
+plt.xlabel('sample index')
+plt.ylabel('distance')
+dendrogram(Z)
+plt.show()
