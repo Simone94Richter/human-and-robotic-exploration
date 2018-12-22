@@ -20,6 +20,7 @@ public class RobotMovement : MonoBehaviour {
 
     private bool goForward;
     private bool goRotation;
+    private bool isMultiTarget;
 
     private int layerMask = 1 << 0;
 
@@ -110,7 +111,8 @@ public class RobotMovement : MonoBehaviour {
                     transform.position = transform.position;
                     transform.rotation = transform.rotation;
                     //Debug.Log("Mission Complete!");
-                    //inGameSession = false;
+                    if(!isMultiTarget)
+                    inGameSession = false;
                 }else
                 {
                     transform.position += transform.forward * Time.deltaTime * speed;
@@ -235,5 +237,10 @@ public class RobotMovement : MonoBehaviour {
     public void ResetMovement()
     {
         targetFound = false;
+    }
+
+    public void SetIsMultiTarget(bool boolean)
+    {
+        isMultiTarget = boolean;
     }
 }

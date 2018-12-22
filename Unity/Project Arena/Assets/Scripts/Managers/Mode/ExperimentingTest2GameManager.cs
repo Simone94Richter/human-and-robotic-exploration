@@ -41,6 +41,7 @@ public class ExperimentingTest2GameManager : GameManager
     private float completionTime; //The time used by the agent to fulfill the task
 
     private int targetsFound; //how many target have been found
+    private int countNotFinished;
 
     private List<bool> targetReached = new List<bool>(); //List saying if a certain target has been reached or not
     private List<GameObject> newTarget = new List<GameObject>(); //List used to instance the target
@@ -97,6 +98,7 @@ public class ExperimentingTest2GameManager : GameManager
                 //Robot agent case
                 if (robotScript && !IsReady())
                 {
+                    robotScript.SetIsMultiTarget(true);
                     robotScript.StartingCountDown();
                 }
 
@@ -130,15 +132,22 @@ public class ExperimentingTest2GameManager : GameManager
                 }
 
                 finished = true;
+                countNotFinished = 0;
 
                 for (int i = 0; i < targetReached.Count; i++)
                 {
                     if (!targetReached[i])
                     {
                         finished = false;
+                        countNotFinished++;
                     }
                 }
                 //Debug.Log(targetReached[0] + "," + targetReached[1] + ", " + targetReached[2] + ", " + targetReached[3]);
+
+                if (countNotFinished < 2)
+                {
+                    robotScript.SetIsMultiTarget(false);
+                }
 
                 if (finished)
                 {

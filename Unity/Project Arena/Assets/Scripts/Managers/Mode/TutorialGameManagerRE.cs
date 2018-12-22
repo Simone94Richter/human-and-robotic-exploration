@@ -73,6 +73,7 @@ public class TutorialGameManagerRE : GameManager
                 }
                 if (robotScript && !IsReady())
                 {
+                    robotScript.SetIsMultiTarget(false);
                     robotScript.StartingCountDown();
                 }
 

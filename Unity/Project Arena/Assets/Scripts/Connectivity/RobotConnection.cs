@@ -50,10 +50,10 @@ public class RobotConnection : MonoBehaviour {
         //uwr.SetRequestHeader("Content-Type", "application/json");
 
         //Send the request then wait here until it returns
-        operation = postMapRequest.SendWebRequest();
 
         if (loadingBar)
         {
+            operation = postMapRequest.SendWebRequest();
             while (!operation.isDone)
             {
                 progress = Mathf.Clamp01(operation.progress / .9f);
@@ -85,10 +85,10 @@ public class RobotConnection : MonoBehaviour {
         //uwr.SetRequestHeader("Content-Type", "application/json");
 
         //Send the request then wait here until it returns
-        operation2 = postTrajectoryRequest.SendWebRequest();
 
         if (loadingBar)
         {
+            operation2 = postTrajectoryRequest.SendWebRequest();
             while (!operation2.isDone)
             {
                 progress = Mathf.Clamp01(operation2.progress / .9f);

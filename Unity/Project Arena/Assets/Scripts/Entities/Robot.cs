@@ -23,8 +23,8 @@ public class Robot : Entity{
     [Header("Arbitrary float used to detect wall after a collision with one of them")]
     public float epsilon = 1f; //for now, 1 is the best
 
-    [Header("Forgetting Factor")]
-    public float forgettingFactor;
+    //[Header("Forgetting Factor")]
+    //public float forgettingFactor;
 
     [Header("Num paramters for numerical mapping")]
     public float numFreeCell = 0f;
@@ -39,6 +39,7 @@ public class Robot : Entity{
     //--- Private and Protected Variables ---//
     
     protected bool targetFound; //is the objective detected by mapping?
+    private bool isMultiTarget;
 
     private RaycastHit hit;
 
@@ -178,7 +179,9 @@ public class Robot : Entity{
         rPl.robot_map = robot_map;
 
         rDM.SetCharMap(robot_map);
-        
+
+        //rM.SetIsMultiTarget(isMultiTarget);
+
     }
 
     /// <summary>
@@ -221,6 +224,14 @@ public class Robot : Entity{
 
         rDM.SetNumericMap(numeric_robot_map);
 
+        //rM.SetIsMultiTarget(isMultiTarget);
+
+    }
+
+    public void SetIsMultiTarget(bool boolean)
+    {
+        isMultiTarget = boolean;
+        rM.SetIsMultiTarget(isMultiTarget);
     }
 
     // parte importata non rilevante
@@ -323,8 +334,11 @@ public class Robot : Entity{
     /// <returns></returns>
     protected IEnumerator RestartAfterReachingObjective()
     {
+        sendingRays = SendingRays();
+        pointToReach = ChoosingPointToReach();
+        yield return new WaitForSeconds(1f);
         StartCoroutine(sendingRays);
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(1f);
         StartCoroutine(pointToReach);
     }
 
@@ -338,20 +352,20 @@ public class Robot : Entity{
         {
             angle = angleRay;
             landingRay[0] = new Ray(transform.position, transform.forward);
-            //Debug.DrawRay(transform.position, transform.forward * rangeRays, Color.red, 2f);
+            Debug.DrawRay(transform.position, transform.forward * rangeRays, Color.red, 2f);
             for (indexRays = 1; indexRays < numbRay - 1; indexRays = indexRays + 2) //y rimane invariato, bisogna spaziare intorno a x e z
             {
                 rayRight = new Ray(transform.position, Quaternion.AngleAxis(-angle, transform.up) * transform.forward);
                 landingRay[indexRays] = rayRight;
-                //Debug.DrawRay(transform.position, Quaternion.AngleAxis(-angle, transform.up) * transform.forward * rangeRays, Color.red, 2f);
+                Debug.DrawRay(transform.position, Quaternion.AngleAxis(-angle, transform.up) * transform.forward * rangeRays, Color.red, 2f);
                 rayLeft = new Ray(transform.position, Quaternion.AngleAxis(angle, transform.up) * transform.forward);
                 landingRay[indexRays + 1] = rayLeft;
-                //Debug.DrawRay(transform.position, Quaternion.AngleAxis(angle, transform.up) * transform.forward * rangeRays, Color.red, 2f);
+                Debug.DrawRay(transform.position, Quaternion.AngleAxis(angle, transform.up) * transform.forward * rangeRays, Color.red, 2f);
 
                 angle = angle + angleRay;
             }
             UpdatingSpace(landingRay);
-            ForgivingMemory();
+            //ForgivingMemory();
             yield return new WaitForSeconds(timeForScan);
         }
     }
@@ -384,7 +398,7 @@ public class Robot : Entity{
                     {
                         if (numeric_robot_map[(int)pointX, (int)pointZ] != numWallCell) numeric_robot_map[(int)pointX, (int)pointZ] = numFreeCell;
                     }
-                    forgettingCounterCell[(int)pointX, (int)pointZ] = forgettingFactor;
+                    //forgettingCounterCell[(int)pointX, (int)pointZ] = forgettingFactor;
                     //Debug.Log(numeric_robot_map[(int)x_coord, (int)y_coord] + "" + (int)x_coord + "" + (int)y_coord);
                 }
             }
@@ -421,7 +435,7 @@ public class Robot : Entity{
                     if (!isNumeric)
                         robot_map[(int)robotX, (int)robotZ] = 'g';
                     else numeric_robot_map[(int)robotX, (int)robotZ] = numGoalCell;
-                    forgettingCounterCell[(int)robotX, (int)robotZ] = forgettingFactor;
+                    //forgettingCounterCell[(int)robotX, (int)robotZ] = forgettingFactor;
                     //Debug.Log(x + "" + y);
                     //portarlo dritto al target
                 }
@@ -435,7 +449,7 @@ public class Robot : Entity{
                 robot_map[(int)targetX, (int)targetZ] = 'g';
             else numeric_robot_map[(int)targetX, (int)targetZ] = numGoalCell;
 
-            forgettingCounterCell[(int)targetX, (int)targetZ] = forgettingFactor;
+            //forgettingCounterCell[(int)targetX, (int)targetZ] = forgettingFactor;
         }
 
         if (!isNumeric)
@@ -467,7 +481,7 @@ public class Robot : Entity{
             if (!isNumeric && robot_map[(int)pointX, (int)pointZ] != 'w')
                 robot_map[(int)pointX, (int)pointZ] = 'r';
             else if(isNumeric && numeric_robot_map[(int)pointX, (int)pointZ] != numWallCell) numeric_robot_map[(int)pointX, (int)pointZ] = numFreeCell;
-            forgettingCounterCell[(int)pointX, (int)pointZ] = forgettingFactor;
+            //forgettingCounterCell[(int)pointX, (int)pointZ] = forgettingFactor;
         }
     }
 
@@ -496,7 +510,7 @@ public class Robot : Entity{
         if (!isNumeric /*&& robot_map[(int)wallPointX,(int)wallPointZ] != 'r'*/)
             robot_map[(int)wallPointX, (int)wallPointZ] = 'w';
         else if(isNumeric /*&& numeric_robot_map[(int)wallPointX, (int)wallPointZ] != numFreeCell*/) numeric_robot_map[(int)wallPointX, (int)wallPointZ] = numWallCell;
-        forgettingCounterCell[(int)wallPointX, (int)wallPointZ] = forgettingFactor;
+        //forgettingCounterCell[(int)wallPointX, (int)wallPointZ] = forgettingFactor;
 
         //method 2
         /*if (dx >= 0 && dz >= 0) //primo quadrante
@@ -564,6 +578,7 @@ public class Robot : Entity{
         }*/
     }
 
+    /*
     /// <summary>
     /// This method lowers by one the counter of the memory of a cell to be "resetted" to the standard value, that is the unknown one
     /// </summary>
@@ -589,6 +604,7 @@ public class Robot : Entity{
             }
         }
     }
+    */
 
     /// <summary>
     /// This method is used to decide which tile the robot has to reach. All the potential tiles are the one that are free and near an unknown one
@@ -600,6 +616,7 @@ public class Robot : Entity{
         {
             DetectingFrontierPoints();
 
+            //Debug.Log(posToReach.Count);
             if (posToReach.Count != 0)
             {
                 goals = posToReach;
