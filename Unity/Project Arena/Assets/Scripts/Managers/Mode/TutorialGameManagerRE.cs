@@ -241,7 +241,7 @@ public class TutorialGameManagerRE : GameManager
             playerScript.ShowGun(false);
             tutorialGameUIManagerScript.ActivatePauseUI(true);
             playerScript.EnableInput(false);
-            playerScript.UpdateStartingTime(Time.time);
+            //playerScript.UpdateStartingTime(Time.time);
         }
         else
         {
@@ -250,7 +250,7 @@ public class TutorialGameManagerRE : GameManager
             playerScript.ShowGun(true);
             tutorialGameUIManagerScript.ActivatePauseUI(false);
             playerScript.EnableInput(true);
-            playerScript.StartTime();
+            //playerScript.StartTime();
         }
 
         isPaused = !isPaused;

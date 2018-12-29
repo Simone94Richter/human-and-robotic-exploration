@@ -123,6 +123,19 @@ public class SLPrefabMapAssembler : PrefabMapAssembler {
                         }
                     }
                 }
+                else if (numeric_map[x, y] == 56)
+                {
+                    string currentMask = GetNeighbourhoodMaskNumb(x, y);
+                    foreach (ProcessedTilePrefab p in processedColoredTilePrefabs[3].coloredProcessedTilePrefabs)
+                    {
+                        //Debug.Log(p.mask);
+                        if (p.mask == currentMask)
+                        {
+                            AddPrefab(p.prefab, x, y, squareSize, p.rotation, wallHeight);
+                            break;
+                        }
+                    }
+                }
                 else if (numeric_map[x, y] != wallNumb)
                 {
                     string currentMask = GetNeighbourhoodMaskNumb(x, y);
