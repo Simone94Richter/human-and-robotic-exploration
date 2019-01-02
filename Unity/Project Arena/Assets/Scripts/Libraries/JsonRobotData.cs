@@ -2,17 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-/// <summary>
-/// This class defines a JSON containing all the information about the trajectory done by an agent
-/// </summary>
+
 [Serializable]
-public class JsonRobotObjects {
+public class JsonRobotData{
 
     public List<string> position;
     public List<float> rotationY;
     public float time;
     public string mapName;
+    public float timeDecision;
+    public float timeScan;
+    public float penalty_cost;
     public string ip;
     public string os;
-
 }

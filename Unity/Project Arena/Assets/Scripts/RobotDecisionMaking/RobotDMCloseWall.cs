@@ -10,24 +10,34 @@ public class RobotDMCloseWall : RobotDecisionMaking {
 
     private float distance;
     private float tempDistance;
-    private float wallX;
-    private float wallZ;
+    //private float wallX;
+    //private float wallZ;
 
     private int frontierXCoord;
     private int frontierZcoord;
+    private int index;
 
     private List<Vector3> closestWall = new List<Vector3>();
     private List<Vector3> closestFrontier = new List<Vector3>();
     private List<Vector3> currentZone;
-    private List<Vector3> frontier;
+    //private List<Vector3> frontier;
+    private List<Vector3> possibleCloseWall = new List<Vector3>();
     private List<Vector3> possibleFrontierCell;
+    private List<List<Vector3>> possibleFrontier = new List<List<Vector3>>();
     private List<Vector3> wallFound;
     private List<Vector3> wallList;
+    private List<Vector3> newPossibleFrontierCell = new List<Vector3>();
     private List<List<Vector3>> filteredFrontierZones;
     private List<List<Vector3>> frontierZones;
 
+
     private Vector3 frontierCell;
     private Vector3 wallCell;
+
+    protected void Start()
+    {
+        Random.InitState(System.DateTime.Now.Millisecond);
+    }
 
     /// <summary>
     /// This method chooses the frontier point that the robot agent has to reach do advance in exploration
@@ -98,12 +108,16 @@ public class RobotDMCloseWall : RobotDecisionMaking {
 
         if (possibleFrontierCell.Count == 1)//returning the point
         {
+            Debug.Log("E' uno");
             return possibleFrontierCell[0];
         }
         else //return the least distant frontier point from the agent
         {
+            Debug.Log("Sono di più");
             frontierCell = possibleFrontierCell[0];
             distance = Mathf.Sqrt( (possibleFrontierCell[0].x - transform.position.x)*(possibleFrontierCell[0].x - transform.position.x) + (possibleFrontierCell[0].z - transform.position.z)*(possibleFrontierCell[0].z - transform.position.z) );
+            newPossibleFrontierCell.Clear();
+            newPossibleFrontierCell.Add(frontierCell);
             for (int i = 1; i < possibleFrontierCell.Count; i++)
             {
                 tempDistance = Mathf.Sqrt( (possibleFrontierCell[i].x - transform.position.x)*(possibleFrontierCell[i].x - transform.position.x) + (possibleFrontierCell[i].z - transform.position.z)*(possibleFrontierCell[i].z - transform.position.z) );
@@ -111,10 +125,19 @@ public class RobotDMCloseWall : RobotDecisionMaking {
                 {
                     distance = tempDistance;
                     frontierCell = possibleFrontierCell[i];
+                    newPossibleFrontierCell.Clear();
+                    newPossibleFrontierCell.Add(possibleFrontierCell[i]);
                 }
+                else if (tempDistance == distance)
+                {
+                    newPossibleFrontierCell.Add(possibleFrontierCell[i]);
+                }
+                //Debug.Log(newPossibleFrontierCell.Count);
             }
 
-            return frontierCell;
+            index = Random.Range(0, newPossibleFrontierCell.Count);
+            //Debug.Log(index + ", " + newPossibleFrontierCell.Count);
+            return newPossibleFrontierCell[index];
         }
     }
 
@@ -140,6 +163,8 @@ public class RobotDMCloseWall : RobotDecisionMaking {
 
         wallCell = wallList[0];
         distance = Mathf.Sqrt( (transform.position.x - wallCell.x)*(transform.position.x - wallCell.x) + (transform.position.z - wallCell.z)*(transform.position.z - wallCell.z) );
+        possibleCloseWall.Clear();
+        possibleCloseWall.Add(wallCell);
 
         for (int i = 0; i < wallList.Count; i++)
         {
@@ -148,7 +173,24 @@ public class RobotDMCloseWall : RobotDecisionMaking {
             {
                 wallCell = wallList[i];
                 distance = tempDistance;
+                possibleCloseWall.Clear();
+                possibleCloseWall.Add(wallList[i]);
             }
+            else if (tempDistance == distance)
+            {
+                possibleCloseWall.Add(wallList[i]);
+            }
+        }
+
+        if (possibleCloseWall.Count == 1)
+        {
+            wallCell = possibleCloseWall[0];
+        }
+        else
+        {
+            //Debug.Log(possibleCloseWall.Count);
+            index = Random.Range(0, possibleCloseWall.Count);
+            wallCell = possibleCloseWall[index];
         }
 
         wallFound.Add(wallCell);
@@ -267,7 +309,8 @@ public class RobotDMCloseWall : RobotDecisionMaking {
     /// <returns></returns>
     private List<Vector3> CalculatingClosestFrontier()
     {
-        frontier = frontierZones[0];
+        possibleFrontier.Clear();
+        possibleFrontier.Add(frontierZones[0]);
         distance = Mathf.Sqrt( (GetXCoordinateFrontier(frontierZones[0]) - transform.position.x) * (GetXCoordinateFrontier(frontierZones[0]) - transform.position.x) + (GetZCoordinateFrontier(frontierZones[0]) - transform.position.z) * (GetZCoordinateFrontier(frontierZones[0]) - transform.position.z) );
         for (int i = 0; i < frontierZones.Count; i++)
         {
@@ -275,11 +318,26 @@ public class RobotDMCloseWall : RobotDecisionMaking {
             if (tempDistance < distance)
             {
                 distance = tempDistance;
-                frontier = frontierZones[i];
+                possibleFrontier.Clear();
+                possibleFrontier.Add(frontierZones[i]);
+            }
+            else if (tempDistance == distance)
+            {
+                possibleFrontier.Add(frontierZones[i]);
             }
         }
 
-        return frontier;
+        Debug.Log("Num frontiers closest: " + possibleFrontier.Count);
+
+        if (possibleFrontier.Count == 1)
+        {
+            return possibleFrontier[0];
+        }
+        else
+        {
+            index = Random.Range(0, possibleFrontier.Count);
+            return possibleFrontier[index];
+        }
     }
 
     /// <summary>

@@ -180,6 +180,10 @@ public class Robot : Entity{
 
         rDM.SetCharMap(robot_map);
 
+        rP.SetTimeDecision(timeForDecision);
+        rP.SetTimeScan(timeForScan);
+        rP.SetPenaltyCost(rPl.penaltyCost);
+
         //rM.SetIsMultiTarget(isMultiTarget);
 
     }
@@ -223,6 +227,10 @@ public class Robot : Entity{
         rPl.numeric_robot_map = numeric_robot_map;
 
         rDM.SetNumericMap(numeric_robot_map);
+
+        rP.SetTimeDecision(timeForDecision);
+        rP.SetTimeScan(timeForScan);
+        rP.SetPenaltyCost(rPl.penaltyCost);
 
         //rM.SetIsMultiTarget(isMultiTarget);
 

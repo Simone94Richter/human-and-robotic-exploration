@@ -24,6 +24,10 @@ public class RobotProgress : MonoBehaviour {
     public string pathMapNum = "/Results/resultMapNum.json";
     public string pathPosNum = "/Results/resultPositionNum.json";
 
+    [Header("Only for Robot Agent Test case")]
+    [Header("Name of the map")]
+    public string map = "open1.map";
+
     private string filePathMapResChar; //complete path for the file dedicated to store map information (Char case)
     private string filePathPosResChar; //complete path for the file dedicated to store trajectory information (Char case)
     private string filePathMapResNum; //complete path for the file dedicated to store map information (Float case)
@@ -32,7 +36,12 @@ public class RobotProgress : MonoBehaviour {
     private string posAsJson;
     private string mapAsJson;
 
+#if UNITY_EDITOR
+    private JsonRobotData gameRobotData;
+#endif
+#if !UNITY_EDITOR
     private JsonRobotObjects gameDataPos;
+#endif
     private JsonMapObjects gameDataMap;
     private RobotConnection rC;
 
@@ -63,16 +72,21 @@ public class RobotProgress : MonoBehaviour {
         {
             File.Create(filePathPosResNum);
         }
-#endif
 
+        gameRobotData = new JsonRobotData
+        {
+            mapName = map,
+            position = new List<string>(),
+            rotationY = new List<float>()
+        };
+#endif
+        gameDataMap = new JsonMapObjects();
+        gameDataMap.mapName = new List<string>();
+#if !UNITY_EDITOR
         gameDataPos = new JsonRobotObjects();
         gameDataPos.position = new List<string>();
         gameDataPos.rotationY = new List<float>();
-        gameDataPos.time = new List<float>();
-        gameDataPos.mapName = new List<string>();
-        gameDataMap = new JsonMapObjects();
-        gameDataMap.mapName = new List<string>();
-
+#endif
         posAsJson = "";
         mapAsJson = "";
     }
@@ -112,7 +126,7 @@ public class RobotProgress : MonoBehaviour {
 
         mapAsJson = JsonUtility.ToJson(gameDataMap);
 #if UNITY_EDITOR
-        File.WriteAllText(filePathMapResChar, mapAsJson); //disattivare se web build
+        File.WriteAllText(filePathMapResChar, mapAsJson);
 #endif
     }
 
@@ -150,48 +164,63 @@ public class RobotProgress : MonoBehaviour {
 
         mapAsJson = JsonUtility.ToJson(gameDataMap);
 #if UNITY_EDITOR
-        File.WriteAllText(filePathMapResNum, mapAsJson); //disattivare se web build
+        File.WriteAllText(filePathMapResNum, mapAsJson);
 #endif
     }
 
     public void SavePosChar(int posX, int posZ, Vector3 rotation)
     {
+#if !UNITY_EDITOR
         gameDataPos.position.Add(posX.ToString() + "," + posZ.ToString());
         gameDataPos.rotationY.Add(rotation.y);
         posAsJson = JsonUtility.ToJson(gameDataPos);
-# if UNITY_EDITOR
-        File.WriteAllText(filePathPosResChar, posAsJson); //disattivare se web build
+#endif
+#if UNITY_EDITOR
+        gameRobotData.position.Add(posX.ToString() + "," + posZ.ToString());
+        gameRobotData.rotationY.Add(rotation.y);
+        posAsJson = JsonUtility.ToJson(gameRobotData);
+        File.WriteAllText(filePathPosResChar, posAsJson);
 #endif
     }
 
     public void SavePosNum(int posX, int posZ, Vector3 rotation)
     {
+#if !UNITY_EDITOR
         gameDataPos.position.Add(posX.ToString() + "," + posZ.ToString());
         gameDataPos.rotationY.Add(rotation.y);
         posAsJson = JsonUtility.ToJson(gameDataPos);
+#endif
 #if UNITY_EDITOR
-        File.WriteAllText(filePathPosResNum, posAsJson); //disattivare se web build
+        gameRobotData.position.Add(posX.ToString() + "," + posZ.ToString());
+        gameRobotData.rotationY.Add(rotation.y);
+        posAsJson = JsonUtility.ToJson(gameRobotData);
+        File.WriteAllText(filePathPosResNum, posAsJson);
 #endif
     }
 
     public void SaveTimeChar(float time)
     {
-        gameDataPos.time.Add(time);
+#if !UNITY_EDITOR
+        gameDataPos.time = time;
         posAsJson = JsonUtility.ToJson(gameDataPos);
+#endif
 #if UNITY_EDITOR
-        File.WriteAllText(filePathPosResChar, posAsJson); //disattivare se web build
+        gameRobotData.time = time;
+        posAsJson = JsonUtility.ToJson(gameRobotData);
+        File.WriteAllText(filePathPosResChar, posAsJson);
 #endif
     }
 
     public void SaveTimeNum(float time)
     {
-        gameDataPos.time.Add(time);
+#if !UNITY_EDITOR
+        gameDataPos.time = time;
         if (ExperimentManager.HasInstance())
         {
             int index = ExperimentManager.Instance.GetCaseIndex();
             Case currentCase = ExperimentManager.Instance.GetCaseList()[index];
             //Debug.Log(currentCase.GetCurrentMap().name);
-            gameDataPos.mapName.Add(currentCase.GetCurrentMap().name);
+            gameDataPos.mapName = currentCase.GetCurrentMap().name;
             gameDataMap.mapName.Add(currentCase.GetCurrentMap().name);
 
             if (!string.IsNullOrEmpty(ExperimentManager.Instance.GetIpAddress()))
@@ -201,15 +230,55 @@ public class RobotProgress : MonoBehaviour {
         }
         gameDataPos.os = SystemInfo.operatingSystem;
         posAsJson = JsonUtility.ToJson(gameDataPos);
-# if UNITY_EDITOR
-        File.WriteAllText(filePathPosResNum, posAsJson);
         mapAsJson = JsonUtility.ToJson(gameDataMap);
+#endif
+#if UNITY_EDITOR
+        gameRobotData.time = time;
+        if (ExperimentManager.HasInstance())
+        {
+            int index = ExperimentManager.Instance.GetCaseIndex();
+            Case currentCase = ExperimentManager.Instance.GetCaseList()[index];
+            //Debug.Log(currentCase.GetCurrentMap().name);
+            gameDataMap.mapName.Add(currentCase.GetCurrentMap().name);
+
+            if (!string.IsNullOrEmpty(ExperimentManager.Instance.GetIpAddress()))
+            {
+                gameRobotData.ip = ExperimentManager.Instance.GetIpAddress();
+            }
+        }
+        gameRobotData.os = SystemInfo.operatingSystem;
+        posAsJson = JsonUtility.ToJson(gameRobotData);
+        mapAsJson = JsonUtility.ToJson(gameDataMap);
+        File.WriteAllText(filePathPosResNum, posAsJson);
         File.WriteAllText(filePathMapResNum, mapAsJson);
-# endif
+#endif
     }
 
     public void PreparingForServer()
     {
+#if !UNITY_EDITOR
         rC.SendDataToServer(JsonUtility.ToJson(gameDataMap), JsonUtility.ToJson(gameDataPos));
+#endif
+    }
+
+    public void SetPenaltyCost(float cost)
+    {
+#if UNITY_EDITOR
+        gameRobotData.penalty_cost = cost;
+#endif
+    }
+
+    public void SetTimeDecision(float time)
+    {
+#if UNITY_EDITOR
+        gameRobotData.timeDecision = time;
+#endif
+    }
+
+    public void SetTimeScan(float time)
+    {
+#if UNITY_EDITOR
+        gameRobotData.timeScan = time;
+#endif
     }
 }

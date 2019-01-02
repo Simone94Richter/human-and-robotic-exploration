@@ -23,8 +23,8 @@ public class RobotDownload : MonoBehaviour {
     private JsonRobotObjects data;
     private List<string> pos = new List<string>();
     private List<float> rot = new List<float>();
-    private List<float> time = new List<float>();
-    private List<string> mName = new List<string>();
+    private float time;
+    private string mName;
 
     /// <summary>
     /// This method calls the coroutine to start the procedure to download data
@@ -44,8 +44,8 @@ public class RobotDownload : MonoBehaviour {
         data = new JsonRobotObjects();
         data.position = new List<string>();
         data.rotationY = new List<float>();
-        data.time = new List<float>();
-        data.mapName = new List<string>();
+        //data.time = new List<float>();
+        //data.mapName = new List<string>();
         id = 1;
         while (keepGoing) //until there are other results to download
         {
@@ -81,30 +81,30 @@ public class RobotDownload : MonoBehaviour {
                 }
                 gameDataPos.timerobot = Regex.Replace(gameDataPos.timerobot, @"[()]", "");
                 gameDataPos.timerobot = Regex.Replace(gameDataPos.timerobot, @"[ ]", "");
-                string[] timeRob = gameDataPos.timerobot.Split(',');
-                time = new List<float>();
-                for (int i = 0; i < timeRob.Length; i++)
-                {
-                    time.Add(float.Parse(timeRob[i]));
-                }
+                //string[] timeRob = gameDataPos.timerobot.Split(',');
+                //time = new List<float>();
+                //for (int i = 0; i < timeRob.Length; i++)
+                //{
+                //    time.Add(float.Parse(timeRob[i]));
+                //}
                 gameDataPos.mapname = Regex.Replace(gameDataPos.mapname, @"[()]", "");
                 gameDataPos.mapname = Regex.Replace(gameDataPos.mapname, @"[ ]", "");
-                string[] name = gameDataPos.mapname.Split(',');
-                mName = new List<string>();
-                for (int i = 0; i < name.Length; i++)
-                {
-                    mName.Add(name[i]);
-                }
+                //string[] name = gameDataPos.mapname.Split(',');
+                //mName = new List<string>();
+                //for (int i = 0; i < name.Length; i++)
+                //{
+                //    mName.Add(name[i]);
+                //}
                 data.position = pos;
                 data.rotationY = rot;
-                data.time = time;
-                data.mapName = mName;
+                data.time = float.Parse(gameDataPos.timerobot);
+                data.mapName = gameDataPos.mapname;
                 data.ip = gameDataPos.ip;
                 data.os = gameDataPos.os;
                 
                 File.WriteAllText(downloadedContentPath + "/Result" + id.ToString() + "t.txt", JsonUtility.ToJson(data));
 
-                WriteTupleLog(pos, rot, mName, id);
+                WriteTupleLog(pos, rot, gameDataPos.mapname, id);
 
                 id++;
             }
@@ -123,7 +123,7 @@ public class RobotDownload : MonoBehaviour {
     /// <param name="rot">List of rotations of the JSON</param>
     /// <param name="name">Name of the map explored by the player/robot</param>
     /// <param name="id">Id of the results according to the database</param>
-    private void WriteTupleLog(List<string> pos, List<float> rot, List<string> name, int id)
+    private void WriteTupleLog(List<string> pos, List<float> rot, string name, int id)
     {
         string log;
         log = "Map Name: " + name[0];
