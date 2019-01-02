@@ -427,7 +427,7 @@ while(finish == False):
     if os.path.isfile(inputDir + "/" + fileName + str(index) + "t.txt"):
         with open(inputDir + "/" + fileName + str(index) + "t.txt") as json_file:
                 data = json.load(json_file)
-                if(data['mapName'][0] == map_name):
+                if(data['mapName'] == map_name):
                     array_pos = data['position']
                     dictionary_path[i] = array_pos
                     dictionary_time_path[i] = data['time']
