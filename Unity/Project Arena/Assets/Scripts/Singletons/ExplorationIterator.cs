@@ -25,13 +25,13 @@ public class ExplorationIterator : MonoBehaviour{
     private float minTimeDecision = 1f;
     private float minPenaltyCost = 0;
 
-    private float startingTimeScan = 0.4f;
-    private float startingTimeDecision = 1f;
-    private float startingPenaltyCost = 0;
+    private float startingTimeScan = 0.6f;
+    private float startingTimeDecision = 8.0f;
+    private float startingPenaltyCost = 8;
 
     private string pathMapNum = "/Results/resultMapNum";
     private string pathPosNum = "/Results/resultPositionNum";
-    private int iteration = 31;
+    private int iteration = 858;
 
     private IEnumerator timer;
 
@@ -113,7 +113,7 @@ public class ExplorationIterator : MonoBehaviour{
 
     public void CheckIteration()
     {
-        if(timeDecision == maxTimeDecision && timeScan == maxTimeScan)
+        if(timeDecision == maxTimeDecision && timeScan >= maxTimeScan && penaltyCost == maxPenaltyCost)
         {
             Debug.Log("End");
         }
