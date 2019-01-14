@@ -38,6 +38,8 @@ public class RobotProgress : MonoBehaviour {
 
 #if UNITY_EDITOR
     private JsonRobotData gameRobotData;
+    private FileStream fileMap;
+    private FileStream filePos;
 #endif
 #if !UNITY_EDITOR
     private JsonRobotObjects gameDataPos;
@@ -50,7 +52,31 @@ public class RobotProgress : MonoBehaviour {
 
         rC = GetComponent<RobotConnection>();
 
-        //disattivare questo blocco se web build
+        gameDataMap = new JsonMapObjects();
+        gameDataMap.mapName = new List<string>();
+#if !UNITY_EDITOR
+        gameDataPos = new JsonRobotObjects();
+        gameDataPos.position = new List<string>();
+        gameDataPos.rotationY = new List<float>();
+#endif
+        posAsJson = "";
+        mapAsJson = "";
+    }
+
+    void Awake()
+    {
+#if UNITY_EDITOR
+        gameRobotData = new JsonRobotData
+        {
+            mapName = map,
+            position = new List<string>(),
+            rotationY = new List<float>()
+        };
+#endif
+    }
+
+    public void DefiningFolderAndFile()
+    {
 #if UNITY_EDITOR
         filePathMapResChar = Application.dataPath + pathMap;
         if (!File.Exists(filePathMapResChar))
@@ -65,30 +91,16 @@ public class RobotProgress : MonoBehaviour {
         filePathMapResNum = Application.dataPath + pathMapNum;
         if (!File.Exists(filePathMapResNum))
         {
-            File.Create(filePathMapResNum);
+            fileMap = File.Create(filePathMapResNum);
+            fileMap.Close();
         }
         filePathPosResNum = Application.dataPath + pathPosNum;
         if (!File.Exists(filePathPosResNum))
         {
-            File.Create(filePathPosResNum);
+            filePos = File.Create(filePathPosResNum);
+            filePos.Close();
         }
-
-        gameRobotData = new JsonRobotData
-        {
-            mapName = map,
-            position = new List<string>(),
-            rotationY = new List<float>()
-        };
 #endif
-        gameDataMap = new JsonMapObjects();
-        gameDataMap.mapName = new List<string>();
-#if !UNITY_EDITOR
-        gameDataPos = new JsonRobotObjects();
-        gameDataPos.position = new List<string>();
-        gameDataPos.rotationY = new List<float>();
-#endif
-        posAsJson = "";
-        mapAsJson = "";
     }
 
     /// <summary>

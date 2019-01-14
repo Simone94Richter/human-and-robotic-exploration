@@ -191,6 +191,11 @@ public class TutorialGameManagerRE : GameManager
 
             completionTime = Time.time;
             gamePhase = 2;
+
+            if (robotScript)
+            {
+                GameObject.Find("ExplorationIterator").GetComponent<ExplorationIterator>().CheckIteration();
+            }
         }
         else if (gamePhase == 2 && Time.time >= completionTime + scoreDuration && (!player.GetComponent<RobotConnection>() || (player.GetComponent<RobotConnection>() && player.GetComponent<RobotConnection>().uploadComplete)))
         {

@@ -60,11 +60,11 @@ public class RobotDMCloseWall : RobotDecisionMaking {
         //defining frontier zones
         DefiningFrontierZones(listFrontierPoints);
 
-        //removing frontier zones considered too little to be taken in consideration
-        //RemovingUselessFrontierZones();
-        //Debug.Log(frontierZones.Count);
-
         FixingOverlappingZones();
+
+        //removing frontier zones considered too little to be taken in consideration
+        RemovingUselessFrontierZones();
+        //Debug.Log(frontierZones.Count);
 
         Debug.Log(frontierZones.Count);
 
@@ -294,10 +294,10 @@ public class RobotDMCloseWall : RobotDecisionMaking {
 
     private bool CheckingSuspiciousFrontier(Vector3 frontierPoint)
     {
-        if ((numeric_map[(int)FixingRound(frontierPoint.x/squareSize), (int)FixingRound(frontierPoint.z/squareSize) - 1] == 1 && numeric_map[(int)FixingRound(frontierPoint.x / squareSize) - 1, (int)FixingRound(frontierPoint.z / squareSize)] == 1)
-            || (numeric_map[(int)FixingRound(frontierPoint.x / squareSize), (int)FixingRound(frontierPoint.z / squareSize) - 1] == 1 && numeric_map[(int)FixingRound(frontierPoint.x / squareSize) + 1, (int)FixingRound(frontierPoint.z / squareSize)] == 1)
-            || (numeric_map[(int)FixingRound(frontierPoint.x / squareSize), (int)FixingRound(frontierPoint.z / squareSize) + 1] == 1 && numeric_map[(int)FixingRound(frontierPoint.x / squareSize) - 1, (int)FixingRound(frontierPoint.z / squareSize)] == 1)
-            || (numeric_map[(int)FixingRound(frontierPoint.x / squareSize), (int)FixingRound(frontierPoint.z / squareSize) + 1] == 1 && numeric_map[(int)FixingRound(frontierPoint.x / squareSize) + 1, (int)FixingRound(frontierPoint.z / squareSize)] == 1))
+        if ((numeric_map[(int)FixingRound(frontierPoint.x/squareSize), (int)FixingRound(frontierPoint.z/squareSize) - 1] == 0 && numeric_map[(int)FixingRound(frontierPoint.x / squareSize) - 1, (int)FixingRound(frontierPoint.z / squareSize)] == 0)
+            || (numeric_map[(int)FixingRound(frontierPoint.x / squareSize), (int)FixingRound(frontierPoint.z / squareSize) - 1] == 0 && numeric_map[(int)FixingRound(frontierPoint.x / squareSize) + 1, (int)FixingRound(frontierPoint.z / squareSize)] == 0)
+            || (numeric_map[(int)FixingRound(frontierPoint.x / squareSize), (int)FixingRound(frontierPoint.z / squareSize) + 1] == 0 && numeric_map[(int)FixingRound(frontierPoint.x / squareSize) - 1, (int)FixingRound(frontierPoint.z / squareSize)] == 0)
+            || (numeric_map[(int)FixingRound(frontierPoint.x / squareSize), (int)FixingRound(frontierPoint.z / squareSize) + 1] == 0 && numeric_map[(int)FixingRound(frontierPoint.x / squareSize) + 1, (int)FixingRound(frontierPoint.z / squareSize)] == 0))
         {
             return true;
         } else return false;

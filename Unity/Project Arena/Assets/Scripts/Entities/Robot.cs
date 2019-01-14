@@ -36,10 +36,13 @@ public class Robot : Entity{
     public float timeForScan;
     public float timeForDecision;
 
+    public float penaltyCost;
+
     //--- Private and Protected Variables ---//
     
     protected bool targetFound; //is the objective detected by mapping?
     private bool isMultiTarget;
+    private bool finished;
 
     private RaycastHit hit;
 
@@ -98,6 +101,7 @@ public class Robot : Entity{
     // Use this for initialization
     void Start()
     {
+        finished = false;
         pointToReach = ChoosingPointToReach();
         sendingRays = SendingRays();
         //noPath = false;
@@ -180,10 +184,6 @@ public class Robot : Entity{
 
         rDM.SetCharMap(robot_map);
 
-        rP.SetTimeDecision(timeForDecision);
-        rP.SetTimeScan(timeForScan);
-        rP.SetPenaltyCost(rPl.penaltyCost);
-
         //rM.SetIsMultiTarget(isMultiTarget);
 
     }
@@ -228,11 +228,18 @@ public class Robot : Entity{
 
         rDM.SetNumericMap(numeric_robot_map);
 
+        //rM.SetIsMultiTarget(isMultiTarget);
+
+    }
+
+    public void SetVariables()
+    {
+        rP = GetComponent<RobotProgress>();
+        rPl = GetComponent<RobotPlanning>();
         rP.SetTimeDecision(timeForDecision);
         rP.SetTimeScan(timeForScan);
-        rP.SetPenaltyCost(rPl.penaltyCost);
-
-        //rM.SetIsMultiTarget(isMultiTarget);
+        rP.SetPenaltyCost(penaltyCost);
+        rPl.penaltyCost = penaltyCost;
 
     }
 
@@ -398,11 +405,11 @@ public class Robot : Entity{
                     //pointZ = pointZ / squareSize;
                     //pointX = FixingRound(pointX);
                     //pointZ = FixingRound(pointZ);
-                    if (!isNumeric)
+                    if (!isNumeric && (int)pointX >= 0 && (int)pointX < width && (int)pointZ >= 0 && (int)pointZ < height)
                     {
                         if (robot_map[(int)pointX, (int)pointZ] != 'w') robot_map[(int)pointX, (int)pointZ] = 'r';
                     }
-                    else
+                    else if ((int)pointX >= 0 && (int)pointX < width && (int)pointZ >= 0 && (int)pointZ < height)
                     {
                         if (numeric_robot_map[(int)pointX, (int)pointZ] != numWallCell) numeric_robot_map[(int)pointX, (int)pointZ] = numFreeCell;
                     }
@@ -777,7 +784,8 @@ public class Robot : Entity{
             rP.SaveTimeChar(finishingTime - startingTime);
         else rP.SaveTimeNum(finishingTime - startingTime);
 
-        rP.PreparingForServer();
+        //rP.PreparingForServer();
+        finished = true;
 
     }
 
@@ -788,7 +796,7 @@ public class Robot : Entity{
     /// <returns></returns>
     public bool TargetReached()
     {
-        if (rC.uploadComplete)
+        if (finished)
         {
             return true;
         }
