@@ -3,9 +3,9 @@ import os
 #import pandas as pd
 import matplotlib.pyplot as plt
 
-inputDir = "C:/Users/princ/OneDrive/Documenti/human-and-robotic-exploration/human-and-robotic-exploration/Results/RobotSamples"
-fileName = "resultMapNum"
-fileName2 = "resultPositionNum"
+inputDir = "C:/Users/princ/OneDrive/Documenti/human-and-robotic-exploration/human-and-robotic-exploration/Unity/Project Arena/Assets/Results"
+fileName = "resultMapNumO1"
+fileName2 = "resultPositionNumO1"
 index = 1
 keepGoing = True
 
