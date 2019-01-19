@@ -372,10 +372,10 @@ public class Robot : Entity{
             {
                 rayRight = new Ray(transform.position, Quaternion.AngleAxis(-angle, transform.up) * transform.forward);
                 landingRay[indexRays] = rayRight;
-                Debug.DrawRay(transform.position, Quaternion.AngleAxis(-angle, transform.up) * transform.forward * rangeRays, Color.red, 2f);
+                //Debug.DrawRay(transform.position, Quaternion.AngleAxis(-angle, transform.up) * transform.forward * rangeRays, Color.red, 2f);
                 rayLeft = new Ray(transform.position, Quaternion.AngleAxis(angle, transform.up) * transform.forward);
                 landingRay[indexRays + 1] = rayLeft;
-                Debug.DrawRay(transform.position, Quaternion.AngleAxis(angle, transform.up) * transform.forward * rangeRays, Color.red, 2f);
+                //Debug.DrawRay(transform.position, Quaternion.AngleAxis(angle, transform.up) * transform.forward * rangeRays, Color.red, 2f);
 
                 angle = angle + angleRay;
             }
@@ -447,7 +447,7 @@ public class Robot : Entity{
 
                     robotX = FixingRound(robotX);
                     robotZ = FixingRound(robotZ);
-                    if (!isNumeric)
+                    if (!isNumeric && (int)pointX >= 0 && (int)pointX < width && (int)pointZ >= 0 && (int)pointZ < height)
                         robot_map[(int)robotX, (int)robotZ] = 'g';
                     else numeric_robot_map[(int)robotX, (int)robotZ] = numGoalCell;
                     //forgettingCounterCell[(int)robotX, (int)robotZ] = forgettingFactor;
@@ -460,7 +460,7 @@ public class Robot : Entity{
         {
             targetX = FixingRound(destination.transform.position.x/squareSize);
             targetZ = FixingRound(destination.transform.position.z/squareSize);
-            if (!isNumeric)
+            if (!isNumeric && (int)pointX >= 0 && (int)pointX < width && (int)pointZ >= 0 && (int)pointZ < height)
                 robot_map[(int)targetX, (int)targetZ] = 'g';
             else numeric_robot_map[(int)targetX, (int)targetZ] = numGoalCell;
 
@@ -493,9 +493,9 @@ public class Robot : Entity{
             pointZ = ray.GetPoint(indexDistance).z / squareSize;
             pointX = FixingRound(pointX);
             pointZ = FixingRound(pointZ);
-            if (!isNumeric && robot_map[(int)pointX, (int)pointZ] != 'w')
+            if (!isNumeric && (int)pointX >= 0 && (int)pointX < width && (int)pointZ >= 0 && (int)pointZ < height && robot_map[(int)pointX, (int)pointZ] != 'w')
                 robot_map[(int)pointX, (int)pointZ] = 'r';
-            else if(isNumeric && numeric_robot_map[(int)pointX, (int)pointZ] != numWallCell) numeric_robot_map[(int)pointX, (int)pointZ] = numFreeCell;
+            else if(isNumeric && (int)pointX >= 0 && (int)pointX < width && (int)pointZ >= 0 && (int)pointZ < height && numeric_robot_map[(int)pointX, (int)pointZ] != numWallCell) numeric_robot_map[(int)pointX, (int)pointZ] = numFreeCell;
             //forgettingCounterCell[(int)pointX, (int)pointZ] = forgettingFactor;
         }
     }
@@ -522,9 +522,9 @@ public class Robot : Entity{
         wallPointX = FixingRound(ray.GetPoint(distance + epsilon).x / squareSize);
         wallPointZ = FixingRound(ray.GetPoint(distance + epsilon).z / squareSize);
 
-        if (!isNumeric /*&& robot_map[(int)wallPointX,(int)wallPointZ] != 'r'*/)
+        if (!isNumeric && (int)pointX >= 0 && (int)pointX < width && (int)pointZ >= 0 && (int)pointZ < height/*&& robot_map[(int)wallPointX,(int)wallPointZ] != 'r'*/)
             robot_map[(int)wallPointX, (int)wallPointZ] = 'w';
-        else if(isNumeric /*&& numeric_robot_map[(int)wallPointX, (int)wallPointZ] != numFreeCell*/) numeric_robot_map[(int)wallPointX, (int)wallPointZ] = numWallCell;
+        else if(isNumeric && (int)pointX >= 0 && (int)pointX < width && (int)pointZ >= 0 && (int)pointZ < height /*&& numeric_robot_map[(int)wallPointX, (int)wallPointZ] != numFreeCell*/) numeric_robot_map[(int)wallPointX, (int)wallPointZ] = numWallCell;
         //forgettingCounterCell[(int)wallPointX, (int)wallPointZ] = forgettingFactor;
 
         //method 2

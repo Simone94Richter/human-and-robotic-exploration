@@ -12,26 +12,27 @@ public class ExplorationIterator : MonoBehaviour{
     private RobotProgress rP;
 
     private bool isTheChosenOne = false;
+    private bool isMulty = true;
 
     private float timeScan;
     private float timeDecision;
     private float penaltyCost;
 
-    private float maxTimeScan = 1.0f;
-    private float maxTimeDecision = 10.0f;
-    private float maxPenaltyCost = 50.0f;
+    private float maxTimeScan = 0.1f;
+    private float maxTimeDecision = 10f;
+    private float maxPenaltyCost = 100.0f;
 
-    private float minTimeScan = 0.1f;
+    private float minTimeScan = 0.01f;
     private float minTimeDecision = 1f;
     private float minPenaltyCost = 0;
 
-    private float startingTimeScan = 0.6f;
-    private float startingTimeDecision = 8.0f;
-    private float startingPenaltyCost = 8;
+    private float startingTimeScan = 0.01f;
+    private float startingTimeDecision = 1f;
+    private float startingPenaltyCost = 0;
 
-    private string pathMapNum = "/Results/resultMapNum";
-    private string pathPosNum = "/Results/resultPositionNum";
-    private int iteration = 858;
+    private string pathMapNum = "/Results/resultMapNumS1";
+    private string pathPosNum = "/Results/resultPositionNumS1";
+    private int iteration = 1;
 
     private IEnumerator timer;
 
@@ -47,15 +48,15 @@ public class ExplorationIterator : MonoBehaviour{
             iteration = 1 + iteration;
             if (timeDecision < maxTimeDecision)
             {
-                timeDecision = 1 + timeDecision;
+                timeDecision = 1f + timeDecision;
             }
             else if (timeScan < maxTimeScan)
             {
-                timeScan = 0.1f + timeScan;
+                timeScan = 0.01f + timeScan;
                 timeDecision = minTimeDecision;
             }else if (penaltyCost < maxPenaltyCost)
             {
-                penaltyCost = 1 + penaltyCost;
+                penaltyCost = 10 + penaltyCost;
                 timeScan = minTimeScan;
                 timeDecision = minTimeDecision;
             }
@@ -113,7 +114,7 @@ public class ExplorationIterator : MonoBehaviour{
 
     public void CheckIteration()
     {
-        if(timeDecision == maxTimeDecision && timeScan >= maxTimeScan && penaltyCost == maxPenaltyCost)
+        if(timeDecision >= maxTimeDecision && timeScan >= maxTimeScan && penaltyCost >= maxPenaltyCost)
         {
             Debug.Log("End");
         }
@@ -121,13 +122,17 @@ public class ExplorationIterator : MonoBehaviour{
         {
             DontDestroyOnLoad(this.gameObject);
             StopCoroutine(timer);
-            SceneManager.LoadScene("Experimenting - Tutorial Robot");
+            if (isMulty)
+            {
+                SceneManager.LoadScene("Experimenting - Multy Target Robot");
+            }
+            else SceneManager.LoadScene("Experimenting - Tutorial Robot");
         }
     } 
 
     private IEnumerator Timer()
     {
-        yield return new WaitForSeconds(300);
+        yield return new WaitForSeconds(480);
         CheckIteration();
     }
 }
