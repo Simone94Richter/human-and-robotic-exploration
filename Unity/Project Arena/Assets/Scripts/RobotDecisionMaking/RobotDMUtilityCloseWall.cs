@@ -6,6 +6,7 @@ public class RobotDMUtilityCloseWall : RobotDecisionMaking
 {
 
     public float alpha;
+    public float beta;
 
     private float distance;
     private float tempDistance;
@@ -33,7 +34,7 @@ public class RobotDMUtilityCloseWall : RobotDecisionMaking
     private List<List<Vector3>> filteredFrontierZones = new List<List<Vector3>>();
     private List<List<Vector3>> frontierZones;
 
-    private SortedDictionary<float, List<Vector3>> utilityForFrontier = new SortedDictionary<float, List<Vector3>>();
+    private Dictionary<List<Vector3>, float> utilityForFrontier = new Dictionary<List<Vector3>, float>();
 
 
     private Vector3 frontierCell;
@@ -41,7 +42,8 @@ public class RobotDMUtilityCloseWall : RobotDecisionMaking
 
     protected void Start()
     {
-        Random.InitState(System.DateTime.Now.Millisecond);
+        Debug.Log(alpha);
+        Debug.Log(beta);
     }
 
     /// <summary>
@@ -99,19 +101,19 @@ public class RobotDMUtilityCloseWall : RobotDecisionMaking
             //Debug.Log(distanceRobotFrontier);
             distanceFrontierWall = BestDistanceFrontierWall(frontierZones[i]);
             //Debug.Log(distanceFrontierWall);
-            utility = distanceRobotFrontier + alpha * distanceFrontierWall + Placing(frontierZones[i]); //aggiungere valore per obiettivo davanti al giocatore
+            utility = (1f - alpha - beta) * distanceRobotFrontier + alpha * distanceFrontierWall + beta * Placing(frontierZones[i]);
             //Debug.Log(utility);
-            utilityForFrontier.Add(utility, frontierZones[i]);
+            utilityForFrontier.Add(frontierZones[i], utility);
         }
 
         //ciclare sul dictionary
         utility = Mathf.Infinity;
-        foreach (KeyValuePair<float, List<Vector3>> candidate in utilityForFrontier)
+        foreach (KeyValuePair<List<Vector3>, float> candidate in utilityForFrontier)
         {
-            if (candidate.Key < utility)
+            if (candidate.Value < utility)
             {
-                utility = candidate.Key;
-                possibleFrontierCell = candidate.Value;
+                utility = candidate.Value;
+                possibleFrontierCell = candidate.Key;
             }
         }
 
@@ -138,7 +140,7 @@ public class RobotDMUtilityCloseWall : RobotDecisionMaking
     /// This method returns the closest wall to a frontier zone
     /// </summary>
     /// <returns></returns>
-    private List<Vector3> CalculatingClosestWall(List<Vector3> frontier)
+    private Vector3 CalculatingClosestWall(List<Vector3> frontier)
     {
         wallFound = new List<Vector3>();
         wallList = new List<Vector3>();
@@ -156,8 +158,8 @@ public class RobotDMUtilityCloseWall : RobotDecisionMaking
 
         wallCell = wallList[0];
         distance = Mathf.Sqrt((GetXCoordinateCollection(frontier) - wallCell.x) * (GetXCoordinateCollection(frontier) - wallCell.x) + (GetZCoordinateCollection(frontier) - wallCell.z) * (GetZCoordinateCollection(frontier) - wallCell.z));
-        possibleCloseWall.Clear();
-        possibleCloseWall.Add(wallCell);
+        //possibleCloseWall.Clear();
+        //possibleCloseWall.Add(wallCell);
 
         for (int i = 0; i < wallList.Count; i++)
         {
@@ -166,40 +168,24 @@ public class RobotDMUtilityCloseWall : RobotDecisionMaking
             {
                 wallCell = wallList[i];
                 distance = tempDistance;
-                possibleCloseWall.Clear();
-                possibleCloseWall.Add(wallList[i]);
-            }
-            else if (tempDistance == distance)
-            {
-                possibleCloseWall.Add(wallList[i]);
+                //possibleCloseWall.Clear();
+                //possibleCloseWall.Add(wallList[i]);
             }
         }
 
-        if (possibleCloseWall.Count == 1)
-        {
-            wallCell = possibleCloseWall[0];
-        }
-        else
-        {
-            //Debug.Log(possibleCloseWall.Count);
-            index = Random.Range(0, possibleCloseWall.Count);
-            wallCell = possibleCloseWall[index];
-        }
+        //wallFound.Add(wallCell);
 
-        wallFound.Add(wallCell);
+        //AddNeighbourWalls(wallCell, wallFound);
 
-        AddNeighbourWalls(wallCell, wallFound);
-
-        return wallFound;
+        return wallCell;
     }
 
     private float BestDistanceFrontierWall(List<Vector3> frontier) //definire metodo per definire distanza muro-frontiera
     {
-        List<Vector3> wall = CalculatingClosestWall(frontier);
-        Vector3 wallPos = new Vector3(GetXCoordinateCollection(wall), transform.position.y, GetZCoordinateCollection(wall));
+        Vector3 wall = CalculatingClosestWall(frontier);
         Vector3 frontierPos = new Vector3(GetXCoordinateCollection(frontier), transform.position.y, GetZCoordinateCollection(frontier));
 
-        return Vector3.Distance(wallPos, frontierPos);
+        return Vector3.Distance(wall, frontierPos);
         //return Mathf.Sqrt( (GetXCoordinateCollection(wall) - GetXCoordinateCollection(frontier))*(GetXCoordinateCollection(wall) - GetXCoordinateCollection(frontier)) + (GetZCoordinateCollection(wall) - GetZCoordinateCollection(frontier))*(GetZCoordinateCollection(wall) - GetZCoordinateCollection(frontier)) );
     }
 
@@ -211,23 +197,22 @@ public class RobotDMUtilityCloseWall : RobotDecisionMaking
         Vector3 directionRobotFrontier = tempRelatedToRobot;
         float distanceDirectionRobotFrontier = directionRobotFrontier.magnitude;
         directionRobotFrontier = directionRobotFrontier / distanceDirectionRobotFrontier;
-        Debug.Log(direction1);
-        Debug.DrawRay(transform.position, Quaternion.AngleAxis(-45, transform.up) * transform.forward * 20, Color.cyan, 2f);
-        Debug.Log(direction2);
-        Debug.DrawRay(transform.position, Quaternion.AngleAxis(45, transform.up) * transform.forward * 20, Color.cyan, 2f);
-        Debug.DrawRay(transform.position, Quaternion.AngleAxis(-45, transform.up) * -transform.forward * 20, Color.cyan, 2f);
-        Debug.DrawRay(transform.position, Quaternion.AngleAxis(45, transform.up) * -transform.forward * 20, Color.cyan, 2f);
-        Debug.Log(directionRobotFrontier);
+        //Debug.Log(direction1);
+        //Debug.DrawRay(transform.position, Quaternion.AngleAxis(-45, transform.up) * transform.forward * 20, Color.cyan, 2f);
+        //Debug.Log(direction2);
+        //Debug.DrawRay(transform.position, Quaternion.AngleAxis(45, transform.up) * transform.forward * 20, Color.cyan, 2f);
+        //Debug.DrawRay(transform.position, Quaternion.AngleAxis(-45, transform.up) * -transform.forward * 20, Color.cyan, 2f);
+        //Debug.DrawRay(transform.position, Quaternion.AngleAxis(45, transform.up) * -transform.forward * 20, Color.cyan, 2f);
+        //Debug.Log(directionRobotFrontier);
         if (Vector3.Distance(directionRobotFrontier, direction1) + Vector3.Distance(directionRobotFrontier, direction2) <= Vector3.Distance(direction1, direction2))
         {
             return 0;
         }
         else if (Vector3.Distance(directionRobotFrontier, -direction1) + Vector3.Distance(directionRobotFrontier, -direction2) <= Vector3.Distance(-direction1, -direction2))
         {
-            return -100;
+            return 50;
         }
-        else return 100;
-
+        else return -50;
 
 
     }
@@ -354,23 +339,11 @@ public class RobotDMUtilityCloseWall : RobotDecisionMaking
                 possibleFrontier.Clear();
                 possibleFrontier.Add(frontierZones[i]);
             }
-            else if (tempDistance == distance)
-            {
-                possibleFrontier.Add(frontierZones[i]);
-            }
         }
 
         Debug.Log("Num frontiers closest: " + possibleFrontier.Count);
 
-        if (possibleFrontier.Count == 1)
-        {
-            return possibleFrontier[0];
-        }
-        else
-        {
-            index = Random.Range(0, possibleFrontier.Count);
-            return possibleFrontier[index];
-        }
+        return possibleFrontier[0];
     }
 
     /// <summary>

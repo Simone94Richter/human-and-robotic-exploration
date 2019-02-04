@@ -8,31 +8,38 @@ public class ExplorationIterator : MonoBehaviour{
     private GameObject robot;
 
     private Robot robotScript;
+    private RobotDMUtilityCloseWall rDMUtility;
     private RobotPlanning rPl;
     private RobotProgress rP;
 
     private bool isTheChosenOne = false;
-    private bool isMulty = true;
+    private bool isMulty = false;
 
-    private float timeScan;
-    private float timeDecision;
-    private float penaltyCost;
+    //private float timeScan;
+    //private float timeDecision;
+    //private float penaltyCost;
+    private float alpha;
+    private float beta;
+    private int deltaIndex;
+    private int[] forgettingFactor = new int[] {30,60,120,180};
 
-    private float maxTimeScan = 0.1f;
-    private float maxTimeDecision = 10f;
-    private float maxPenaltyCost = 100.0f;
+    private float maxAlpha = 1f;
+    private float maxBeta = 1f;
+    private int maxDeltaIndex = 3;
 
-    private float minTimeScan = 0.01f;
-    private float minTimeDecision = 1f;
-    private float minPenaltyCost = 0;
+    private float minAlpha = 0f;
+    private float minBeta = 0f;
+    private int minDeltaIndex = 0;
 
-    private float startingTimeScan = 0.01f;
-    private float startingTimeDecision = 1f;
-    private float startingPenaltyCost = 0;
+    private float startingAlpha = 0f;
+    private float startingBeta = 0f;
+    private int startingDelta = 0;
 
-    private string pathMapNum = "/Results/resultMapNumS1";
-    private string pathPosNum = "/Results/resultPositionNumS1";
+    private string pathMapNum = "/Results/ExperimentSamples2/resultMapNum";
+    private string pathPosNum = "/Results/ExperimentSamples2/resultPositionNum";
     private int iteration = 1;
+
+    private string mapName = "open1.map";
 
     private IEnumerator timer;
 
@@ -46,37 +53,42 @@ public class ExplorationIterator : MonoBehaviour{
         {
             timer = Timer();
             iteration = 1 + iteration;
-            if (timeDecision < maxTimeDecision)
+            if (alpha < maxAlpha)
             {
-                timeDecision = 1f + timeDecision;
+                alpha = 0.1f + alpha;
             }
-            else if (timeScan < maxTimeScan)
+            else if (beta < maxBeta)
             {
-                timeScan = 0.01f + timeScan;
-                timeDecision = minTimeDecision;
-            }else if (penaltyCost < maxPenaltyCost)
+                beta = 0.1f + beta;
+                alpha = minAlpha;
+            }else if (deltaIndex < maxDeltaIndex)
             {
-                penaltyCost = 10 + penaltyCost;
-                timeScan = minTimeScan;
-                timeDecision = minTimeDecision;
+                deltaIndex = deltaIndex + 1;
+                alpha = minAlpha;
+                beta = minBeta;
             }
 
             robot = GameObject.Find("Robot");
             robotScript = robot.GetComponent<Robot>();
             rPl = robot.GetComponent<RobotPlanning>();
             rP = robot.GetComponent<RobotProgress>();
-            robotScript.timeForScan = timeScan;
-            robotScript.timeForDecision = timeDecision;
-            robotScript.penaltyCost = penaltyCost;
+            rDMUtility = robot.GetComponent<RobotDMUtilityCloseWall>();
+            rDMUtility.alpha = alpha;
+            rDMUtility.beta = beta;
+            robotScript.forgettingFactor = forgettingFactor[deltaIndex];
             rP.pathMapNum = pathMapNum + iteration.ToString() + ".json";
             rP.pathPosNum = pathPosNum + iteration.ToString() + ".json";
 
-            robotScript.SetVariables();
+            //robotScript.SetVariables();
             rP.DefiningFolderAndFile();
+            rP.SetAlpha(alpha);
+            rP.SetBeta(beta);
+            rP.SetDelta(forgettingFactor[deltaIndex]);
+            rP.SetMapName(mapName);
 
-            Debug.Log(timeScan);
-            Debug.Log(timeDecision);
-            Debug.Log(penaltyCost);
+            Debug.Log(alpha);
+            Debug.Log(beta);
+            Debug.Log(forgettingFactor[deltaIndex]);
 
             StartCoroutine(timer);
         }
@@ -91,30 +103,35 @@ public class ExplorationIterator : MonoBehaviour{
         robotScript = robot.GetComponent<Robot>();
         rPl = robot.GetComponent<RobotPlanning>();
         rP = robot.GetComponent<RobotProgress>();
+        rDMUtility = robot.GetComponent<RobotDMUtilityCloseWall>(); 
 
-        robotScript.timeForScan = startingTimeScan;
-        robotScript.timeForDecision = startingTimeDecision;
-        robotScript.penaltyCost = startingPenaltyCost;
+        rDMUtility.alpha = startingAlpha;
+        rDMUtility.beta = startingBeta;
+        robotScript.forgettingFactor = forgettingFactor[startingDelta];
         rP.pathMapNum = pathMapNum + iteration.ToString() + ".json";
         rP.pathPosNum = pathPosNum + iteration.ToString() + ".json";
 
-        robotScript.SetVariables();
+        alpha = startingAlpha;
+        beta = startingBeta;
+        deltaIndex = startingDelta;
+
+        //robotScript.SetVariables();
         rP.DefiningFolderAndFile();
+        rP.SetAlpha(alpha);
+        rP.SetBeta(beta);
+        rP.SetDelta(forgettingFactor[deltaIndex]);
+        rP.SetMapName(mapName);
 
-        timeScan = startingTimeScan;
-        timeDecision = startingTimeDecision;
-        penaltyCost = startingPenaltyCost;
-
-        Debug.Log(robotScript.timeForScan);
-        Debug.Log(robotScript.timeForDecision);
-        Debug.Log(robotScript.penaltyCost);
+        Debug.Log(rDMUtility.alpha);
+        Debug.Log(rDMUtility.beta);
+        Debug.Log(robotScript.forgettingFactor);
         
         StartCoroutine(timer);
     }
 
     public void CheckIteration()
     {
-        if(timeDecision >= maxTimeDecision && timeScan >= maxTimeScan && penaltyCost >= maxPenaltyCost)
+        if(alpha >= maxAlpha && beta >= maxBeta && deltaIndex >= maxDeltaIndex)
         {
             Debug.Log("End");
         }

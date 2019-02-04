@@ -23,8 +23,8 @@ public class Robot : Entity{
     [Header("Arbitrary float used to detect wall after a collision with one of them")]
     public float epsilon = 1f; //for now, 1 is the best
 
-    //[Header("Forgetting Factor")]
-    //public float forgettingFactor;
+    [Header("Forgetting Factor")]
+    public float forgettingFactor;
 
     [Header("Num paramters for numerical mapping")]
     public float numFreeCell = 0f;
@@ -232,6 +232,7 @@ public class Robot : Entity{
 
     }
 
+    /*
     public void SetVariables()
     {
         rP = GetComponent<RobotProgress>();
@@ -241,7 +242,7 @@ public class Robot : Entity{
         rP.SetPenaltyCost(penaltyCost);
         rPl.penaltyCost = penaltyCost;
 
-    }
+    }*/
 
     public void SetIsMultiTarget(bool boolean)
     {
@@ -372,15 +373,15 @@ public class Robot : Entity{
             {
                 rayRight = new Ray(transform.position, Quaternion.AngleAxis(-angle, transform.up) * transform.forward);
                 landingRay[indexRays] = rayRight;
-                //Debug.DrawRay(transform.position, Quaternion.AngleAxis(-angle, transform.up) * transform.forward * rangeRays, Color.red, 2f);
+                Debug.DrawRay(transform.position, Quaternion.AngleAxis(-angle, transform.up) * transform.forward * rangeRays, Color.red, 2f);
                 rayLeft = new Ray(transform.position, Quaternion.AngleAxis(angle, transform.up) * transform.forward);
                 landingRay[indexRays + 1] = rayLeft;
-                //Debug.DrawRay(transform.position, Quaternion.AngleAxis(angle, transform.up) * transform.forward * rangeRays, Color.red, 2f);
+                Debug.DrawRay(transform.position, Quaternion.AngleAxis(angle, transform.up) * transform.forward * rangeRays, Color.red, 2f);
 
                 angle = angle + angleRay;
             }
             UpdatingSpace(landingRay);
-            //ForgivingMemory();
+            ForgivingMemory();
             yield return new WaitForSeconds(timeForScan);
         }
     }
@@ -413,7 +414,7 @@ public class Robot : Entity{
                     {
                         if (numeric_robot_map[(int)pointX, (int)pointZ] != numWallCell) numeric_robot_map[(int)pointX, (int)pointZ] = numFreeCell;
                     }
-                    //forgettingCounterCell[(int)pointX, (int)pointZ] = forgettingFactor;
+                    forgettingCounterCell[(int)pointX, (int)pointZ] = forgettingFactor;
                     //Debug.Log(numeric_robot_map[(int)x_coord, (int)y_coord] + "" + (int)x_coord + "" + (int)y_coord);
                 }
             }
@@ -450,11 +451,12 @@ public class Robot : Entity{
                     if (!isNumeric && (int)pointX >= 0 && (int)pointX < width && (int)pointZ >= 0 && (int)pointZ < height)
                         robot_map[(int)robotX, (int)robotZ] = 'g';
                     else numeric_robot_map[(int)robotX, (int)robotZ] = numGoalCell;
-                    //forgettingCounterCell[(int)robotX, (int)robotZ] = forgettingFactor;
+                    forgettingCounterCell[(int)robotX, (int)robotZ] = forgettingFactor;
                     //Debug.Log(x + "" + y);
                     //portarlo dritto al target
                 }
             }
+
         }
         if (destination)
         {
@@ -464,7 +466,7 @@ public class Robot : Entity{
                 robot_map[(int)targetX, (int)targetZ] = 'g';
             else numeric_robot_map[(int)targetX, (int)targetZ] = numGoalCell;
 
-            //forgettingCounterCell[(int)targetX, (int)targetZ] = forgettingFactor;
+            forgettingCounterCell[(int)targetX, (int)targetZ] = forgettingFactor;
         }
 
         if (!isNumeric)
@@ -496,7 +498,7 @@ public class Robot : Entity{
             if (!isNumeric && (int)pointX >= 0 && (int)pointX < width && (int)pointZ >= 0 && (int)pointZ < height && robot_map[(int)pointX, (int)pointZ] != 'w')
                 robot_map[(int)pointX, (int)pointZ] = 'r';
             else if(isNumeric && (int)pointX >= 0 && (int)pointX < width && (int)pointZ >= 0 && (int)pointZ < height && numeric_robot_map[(int)pointX, (int)pointZ] != numWallCell) numeric_robot_map[(int)pointX, (int)pointZ] = numFreeCell;
-            //forgettingCounterCell[(int)pointX, (int)pointZ] = forgettingFactor;
+            forgettingCounterCell[(int)pointX, (int)pointZ] = forgettingFactor;
         }
     }
 
@@ -525,7 +527,7 @@ public class Robot : Entity{
         if (!isNumeric && (int)pointX >= 0 && (int)pointX < width && (int)pointZ >= 0 && (int)pointZ < height/*&& robot_map[(int)wallPointX,(int)wallPointZ] != 'r'*/)
             robot_map[(int)wallPointX, (int)wallPointZ] = 'w';
         else if(isNumeric && (int)pointX >= 0 && (int)pointX < width && (int)pointZ >= 0 && (int)pointZ < height /*&& numeric_robot_map[(int)wallPointX, (int)wallPointZ] != numFreeCell*/) numeric_robot_map[(int)wallPointX, (int)wallPointZ] = numWallCell;
-        //forgettingCounterCell[(int)wallPointX, (int)wallPointZ] = forgettingFactor;
+        forgettingCounterCell[(int)wallPointX, (int)wallPointZ] = forgettingFactor;
 
         //method 2
         /*if (dx >= 0 && dz >= 0) //primo quadrante
@@ -593,7 +595,7 @@ public class Robot : Entity{
         }*/
     }
 
-    /*
+
     /// <summary>
     /// This method lowers by one the counter of the memory of a cell to be "resetted" to the standard value, that is the unknown one
     /// </summary>
@@ -619,7 +621,6 @@ public class Robot : Entity{
             }
         }
     }
-    */
 
     /// <summary>
     /// This method is used to decide which tile the robot has to reach. All the potential tiles are the one that are free and near an unknown one

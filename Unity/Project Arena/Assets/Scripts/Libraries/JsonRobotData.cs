@@ -13,6 +13,9 @@ public class JsonRobotData{
     public float timeDecision;
     public float timeScan;
     public float penalty_cost;
+    public float alpha;
+    public float beta;
+    public int delta;
     public string ip;
     public string os;
 }

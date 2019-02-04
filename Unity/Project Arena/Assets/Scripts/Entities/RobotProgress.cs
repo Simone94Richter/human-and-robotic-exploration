@@ -293,4 +293,32 @@ public class RobotProgress : MonoBehaviour {
         gameRobotData.timeScan = time;
 #endif
     }
+
+    public void SetAlpha(float alpha)
+    {
+#if UNITY_EDITOR
+        gameRobotData.alpha = alpha;
+#endif
+    }
+
+    public void SetBeta(float beta)
+    {
+#if UNITY_EDITOR
+        gameRobotData.beta = beta;
+#endif
+    }
+
+    public void SetDelta(int delta)
+    {
+#if UNITY_EDITOR
+        gameRobotData.delta = delta;
+#endif
+    }
+
+    public void SetMapName(string mapName)
+    {
+#if UNITY_EDITOR
+        map = mapName;
+#endif
+    }
 }
