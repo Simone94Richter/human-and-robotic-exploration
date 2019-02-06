@@ -2,13 +2,15 @@ import json
 import os
 #import pandas as pd
 import numpy as np
+import scipy.spatial
 import math
 import matplotlib.pyplot as plt
 
-robotDir = "C:/Users/princ/OneDrive/Documenti/human-and-robotic-exploration/human-and-robotic-exploration/Unity/Project Arena/Assets/Results/ExperimentSamples"
+robotDir = "C:/Users/princ/OneDrive/Documenti/human-and-robotic-exploration/human-and-robotic-exploration/Unity/Project Arena/Assets/Results/ExperimentSamples2"
 humanDir = "C:/Users/princ/OneDrive/Documenti/human-and-robotic-exploration/human-and-robotic-exploration/DownloadedResults"
 fileName = "resultMapNum"
 fileName2 = "resultPositionNum"
+fileMap = ""
 humanfileName = "Result"
 index = 1
 keepGoing = True
@@ -16,6 +18,38 @@ indexBestMatch = 1
 distanceBestMatch = math.inf
 
 #Porre scelta per il file umano da confrontare
+mappa = input("Inserire il numero della mappa sulla quale lavorare (solo il numero, non la lettera): ")
+
+
+def rotate(x,y, origin=(0,0)):
+    # shift to origin
+    x1 = x #- origin[0]
+    y1 = y #- origin[1]
+
+    #rotate
+    x2 = y1
+    y2 = -x1
+
+    #if os.path.isfile(inputDir + "/" + fileName + str(i) + "t.txt"):
+    #    with open(inputDir + "/" + fileName + str(i) + "t.txt") as json_file:
+    #       data = json.load(json_file)
+    if(map_name == "uffici2.map"):
+                # shift back
+        x3 = x2
+        y3 = y2 +53
+    if(map_name == "open2.map"):
+                # shift back
+        x3 = x2
+        y3 = y2 +57
+    if(map_name == "open1.map"):
+                # shift back
+        x3 = x2
+        y3 = y2 +48
+    if(map_name == "uffici1.map"):
+        x3 = x2
+        y3 = y2 +54 
+
+    return x3, y3
 
 def euc_dist(pt1,pt2):
 
@@ -187,11 +221,20 @@ def distance_dtw(s1, s2, window=None, max_dist=None, max_step=None, max_length_d
 
     return d
 
-if os.path.isfile(inputDir + "/" + humanfileName + "t.txt"):
-    with open(inputDir + "/" + humanfileName + "t.txt") as json_file:
+if os.path.isfile(humanDir + "/" + humanfileName + str(mappa) + "t.txt"):
+    with open(humanDir + "/" + humanfileName + str(mappa) + "t.txt") as json_file:
         data = json.load(json_file)
         map_name = data['mapName']
         human_array_pos = data['position']
+
+if(map_name == "uffici2.map"):
+    fileMap = "uffici2PythonFormat.map.txt"
+if(map_name == "uffici1.map"):
+    fileMap = "uffici1PythonFormat.map.txt"
+if(map_name == "open1.map"):
+    fileMap = "open1PythonFormat.map.txt"
+if(map_name == "open2.map"):
+    fileMap = "open2PythonFormat.map.txt"
 
 while(keepGoing == True):
     if os.path.isfile(robotDir + "/" + fileName + str(index) + ".json") and os.path.isfile(robotDir + "/" + fileName2 + str(index) + ".json"):
@@ -203,16 +246,98 @@ while(keepGoing == True):
                 beta = data['beta']
                 delta = data['delta']
                 distanceDTW = round(distance_dtw(human_array_pos, robot_array_pos), 5)
+                print(distanceDTW)
                 if(distanceDTW < distanceBestMatch):
                     indexBestMatch = index
+                    distanceBestMatch = distanceDTW
 
         index = index + 1
     
     else:
         keepGoing = False
 
-# rappresentare ledue traiettorie sul plot
+print(indexBestMatch)
+print(distanceBestMatch)
 
+if os.path.isfile(robotDir + "/" + fileName + str(indexBestMatch) + ".json") and os.path.isfile(robotDir + "/" + fileName2 + str(indexBestMatch) + ".json"):
+    with open(robotDir + "/" + fileName2 + str(indexBestMatch) + ".json") as json_file:
+        data = json.load(json_file)
+        if(data['mapName'] == map_name):
+            robot_array_pos = data['position']
+            alpha = data['alpha']
+            beta = data['beta']
+            delta = data['delta']
+
+# rappresentare ledue traiettorie sul plot
+for k in range(len(human_array_pos)):
+    for s in human_array_pos[k].split():
+        x,z = s.split(",")
+        origin = (0.0,0.0)
+        x, z = rotate(int(x),int(z), origin )
+                #x = maxlen-int(x)
+                #z = int(z)
+                #print(x, z)
+        if k+1 < len(human_array_pos):
+            a,b = human_array_pos[k+1].split(",")
+            a, b = rotate(int(a),int(b), origin )
+                    #a = int(a)
+                    #b = int(b)
+                    #if(frag == 1):
+            plt.plot([x, a], [z, b], 'k-')
+                    #if(frag == 2):
+                    #    plt.plot([x, a], [z, b], 'r-')
+                    #if(frag == 3):
+                    #    plt.plot([x, a], [z, b], 'b-')
+                    #if(frag == 4):
+                    #    plt.plot([x, a], [z, b], 'm-')
+                    #if(frag == 5):
+                    #    plt.plot([x, a], [z, b], 'c-')
+                    #if(frag == 6):
+                    #    plt.plot([x, a], [z, b], 'y-')
+                    #pos = pos + 1
+                    
+                    #if(pos == 6):
+                    #    pos = 0
+                    #    frag = frag + 1
+                    #    if(frag == 7):
+                    #        frag = 1
+
+for k in range(len(robot_array_pos)):
+    for s in robot_array_pos[k].split():
+        x,z = s.split(",")
+        origin = (0.0,0.0)
+        x, z = rotate(int(x),int(z), origin )
+                #x = maxlen-int(x)
+                #z = int(z)
+                #print(x, z)
+        if k+1 < len(robot_array_pos):
+            a,b = robot_array_pos[k+1].split(",")
+            a, b = rotate(int(a),int(b), origin )
+                    #a = int(a)
+                    #b = int(b)
+                    #if(frag == 1):
+            plt.plot([x, a], [z, b], 'b-')
+                    #if(frag == 2):
+                    #    plt.plot([x, a], [z, b], 'r-')
+                    #if(frag == 3):
+                    #    plt.plot([x, a], [z, b], 'b-')
+                    #if(frag == 4):
+                    #    plt.plot([x, a], [z, b], 'm-')
+                    #if(frag == 5):
+                    #    plt.plot([x, a], [z, b], 'c-')
+                    #if(frag == 6):
+                    #    plt.plot([x, a], [z, b], 'y-')
+                    #pos = pos + 1
+                    
+                    #if(pos == 6):
+                    #    pos = 0
+                    #    frag = frag + 1
+                    #    if(frag == 7):
+                    #        frag = 1
+
+    #plt.axis([0, 50, 0, 50])
+plt.title('Alpha: ' + str(alpha) + ', Beta: ' + str(beta) + ', Delta:' + str(delta), fontsize = 8)
+plt.show()
 
 
 

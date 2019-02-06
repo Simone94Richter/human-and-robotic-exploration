@@ -35,8 +35,8 @@ public class ExplorationIterator : MonoBehaviour{
     private float startingBeta = 0f;
     private int startingDelta = 0;
 
-    private string pathMapNum = "/Results/ExperimentSamples2/resultMapNum";
-    private string pathPosNum = "/Results/ExperimentSamples2/resultPositionNum";
+    private string pathMapNum = "/Results/ExperimentSamplesMultyTarget1/resultMapNum";
+    private string pathPosNum = "/Results/ExperimentSamplesMultyTarget1/resultPositionNum";
     private int iteration = 1;
 
     private string mapName = "open1.map";
