@@ -6,7 +6,7 @@ import scipy.spatial
 import math
 import matplotlib.pyplot as plt
 
-robotDir = "C:/Users/princ/OneDrive/Documenti/human-and-robotic-exploration/human-and-robotic-exploration/Unity/Project Arena/Assets/Results/ExperimentSamples2"
+robotDir = "C:/Users/princ/OneDrive/Documenti/human-and-robotic-exploration/human-and-robotic-exploration/Unity/Project Arena/Assets/Results/ExperimentSamplesMultyTarget1"
 humanDir = "C:/Users/princ/OneDrive/Documenti/human-and-robotic-exploration/human-and-robotic-exploration/DownloadedResults"
 fileName = "resultMapNum"
 fileName2 = "resultPositionNum"

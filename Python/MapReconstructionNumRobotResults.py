@@ -116,7 +116,7 @@ while(keepGoing == True):
         #else:
         #    intCounter = 1
             #plt.show()
-        plt.savefig(os.path.join(os.path.expanduser('~'), 'C:/Users/princ/OneDrive/Documenti/human-and-robotic-exploration/human-and-robotic-exploration/Results/AllHaREResults/RoboticSamples2', 'sample' + str(numImg) + '.png'))
+        plt.savefig(os.path.join(os.path.expanduser('~'), 'C:/Users/princ/OneDrive/Documenti/human-and-robotic-exploration/human-and-robotic-exploration/Results/AllHaREResults/RoboticSamplesMulty1', 'sample' + str(numImg) + '.png'))
         plt.clf()
         numImg = numImg + 1
         index = index + 1

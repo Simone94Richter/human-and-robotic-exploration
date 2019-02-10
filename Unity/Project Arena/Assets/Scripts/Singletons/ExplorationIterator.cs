@@ -13,7 +13,7 @@ public class ExplorationIterator : MonoBehaviour{
     private RobotProgress rP;
 
     private bool isTheChosenOne = false;
-    private bool isMulty = false;
+    private bool isMulty = true;
 
     //private float timeScan;
     //private float timeDecision;
@@ -32,12 +32,12 @@ public class ExplorationIterator : MonoBehaviour{
     private int minDeltaIndex = 0;
 
     private float startingAlpha = 0f;
-    private float startingBeta = 0f;
-    private int startingDelta = 0;
+    private float startingBeta = 0.8f;
+    private int startingDelta = 3;
 
     private string pathMapNum = "/Results/ExperimentSamplesMultyTarget1/resultMapNum";
     private string pathPosNum = "/Results/ExperimentSamplesMultyTarget1/resultPositionNum";
-    private int iteration = 1;
+    private int iteration = 452;
 
     private string mapName = "open1.map";
 
