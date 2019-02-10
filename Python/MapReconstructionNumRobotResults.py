@@ -3,7 +3,7 @@ import os
 #import pandas as pd
 import matplotlib.pyplot as plt
 
-inputDir = "C:/Users/princ/OneDrive/Documenti/human-and-robotic-exploration/human-and-robotic-exploration/Unity/Project Arena/Assets/Results/ExperimentSamples2"
+inputDir = "C:/Users/princ/OneDrive/Documenti/human-and-robotic-exploration/human-and-robotic-exploration/Unity/Project Arena/Assets/Results/ExperimentSamplesMultyTarget1"
 fileName = "resultMapNum"
 fileName2 = "resultPositionNum"
 index = 1
