@@ -31,15 +31,15 @@ public class ExplorationIterator : MonoBehaviour{
     private float minBeta = 0f;
     private int minDeltaIndex = 0;
 
-    private float startingAlpha = 0f;
-    private float startingBeta = 0.8f;
-    private int startingDelta = 3;
+    private float startingAlpha = 0.9f;
+    private float startingBeta = 0.5f;
+    private int startingDelta = 0;
 
-    private string pathMapNum = "/Results/ExperimentSamplesMultyTarget1/resultMapNum";
-    private string pathPosNum = "/Results/ExperimentSamplesMultyTarget1/resultPositionNum";
-    private int iteration = 452;
+    private string pathMapNum = "/Results/ExperimentSamplesMultyTarget/resultMapNum";
+    private string pathPosNum = "/Results/ExperimentSamplesMultyTarget/resultPositionNum";
+    private int iteration = 65;
 
-    private string mapName = "open1.map";
+    private string mapName = "uffici1.map";
 
     private IEnumerator timer;
 

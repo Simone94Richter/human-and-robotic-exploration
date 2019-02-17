@@ -630,6 +630,7 @@ public class Robot : Entity{
     {
         while (!targetFound)
         {
+            RemovingWrongDetection();
             DetectingFrontierPoints();
 
             //Debug.Log(posToReach.Count);
@@ -661,6 +662,27 @@ public class Robot : Entity{
             }
 
             yield return new WaitForSeconds(timeForDecision);
+        }
+    }
+
+    private void RemovingWrongDetection()
+    {
+        width = numeric_robot_map.GetLength(0);
+        height = numeric_robot_map.GetLength(1);
+
+        for (i = 0; i < width; i++)
+        {
+            for (j = 0; j < height; j++)
+            {
+                if (numeric_robot_map[i, j] == numFreeCell && i + 1 < width && i - 1 >= 0 && j + 1 < height && j - 1 >= 0)
+                {
+                    if (numeric_robot_map[i + 1, j] != numFreeCell && numeric_robot_map[i - 1, j] != numFreeCell && numeric_robot_map[i, j + 1] != numFreeCell 
+                        && numeric_robot_map[i, j - 1] != numFreeCell)
+                    {
+                        numeric_robot_map[i, j] = numUnknownCell;
+                    }
+                }
+            }
         }
     }
 
