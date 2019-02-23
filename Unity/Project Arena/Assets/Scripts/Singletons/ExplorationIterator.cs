@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.IO;
 
 public class ExplorationIterator : MonoBehaviour{ 
 
@@ -31,17 +32,23 @@ public class ExplorationIterator : MonoBehaviour{
     private float minBeta = 0f;
     private int minDeltaIndex = 0;
 
-    private float startingAlpha = 0.9f;
-    private float startingBeta = 0.5f;
+    private float startingAlpha = 1f;
+    private float startingBeta = 0.1f;
     private int startingDelta = 0;
 
-    private string pathMapNum = "/Results/ExperimentSamplesMultyTarget/resultMapNum";
-    private string pathPosNum = "/Results/ExperimentSamplesMultyTarget/resultPositionNum";
-    private int iteration = 65;
+    private string pathMapNum = "/Results/ExperimentSamplesMultyTarget1/resultMapNum";
+    private string pathPosNum = "/Results/ExperimentSamplesMultyTarget1/resultPositionNum";
+    private int iteration = 22;
 
     private string mapName = "uffici1.map";
+    private string filePathPosResNum;
+    private string fileContent;
 
     private IEnumerator timer;
+
+    private FileStream filePos;
+
+    private JsonRobotData trajectory;
 
     private void OnLevelWasLoaded(int level)
     {
@@ -51,7 +58,6 @@ public class ExplorationIterator : MonoBehaviour{
         }
         else
         {
-            timer = Timer();
             iteration = 1 + iteration;
             if (alpha < maxAlpha)
             {
@@ -61,13 +67,32 @@ public class ExplorationIterator : MonoBehaviour{
             {
                 beta = 0.1f + beta;
                 alpha = minAlpha;
-            }else if (deltaIndex < maxDeltaIndex)
+            }
+            else if (deltaIndex < maxDeltaIndex)
             {
                 deltaIndex = deltaIndex + 1;
                 alpha = minAlpha;
                 beta = minBeta;
             }
 
+            filePathPosResNum = Application.dataPath + pathPosNum;
+            if (File.Exists(filePathPosResNum))
+            {
+                fileContent = File.ReadAllText(filePathPosResNum);
+                trajectory = JsonUtility.FromJson<JsonRobotData>(fileContent);
+                Debug.Log(trajectory.time);
+                filePos.Close();
+                if (trajectory.time == 0.0f)
+                {
+                    CheckIteration();
+                }
+            }
+
+            if(alpha + beta > 1f){
+                CheckIteration();
+            }
+
+            timer = Timer();
             robot = GameObject.Find("Robot");
             robotScript = robot.GetComponent<Robot>();
             rPl = robot.GetComponent<RobotPlanning>();
@@ -98,6 +123,18 @@ public class ExplorationIterator : MonoBehaviour{
     void Start()
     {
         isTheChosenOne = true;
+        filePathPosResNum = Application.dataPath + pathPosNum;
+        if (File.Exists(filePathPosResNum))
+        {
+            fileContent = File.ReadAllText(filePathPosResNum);
+            trajectory = JsonUtility.FromJson<JsonRobotData>(fileContent);
+            Debug.Log(trajectory.time);
+            filePos.Close();
+            if (trajectory.time == 0.0f)
+            {
+                CheckIteration();
+            }
+        }
         timer = Timer();
         robot = GameObject.Find("Robot");
         robotScript = robot.GetComponent<Robot>();

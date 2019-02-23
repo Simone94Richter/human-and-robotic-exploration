@@ -47,11 +47,20 @@ public class RobotPlanningThetaStar : RobotPlanning {
                 returnedPath = ThetaStarCharMap(destination);
                 //if (noPath && returnedPath == null)
                 //{
-                    //mainScipt.noPath = true;
+                //mainScipt.noPath = true;
                 //}
                 return returnedPath;
             }
-            else return ThetaStarNumMap(destination);
+            else
+            {
+                returnedPath = ThetaStarNumMap(destination);
+                if (returnedPath == null)
+                {
+                    mainScipt.noPath = true;
+                }
+                else mainScipt.noPath = false;
+                return returnedPath;
+            }
         }
 
         return null;

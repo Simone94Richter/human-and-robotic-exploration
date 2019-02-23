@@ -20,6 +20,8 @@ public class Robot : Entity{
     [Header("Is map to be analyzed numeric or char?")]
     public bool isNumeric;
 
+    public bool noPath = false;
+
     [Header("Arbitrary float used to detect wall after a collision with one of them")]
     public float epsilon = 1f; //for now, 1 is the best
 
@@ -630,7 +632,7 @@ public class Robot : Entity{
     {
         while (!targetFound)
         {
-            RemovingWrongDetection();
+            //RemovingWrongDetection();
             DetectingFrontierPoints();
 
             //Debug.Log(posToReach.Count);
@@ -647,6 +649,22 @@ public class Robot : Entity{
                 route = rPl.CheckVisibility(transform.position, tempGoal);
                 rM.tempReached = false;
 
+                if (route == null && noPath)
+                {
+                    numeric_robot_map[(int)FixingRound(tempGoal.x / squareSize), (int)FixingRound(tempGoal.z / squareSize)] = numUnknownCell;
+                    goals = posToReach;
+                    tempGoal = rDM.PosToReach(goals);
+
+                    if (route != null)
+                    {
+                        route.Clear();
+                    }
+
+                    route = rPl.CheckVisibility(transform.position, tempGoal);
+                    rM.tempReached = false;
+                }
+
+                //Debug.Log(route);
                 if (route == null)
                 {
                     rM.ApproachingPointToReach(tempGoal);
@@ -702,8 +720,26 @@ public class Robot : Entity{
             DFPinNumMap();
         }
 
+        bool somethingToDelete = false;
         //remove the point where the agent stands (because sometimes it could be a frontier point)
-        posToReach.Remove(transform.position);
+        for (int i  = 0; i < posToReach.Count; i++)
+        {
+            int posToReachX = (int)FixingRound(posToReach[i].x / squareSize);
+            int posToReachZ = (int)FixingRound(posToReach[i].z / squareSize);
+            int robotX = (int)FixingRound(transform.position.x / squareSize);
+            int robotZ = (int)FixingRound(transform.position.z / squareSize);
+            if (posToReachX == robotX && posToReachZ == robotZ)
+            {
+                somethingToDelete = true;
+                //Debug.Log("match");
+            }
+        }
+
+        if (somethingToDelete)
+        {
+            Vector3 posToDelete = new Vector3(robotX * squareSize, transform.position.y, robotZ * squareSize);
+            posToReach.Remove(posToDelete);
+        }
     }
 
     /// <summary>

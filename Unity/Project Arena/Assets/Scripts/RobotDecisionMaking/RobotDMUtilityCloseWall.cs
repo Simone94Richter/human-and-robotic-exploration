@@ -101,7 +101,13 @@ public class RobotDMUtilityCloseWall : RobotDecisionMaking
             //Debug.Log(distanceRobotFrontier);
             distanceFrontierWall = BestDistanceFrontierWall(frontierZones[i]);
             //Debug.Log(distanceFrontierWall);
-            utility = (1f - alpha - beta) * distanceRobotFrontier + alpha * distanceFrontierWall + beta * Placing(frontierZones[i]);
+            if(1f-alpha-beta < 0f){
+                float normAlpha = alpha/(1f+alpha+beta);
+                float normBeta = beta/(1f+alpha+beta);
+                utility = (1f - normAlpha - normBeta) * distanceRobotFrontier + normAlpha * distanceFrontierWall + normBeta * Placing(frontierZones[i]);
+            }
+            else
+                utility = (1f - alpha - beta) * distanceRobotFrontier + alpha * distanceFrontierWall + beta * Placing(frontierZones[i]);
             //Debug.Log(utility);
             utilityForFrontier.Add(frontierZones[i], utility);
         }
