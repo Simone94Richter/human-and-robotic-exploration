@@ -416,7 +416,8 @@ public class Robot : Entity{
                     {
                         if (numeric_robot_map[(int)pointX, (int)pointZ] != numWallCell) numeric_robot_map[(int)pointX, (int)pointZ] = numFreeCell;
                     }
-                    forgettingCounterCell[(int)pointX, (int)pointZ] = forgettingFactor;
+                    if((int)pointX >= 0 && (int)pointX < width && (int)pointZ >= 0 && (int)pointZ < height)
+                        forgettingCounterCell[(int)pointX, (int)pointZ] = forgettingFactor;
                     //Debug.Log(numeric_robot_map[(int)x_coord, (int)y_coord] + "" + (int)x_coord + "" + (int)y_coord);
                 }
             }

@@ -32,13 +32,13 @@ public class ExplorationIterator : MonoBehaviour{
     private float minBeta = 0f;
     private int minDeltaIndex = 0;
 
-    private float startingAlpha = 1f;
-    private float startingBeta = 0.1f;
-    private int startingDelta = 0;
+    private float startingAlpha = 0.5f;
+    private float startingBeta = 0.8f;
+    private int startingDelta = 2;
 
     private string pathMapNum = "/Results/ExperimentSamplesMultyTarget1/resultMapNum";
     private string pathPosNum = "/Results/ExperimentSamplesMultyTarget1/resultPositionNum";
-    private int iteration = 22;
+    private int iteration = 336;
 
     private string mapName = "uffici1.map";
     private string filePathPosResNum;
@@ -88,7 +88,7 @@ public class ExplorationIterator : MonoBehaviour{
                 }
             }
 
-            if(alpha + beta > 1f){
+            if(alpha + beta < 1f){
                 CheckIteration();
             }
 
@@ -135,6 +135,15 @@ public class ExplorationIterator : MonoBehaviour{
                 CheckIteration();
             }
         }
+
+        alpha = startingAlpha;
+        beta = startingBeta;
+
+        if (alpha + beta < 1f)
+        {
+            CheckIteration();
+        }
+
         timer = Timer();
         robot = GameObject.Find("Robot");
         robotScript = robot.GetComponent<Robot>();
@@ -175,7 +184,10 @@ public class ExplorationIterator : MonoBehaviour{
         else
         {
             DontDestroyOnLoad(this.gameObject);
-            StopCoroutine(timer);
+            if (timer != null)
+            {
+                StopCoroutine(timer);
+            }
             if (isMulty)
             {
                 SceneManager.LoadScene("Experimenting - Multy Target Robot");
