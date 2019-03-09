@@ -53,7 +53,11 @@ def rotate(x,y, origin=(0,0)):
 
 def euc_dist(pt1,pt2):
 
-    return scipy.spatial.distance.cdist(pt1, pt2, 'euclidean')[0][0]
+    effective_d = scipy.spatial.distance.cdist(pt1, pt2, 'euclidean')[0][0]
+    if(effective_d < 6):
+        return 0
+    else:
+        return effective_d
 
 def distance_dtw(s1, s2, window=None, max_dist=None, max_step=None, max_length_diff=None, penalty=None, psi=None, use_c=False):
 
