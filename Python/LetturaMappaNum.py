@@ -4,7 +4,7 @@ import os
 import matplotlib.pyplot as plt
 
 inputDir = "C:/Users/princ/OneDrive/Documenti/human-and-robotic-exploration/human-and-robotic-exploration/Python"
-fileName = "MapToRead.txt"
+fileName = "uffici2PythonFormat.map.txt"
 if os.path.isfile(inputDir + "/" + fileName):
     with open(inputDir + "/" + fileName) as f:
         array = []
@@ -28,7 +28,10 @@ if os.path.isfile(inputDir + "/" + fileName):
                     plt.plot(i, j, 'ks')
                 
                 if(a == 4):
-                    plt.plot(i, j , 'gs')
+                    plt.plot(i, j, 'gs')
+                
+                if(a == 3):
+                    plt.plot(i, j, 'bs')
 
             j = j + 1    
                 
