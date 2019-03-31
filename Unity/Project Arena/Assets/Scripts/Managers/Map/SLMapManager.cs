@@ -11,8 +11,8 @@ public class SLMapManager : MapManager {
     [Header("The asset of the file containing the map")]
     public TextAsset mapFile;
 
-    private char[,] map;
-    private float[,] numeric_map;
+    private char[,] charMap;
+    private float[,] numericMap;
 
     public override void ManageMap(bool assembleMap) {
         if (loadMapFromFile) {
@@ -20,14 +20,14 @@ public class SLMapManager : MapManager {
             LoadMapFromText();
             // Flip the map if needed.
             if (flip && !isNumeric) {
-                map = MapEdit.FlipMap(map);                
+                charMap = MapEdit.FlipMap(charMap);                
             }
         } else {
             // Generate the map.
             if (ParameterManager.HasInstance()) {
-                map = mapGeneratorScript.GenerateMap(seed, export, exportPath);
+                charMap = mapGeneratorScript.GenerateMap(seed, export, exportPath);
             } else {
-                map = mapGeneratorScript.GenerateMap();
+                charMap = mapGeneratorScript.GenerateMap();
             }
         }
 
@@ -35,19 +35,19 @@ public class SLMapManager : MapManager {
             if (!isNumeric)
             {
                 // Assemble the map.
-                mapAssemblerScript.AssembleMap(map, mapGeneratorScript.GetWallChar(),
+                mapAssemblerScript.AssembleMap(charMap, mapGeneratorScript.GetWallChar(),
                     mapGeneratorScript.GetRoomChar());
                 // Displace the objects.
-                objectDisplacerScript.DisplaceObjects(map, mapAssemblerScript.GetSquareSize(),
+                objectDisplacerScript.DisplaceObjects(charMap, mapAssemblerScript.GetSquareSize(),
                     mapAssemblerScript.GetWallHeight());
             }
             else
             {
                 //Assemble the map
-                mapAssemblerScript.AssembleMap(numeric_map, mapGeneratorScript.GetWallNumb(), mapGeneratorScript.GetRoomNumb());
+                mapAssemblerScript.AssembleMap(numericMap, mapGeneratorScript.GetWallNumb(), mapGeneratorScript.GetRoomNumb());
                 
                 // Displace the objects
-                objectDisplacerScript.DisplaceObjects(numeric_map, mapAssemblerScript.GetSquareSize(), mapAssemblerScript.GetWallHeight());
+                objectDisplacerScript.DisplaceObjects(numericMap, mapAssemblerScript.GetSquareSize(), mapAssemblerScript.GetWallHeight());
             }
         }
 
@@ -56,11 +56,11 @@ public class SLMapManager : MapManager {
         {
             if (!isNumeric)
             {
-                robot.SetMap(map, floorSize);
+                robot.SetMap(charMap, floorSize);
             }
             else
             {
-                robot.SetMap(numeric_map, floorSize);
+                robot.SetMap(numericMap, floorSize);
             }
         }
         if (player)
@@ -97,25 +97,25 @@ public class SLMapManager : MapManager {
     private void ConvertToMatrix(string[] lines) {
         if (!isNumeric)
         {
-            map = new char[lines.GetLength(0), lines[0].Length];
+            charMap = new char[lines.GetLength(0), lines[0].Length];
 
-            for (int x = 0; x < map.GetLength(0); x++)
+            for (int x = 0; x < charMap.GetLength(0); x++)
             {
-                for (int y = 0; y < map.GetLength(1); y++)
+                for (int y = 0; y < charMap.GetLength(1); y++)
                 {
-                    map[x, y] = lines[x][y];
+                    charMap[x, y] = lines[x][y];
                 }
             }
         }
         else
         {
-            numeric_map = new float[lines.GetLength(0), lines[0].Length];
+            numericMap = new float[lines.GetLength(0), lines[0].Length];
 
-            for (int x = 0; x < numeric_map.GetLength(0); x++)
+            for (int x = 0; x < numericMap.GetLength(0); x++)
             {
-                for (int y = 0; y < numeric_map.GetLength(1); y++)
+                for (int y = 0; y < numericMap.GetLength(1); y++)
                 {
-                    numeric_map[x, y] = lines[x][y];
+                    numericMap[x, y] = lines[x][y];
                     //Debug.Log(numeric_map[x, y]);
                 }
             }

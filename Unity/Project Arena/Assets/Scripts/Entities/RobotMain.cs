@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// This class manages the core functionalities of the robot: it gives start to moving, map analyze, saving data and the other features provided
 /// </summary>
-public class Robot : Entity{
+public class RobotMain : Entity{
 
     [SerializeField] public Camera robotCamera;
     [SerializeField] public float speed = 10f;

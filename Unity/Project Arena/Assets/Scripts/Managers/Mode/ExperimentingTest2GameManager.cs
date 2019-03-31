@@ -51,7 +51,7 @@ public class ExperimentingTest2GameManager : GameManager
     private RaycastHit hit; //hit point of the raycast of the agent
 
     private Player playerScript;
-    private Robot robotScript;
+    private RobotMain robotScript;
 
     private Vector3 localDownVector; // vector used to give the angular direction of the camera
 
@@ -62,7 +62,7 @@ public class ExperimentingTest2GameManager : GameManager
         #endif */
 
         playerScript = player.GetComponent<Player>();
-        robotScript = player.GetComponent<Robot>();
+        robotScript = player.GetComponent<RobotMain>();
 
         for (int i = 0; i < target.Length; i++)
         {

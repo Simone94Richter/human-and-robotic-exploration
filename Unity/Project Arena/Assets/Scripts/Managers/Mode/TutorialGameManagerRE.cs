@@ -30,8 +30,8 @@ public class TutorialGameManagerRE : GameManager
     private RaycastHit hit;
 
     private Player playerScript;
-    private Robot robotScript;
-    private bool tutorialCompleted = false;
+    private RobotMain robotScript;
+    private bool levelCompleted = false;
     private float completionTime;
 
     private Vector3 targetPos;
@@ -43,7 +43,7 @@ public class TutorialGameManagerRE : GameManager
         #endif */
 
         playerScript = player.GetComponent<Player>();
-        robotScript = player.GetComponent<Robot>();
+        robotScript = player.GetComponent<RobotMain>();
 
         tutorialGameUIManagerScript.Fade(0.7f, 1f, true, 0.5f);
     }
@@ -86,9 +86,9 @@ public class TutorialGameManagerRE : GameManager
         {
             if (robotScript)
             {
-                tutorialCompleted = robotScript.TargetReached();
+                levelCompleted = robotScript.TargetReached();
             }
-            else if (playerScript && !tutorialCompleted)
+            else if (playerScript && !levelCompleted)
             {
                 Vector3 localDownVector = Quaternion.AngleAxis(headPlayer.transform.eulerAngles.x, player.transform.right) * player.transform.forward;
                 //Vector3 downDirection = headPlayer.transform.TransformDirection(localDownVector);
@@ -101,13 +101,13 @@ public class TutorialGameManagerRE : GameManager
                     //Debug.Log(Mathf.Sqrt((player.transform.position.x - targetPos.x) * (player.transform.position.x - targetPos.x) + (player.transform.position.z - targetPos.z) * (player.transform.position.z - targetPos.z)));
                     if (hit.transform.gameObject.tag == "Target" && Mathf.Sqrt((player.transform.position.x - targetPos.x) * (player.transform.position.x - targetPos.x) + (player.transform.position.z - targetPos.z) * (player.transform.position.z - targetPos.z)) <= goalDistance)
                     {
-                        tutorialCompleted = true;
+                        levelCompleted = true;
                     }
-                    else tutorialCompleted = false;
+                    else levelCompleted = false;
                 }
                 else
                 {
-                    tutorialCompleted = false;
+                    levelCompleted = false;
                 }
             }
             //Debug.Log(gamePhase);
@@ -172,7 +172,7 @@ public class TutorialGameManagerRE : GameManager
             tutorialGameUIManagerScript.ActivateFightUI();
             gamePhase = 1;
         }
-        else if (gamePhase == 1 && tutorialCompleted)
+        else if (gamePhase == 1 && levelCompleted)
         {
             // Disable the player movement and interactions, activate the score UI, set the winner 
             // and set the phase.
@@ -275,7 +275,7 @@ public class TutorialGameManagerRE : GameManager
 
     public override void AddScore(int i, int j)
     {
-        tutorialCompleted = true;
+        levelCompleted = true;
     }
 
     public override void MenageEntityDeath(GameObject g, Entity e)

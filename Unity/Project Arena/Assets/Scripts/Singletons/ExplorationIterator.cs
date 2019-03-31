@@ -8,7 +8,7 @@ public class ExplorationIterator : MonoBehaviour{
 
     private GameObject robot;
 
-    private Robot robotScript;
+    private RobotMain robotScript;
     private RobotDMUtilityCloseWall rDMUtility;
     private RobotPlanning rPl;
     private RobotProgress rP;
@@ -94,7 +94,7 @@ public class ExplorationIterator : MonoBehaviour{
 
             timer = Timer();
             robot = GameObject.Find("Robot");
-            robotScript = robot.GetComponent<Robot>();
+            robotScript = robot.GetComponent<RobotMain>();
             rPl = robot.GetComponent<RobotPlanning>();
             rP = robot.GetComponent<RobotProgress>();
             rDMUtility = robot.GetComponent<RobotDMUtilityCloseWall>();
@@ -146,7 +146,7 @@ public class ExplorationIterator : MonoBehaviour{
 
         timer = Timer();
         robot = GameObject.Find("Robot");
-        robotScript = robot.GetComponent<Robot>();
+        robotScript = robot.GetComponent<RobotMain>();
         rPl = robot.GetComponent<RobotPlanning>();
         rP = robot.GetComponent<RobotProgress>();
         rDMUtility = robot.GetComponent<RobotDMUtilityCloseWall>(); 

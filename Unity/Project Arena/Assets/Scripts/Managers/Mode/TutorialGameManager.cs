@@ -21,7 +21,7 @@ public class TutorialGameManager : GameManager {
     private RaycastHit hit;
 
     private Player playerScript;
-    private Robot robotScript;
+    private RobotMain robotScript;
     private bool tutorialCompleted = false;
     private float completionTime;
 
@@ -33,7 +33,7 @@ public class TutorialGameManager : GameManager {
         #endif */
 
         playerScript = player.GetComponent<Player>();
-        robotScript = player.GetComponent<Robot>();
+        robotScript = player.GetComponent<RobotMain>();
 
         tutorialGameUIManagerScript.Fade(0.7f, 1f, true, 0.5f);
     }

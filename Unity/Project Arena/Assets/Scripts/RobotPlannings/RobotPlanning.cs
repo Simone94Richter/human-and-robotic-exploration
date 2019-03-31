@@ -29,11 +29,11 @@ public class RobotPlanning : MonoBehaviour {
     public char[,] robot_map;
     public float[,] numeric_robot_map;
 
-    protected Robot mainScipt; //The core component (the one responsible for scanning and decisioning)
+    protected RobotMain mainScipt; //The core component (the one responsible for scanning and decisioning)
 
     private void Start()
     {
-        mainScipt = GetComponent<Robot>();
+        mainScipt = GetComponent<RobotMain>();
     }
 
     /// <summary>

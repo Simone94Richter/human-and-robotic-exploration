@@ -16,7 +16,7 @@ public abstract class MapManager : CoreComponent {
     [SerializeField]
     protected ObjectDisplacer objectDisplacerScript;
     [SerializeField]
-    protected Robot robot;
+    protected RobotMain robot;
     [SerializeField]
     protected Player player;
 
